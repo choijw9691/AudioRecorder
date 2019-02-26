@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/highlight"
+        android:orderInCategory="1"
+        android:title="형광펜"
+        />
+
+    <item
+        android:id="@+id/memo"
+        android:orderInCategory="2"
+        android:title="메모" />
+
+    <item
+        android:id="@+id/share"
+        android:orderInCategory="4"
+        android:title="공유"
+     />
+
+    <item
+        android:id="@+id/tts"
+        android:orderInCategory="5"
+        android:title="읽기" />
+
+</menu>

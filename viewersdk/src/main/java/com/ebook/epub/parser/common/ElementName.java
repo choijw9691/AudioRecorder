@@ -1,0 +1,74 @@
+package com.ebook.epub.parser.common;
+
+public class ElementName {
+	
+	public final static String A = "a";
+    public final static String BINDINGS = "bindings";
+    public final static String BODY = "body";
+    public final static String COLLECTION = "collection";
+    public final static String CONTAINER = "container";
+    public final static String CONTENT = "content";
+    public final static String CONTRIBUTOR = "contributor";
+    public final static String COVERAGE = "coverage";
+    public final static String CREATOR = "creator";
+    public final static String DATE = "date";
+    public final static String DESCRIPTION = "description";
+    public final static String DRM = "drm";
+    public final static String DOCTITLE = "docTitle";
+    public final static String FORMAT = "format";
+    public final static String GUIDE = "guide";
+    public final static String H1 = "h1";
+    public final static String H2 = "h2";
+    public final static String H3 = "h3";
+    public final static String H4 = "h4";
+    public final static String H5 = "h5";
+    public final static String H6 = "h6";
+    public final static String HEAD = "head";
+    public final static String HTML = "html";
+    public final static String IDENTIFIER = "identifier";
+    public final static String ITEM = "item";
+    public final static String ITEMREF = "itemref";
+    public final static String LANGUAGE = "language";
+    public final static String LI = "li";
+    public final static String LINK = "link";
+    public final static String MANIFEST = "manifest";
+    public final static String MEDIATYPE = "mediaType";
+    public final static String META = "meta";
+    public final static String METADATA = "metadata";
+    public final static String NAV = "nav";
+    public final static String NAVLABEL = "navLabel";
+    public final static String NAVMAP = "navMap";
+    public final static String NAVPOINT = "navPoint";
+    public final static String NCX = "ncx";
+    public final static String OL = "ol";
+    public final static String PACKAGE = "package";
+    public final static String PUBLISHER = "publisher";
+    public final static String REFERENCE = "reference";
+    public final static String RELATION = "relation";
+    public final static String RIGHTS = "rights";
+    public final static String ROOTFILE = "rootfile";
+    public final static String ROOTFILES = "rootfiles";
+    public final static String SOURCE = "source";
+    public final static String SPAN = "span";
+    public final static String SPINE = "spine";
+    public final static String SUBJECT = "subject";
+    public final static String TEXT = "text";
+    public final static String TITLE = "title";
+    public final static String TYPE = "type";
+    public final static String PAR = "par";
+    public final static String SEQ = "seq";
+    public final static String AUDIO = "audio";
+    public final static String VIDEO = "video";
+    public final static String IMG = "img";
+    
+    public final static String ENCRYPTEDKEY = "EncryptedKey";
+    public final static String ENCRYPTEDDATA = "EncryptedData";
+    public final static String ENCRYPTIONMETHOD = "EncryptionMethod";
+    public final static String KEYINFO = "KeyInfo";
+    public final static String CIPHERDATA = "CipherData";
+    public final static String KEYNAME = "KeyName";
+    public final static String CIPHERVALUE = "CipherValue";
+    public final static String CIPHERREFERENCE = "CipherReference";
+    public final static String RETRIEVALMETHOD = "RetrievalMethod";
+
+}

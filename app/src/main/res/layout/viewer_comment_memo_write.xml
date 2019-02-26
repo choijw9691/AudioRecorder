@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:orientation="vertical">
+    <!-- Top NavigationBar -->
+    <RelativeLayout
+        android:id="@+id/viewer_imageviewer_top_layout" 
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#ffffff">
+        <!-- Viewer -->
+        <TextView
+            android:id="@+id/viewer_write_memo_backtoViewer" 
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+			android:layout_alignParentLeft="true"
+			android:textSize="13dp"
+			android:paddingLeft="14dp"
+			android:gravity="center_vertical"
+			android:textColor="#777777"
+			android:text="책보기"/>
+		<!-- Save -->
+		<TextView
+			android:id="@+id/viewer_write_memo_save"
+			android:layout_width="70dp"
+			android:layout_height="match_parent"
+			android:layout_alignParentRight="true"
+			android:textSize="13dp"
+			android:gravity="center_vertical|right"
+			android:paddingRight="14dp"
+			android:textColor="#1a1a1a"
+			android:text="저장"/>
+        <TextView
+			android:layout_toLeftOf="@id/viewer_write_memo_save"
+			android:layout_toRightOf="@id/viewer_write_memo_backtoViewer"
+            android:layout_width="wrap_content"
+			android:layout_height="18.33dp"
+            android:text="메모"
+			android:gravity="center"
+            android:textSize="18dp"
+			android:paddingLeft="18.33dp"
+			android:paddingRight="18.33dp"
+			android:textColor="#1a1a1a"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+	<View
+		android:background="#dddddd"
+		android:layout_alignParentBottom="true"
+		android:layout_width="match_parent"
+		android:layout_height="2px" />
+    <!-- Edit Area -->
+    <ScrollView
+        android:layout_below="@+id/viewer_imageviewer_top_layout" 
+        android:layout_width="match_parent" 
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="#FFFFFF"
+    >
+	    <RelativeLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:focusableInTouchMode="true"
+	        android:paddingBottom="10.67dp"
+		    android:background="#D6D7DA">
+
+			<EditText
+			    android:id="@+id/viewer_comment_memo_text"
+			    android:layout_width="match_parent"
+			    android:layout_height="match_parent"
+			    android:layout_marginLeft="13.3dp"
+			    android:layout_marginTop="13.3dp"
+			    android:layout_marginRight="13.3dp"
+			    android:paddingLeft="13.3dp"
+			    android:paddingRight="13.3dp"
+	   			android:paddingTop="8dp"
+			    android:paddingBottom="5.3dp"
+			    android:textSize="14.67sp"
+			    android:textColor="#000000"
+			    android:maxLength="2000"
+			    android:inputType="textMultiLine"
+			    android:gravity="top" />
+
+	    </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

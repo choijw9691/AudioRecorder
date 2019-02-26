@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@drawable/popup_shadow" />
+
+        <ScrollView
+            android:id="@+id/sv_memo"
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:background="#f9f7ea" >
+
+            <TextView
+                android:id="@+id/tv_memo"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_margin="20dp"
+                android:focusable="false"
+                android:gravity="top"
+                android:scrollbars="vertical"
+                android:text="TEST1234"
+                android:textColor="#1a1a1a"
+                android:textSize="12sp" />
+        </ScrollView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#eaeaea" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center_vertical" >
+
+            <Button
+                android:id="@+id/btn_orange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/btn_color_pen_o_c_nor" />
+
+            <Button
+                android:id="@+id/btn_pink"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/btn_color_pen_p_c_nor" />
+
+            <Button
+                android:id="@+id/btn_yellow"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/btn_color_pen_y_c_nor" />
+
+            <Button
+                android:id="@+id/btn_green"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/btn_color_pen_g_c_nor" />
+
+            <Button
+                android:id="@+id/btn_violet"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/btn_color_pen_v_c_nor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center_vertical|right" >
+
+                <Button
+                    android:id="@+id/btn_edit"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginRight="14dp"
+                    android:background="@drawable/btn_pen_change_nor" />
+
+                <TextView
+                    android:layout_width="2dp"
+                    android:layout_height="20dp" android:layout_marginRight="14dp"
+                    android:background="#dddddd" />
+
+                <Button
+                    android:id="@+id/btn_delete"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/btn_pen_del_nor" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

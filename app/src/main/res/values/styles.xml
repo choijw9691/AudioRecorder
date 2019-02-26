@@ -1,0 +1,35 @@
+<resources>
+    <style name="myDialog" parent="android:Theme.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleStyle">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme" parent="android:Theme.Light.NoTitleBar.Fullscreen">
+        <item name="android:windowNoTitle">true</item>
+
+        <!--how to hide action mode-->
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:actionModeStyle">@style/ActionModeStyleBlank</item>
+        <item name="android:actionModeBackground">@android:color/transparent</item>
+        <item name="android:actionModeCopyDrawable">@drawable/blank</item>
+        <item name="android:actionModeCloseDrawable">@drawable/blank</item>
+        <item name="android:actionModeCutDrawable">@drawable/blank</item>
+        <item name="android:actionModePasteDrawable">@drawable/blank</item>
+        <item name="android:actionModeSelectAllDrawable">@drawable/blank</item>
+        <item name="android:actionModeSplitBackground">@android:color/transparent</item>
+    </style>
+
+    <!--size should be 1px otherwise full size action bar is shown -->
+    <style name="ActionModeStyleBlank">
+        <item name="android:actionBarSize">1px</item>
+        <item name="android:height">1px</item>
+    </style>
+
+</resources>

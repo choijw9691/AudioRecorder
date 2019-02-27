@@ -2061,7 +2061,6 @@ public class EPubViewer extends ViewerBase {
         }
     }
 
-    // 20dp to pixel
     private int convertDpToPixels(int value){
         float px = 0;
         try {
@@ -4936,15 +4935,15 @@ public class EPubViewer extends ViewerBase {
         if(mStartHandle.isVisible() && handlerStartRegion.contains(x+getScrollX(),y+getScrollY())){
             isStartHandlerTouched=true;
             mTextSelectionMode = true;
-            targetX = mStartHandle.getBounds().left - getScrollX();
-            targetY = mStartHandle.getBounds().top - getScrollY();
+            targetX = selectionRectList.get(0).left - getScrollX();
+            targetY = selectionRectList.get(0).top - getScrollY();
         }
 
         if(mEndHandle.isVisible() && handlerEndRegion.contains(x+getScrollX(),y+getScrollY())){
             isEndHandlerTouched=true;
             mTextSelectionMode = true;
-            targetX = mEndHandle.getBounds().right - getScrollX();
-            targetY = mEndHandle.getBounds().top - getScrollY();
+            targetX = selectionRectList.get(selectionRectList.size()-1).right - getScrollX();
+            targetY = selectionRectList.get(selectionRectList.size()-1).top - getScrollY();
         }
     }
 
@@ -5012,9 +5011,6 @@ public class EPubViewer extends ViewerBase {
             }
 
             wx = Scr2Web((int) (targetX + moveDistX));
-            if(targetY + moveDistY<0 || targetY + moveDistY > getHeight()){
-                moveDistY = 0;
-            }
             wy = Scr2Web((int) (targetY + moveDistY));
 
             if(scrollToTop || scrollToBottom){  // 자동 스크롤 실행

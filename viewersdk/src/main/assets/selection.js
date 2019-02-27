@@ -589,20 +589,20 @@ function findHighlight(x, y, element) {
 	        highlightID=element.title;
 	    }
 
-	    var l=x;
-	    var t=y;
-	    var w=0;
-	    var h=0;
+//	    var l=x;
+//	    var t=y;
+//	    var w=0;
+//	    var h=0;
 	    if( highlightID !== null ) {
-	        var highlightSpans=$("[title=\""+highlightID+"\"]");
-	        if(highlightSpans) {
-	            l = $(highlightSpans).offset().left;
-	            t = $(highlightSpans).offset().top;
-	            if(gCurrentViewMode==3)
-	            	t = $(highlightSpans).offset().top-$(document).scrollTop();
-	            w = $(highlightSpans).width();
-	            h = $(highlightSpans).height();
-	         }
+//	        var highlightSpans=$("[title=\""+highlightID+"\"]");
+//	        if(highlightSpans) {
+//	            l = $(highlightSpans).offset().left;
+//	            t = $(highlightSpans).offset().top;
+//	            if(gCurrentViewMode==3)
+//	            	t = $(highlightSpans).offset().top-$(document).scrollTop();
+//	            w = $(highlightSpans).width();
+//	            h = $(highlightSpans).height();
+//	         }
 	         showCurrentHighlightSelection(highlightID);
 	    }
 //	    window.selection.showContextMenu( highlightID, 2, contextMenuTargetPosition);
@@ -3517,7 +3517,7 @@ function setStartSelectionRange(x,y) {
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
-        console.log("error setStartSelectionRange error : "+error);
+        console.log("setStartSelectionRange error : "+error);
         window.selection.reportError(1);
     }
 }
@@ -3579,7 +3579,7 @@ function setMoveRange(x,y) {
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
 
     } catch(error){
-        console.log("error setMoveRange error : "+error);
+        console.log("setMoveRange error : "+error);
         window.selection.reportError(1);
     }
 }
@@ -3644,7 +3644,7 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
             }
         }
     } catch(error){
-        console.log("error setEndRange error : "+error);
+        console.log("setEndRange error : "+error);
         window.selection.reportError(1);
     }
 }
@@ -3721,7 +3721,7 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
-        console.log("error setMoveRangeWithHandler error : "+error);
+        console.log("setMoveRangeWithHandler error : "+error);
         window.selection.reportError(1);
     }
 }
@@ -4415,7 +4415,7 @@ function deleteAnnotationInRange(){
 
 function checkSelectionAvailable(element, checkRange){
     if(element.tagName.toUpperCase()=="HTML" || element.tagName.toUpperCase()=='BODY' || element.tagName.toUpperCase()=="IMG" || element.tagName.toUpperCase()=="AUDIO" || element.tagName.toUpperCase()=="VIDEO" ||
-        $(element).getPath().toLowerCase().indexOf('>svg') != -1 || element.id == "feelingk_booktable" || element.id == "feelingk_bookcontent" || element.id == "feelingk_modify_bookcontent") {
+        $(element).getPath().toLowerCase().indexOf('>svg') != -1 ) { // || element.id == "feelingk_booktable" || element.id == "feelingk_bookcontent" || element.id == "feelingk_modify_bookcontent"
             return false;
     } else if(checkRange!=null && checkRange.startContainer.nodeType!=TEXT_NODE){
         return false;

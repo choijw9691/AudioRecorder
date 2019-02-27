@@ -4925,6 +4925,8 @@ public class EPubViewer extends ViewerBase {
         if(isChapterScrolling || __forceChapterChanging)
             return;
 
+        hideAnnotationMenu();
+
         if( mOnTouchEventListener != null ) {
             mOnTouchEventListener.onDown(x, y);
         }

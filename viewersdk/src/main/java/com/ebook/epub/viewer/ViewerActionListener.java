@@ -118,16 +118,6 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
                                 mViewer.onTouchMove((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
                             }
                         }
-
-//                        float moveDistx = motionEvent.getX() - pressDownX;
-//                        float moveDisty = motionEvent.getY() - pressDownY;
-//                        if (isLongPressed){
-//                            mViewer.onTouchMoveAfterLongPress((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
-//                        } else {
-//                            mViewer.onTouchMove((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
-//                        }
-//                        pressDownX = motionEvent.getX();
-//                        pressDownY = motionEvent.getY();
                         return true;
                     }
                 }

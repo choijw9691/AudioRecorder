@@ -73,12 +73,18 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
             case MotionEvent.ACTION_MOVE:
 
                 if(touchCount == 2) {
-                    if(multiX[0] == motionEvent.getX(0)
-                            && multiX[1] == motionEvent.getX(1)
-                            && multiY[0] == motionEvent.getY(0)
-                            && multiY[1] == motionEvent.getY(1)){
-                        // 처음 two finger touch in 들어가는 경우 콜백 안보내기 위한 예외처리
-                        break;
+
+                    int slop = ViewConfiguration.get(mViewer.getContext()).getScaledTouchSlop();
+                    boolean userMoveConfirmed = Math.abs(multiX[0] - motionEvent.getX(0)) > slop
+                            ||  Math.abs(multiX[1] - motionEvent.getX(1)) > slop
+                            ||  Math.abs(multiY[0] - motionEvent.getY(0)) > slop
+                            ||  Math.abs(multiY[1] - motionEvent.getY(1)) > slop;
+
+                    if(!userMoveConfirmed) {
+                        multiPressed = false;
+                        return true;
+                    } else {
+                        multiPressed = true;
                     }
 
                     float moveDistx = motionEvent.getX(0) - motionEvent.getX(1);
@@ -99,8 +105,6 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
 
                             twoFingerDistantX = moveDistx;
                             twoFingerDistantY = moveDisty;
-
-                            //smaller
 
                             mViewer.onTwoFingerMove(-1);
                         }
@@ -134,8 +138,9 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
                 break;
 
             case MotionEvent.ACTION_POINTER_UP:
-                if( touchCount == 2 ) {
+                if( touchCount == 2 && multiPressed) {
                     mViewer.onTwoFingerMove(0);
+                    return true;
                 }
                 break;
 

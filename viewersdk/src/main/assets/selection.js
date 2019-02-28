@@ -3533,6 +3533,13 @@ function setMoveRange(x,y) {
 
     var currentElement = document.elementFromPoint(x, y);
     var moveRange = document.caretRangeFromPoint(x, y);
+
+    var currentLeft = window.scrollX;
+    var checkValue = moveRange.getBoundingClientRect().right+currentLeft;
+    if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+        return;
+    }
+
     if(!checkSelectionAvailable(currentElement, moveRange)){
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
@@ -3674,6 +3681,12 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
 
     var currentElement = document.elementFromPoint(x, y);
     var moveRange = document.caretRangeFromPoint(x, y);
+
+    var currentLeft = window.scrollX;
+    var checkValue = moveRange.getBoundingClientRect().right+currentLeft;
+    if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+         return;
+    }
 
     if(!checkSelectionAvailable(currentElement, moveRange)){
         var rectList = getSelectedTextNodeRectList(totalRange);

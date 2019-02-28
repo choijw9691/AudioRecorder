@@ -3442,6 +3442,7 @@ var textSelectionMode=false;            // 셀렉션 모드 여부
 
 var totalRange;                         // 실제 저장 될 셀렉션 range
 var totalRangeTemp;                     // 핸들러 움직임 체크를 위한 임시 셀렉션 range
+var totalRangeContinuable;              // 이어긋기 시 참조할 셀렉션 range
 
 var startRange;                         // 롱프레스 시 단어 판단을 위한 단어 range
 
@@ -4065,7 +4066,9 @@ function isExistMoreText(textNode, currentEndOffset){
 
         if(tempRange.getBoundingClientRect().left+tempRange.getBoundingClientRect().width>maxRight){
             canSelectContinuously = true;
-            totalRange.setEnd(tempRange.endContainer, tempRange.endOffset-1);
+//            totalRange.setEnd(tempRange.endContainer, tempRange.endOffset-1);
+            totalRangeContinuable = totalRange.cloneRange();
+            totalRangeContinuable.setEnd(tempRange.endContainer, tempRange.endOffset-1);
             return canSelectContinuously;
         }else {
             return canSelectContinuously;
@@ -4124,7 +4127,7 @@ function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
     if(textNode==null)
         return findEndPosition = false;
 
-    var tempRange = totalRange.cloneRange();
+    var tempRange = totalRangeContinuable.cloneRange();
 
     for(var endOffset=currentEndOffset; endOffset<textNode.textContent.length; endOffset+=1){
         tempRange.setEnd(textNode, endOffset);
@@ -4144,7 +4147,7 @@ function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
 
 function getSelectionLandingPage(){
 
-    var tempRange = totalRange.cloneRange();
+    var tempRange = totalRangeContinuable.cloneRange();
     if(tempRange.endOffset<tempRange.endContainer.textContent.length){
         tempRange.setEnd(tempRange.endContainer, tempRange.endOffset+1);
     }
@@ -4163,7 +4166,7 @@ function getSelectionLandingPage(){
 
     var findEndPosition = findEndRangeAndOffset(checkValue+gWindowInnerWidth, tempRange.endContainer, tempRange.endOffset)
     if(!findEndPosition){
-        var tempRange = totalRange.cloneRange();
+        var tempRange = totalRangeContinuable.cloneRange();
         while(tempRange.endOffset<tempRange.endContainer.textContent.length){
             tempRange.setEnd(tempRange.endContainer, tempRange.endOffset+1);
             if (/\s$/.test(tempRange.toString())) {

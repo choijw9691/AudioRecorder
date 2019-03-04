@@ -900,6 +900,10 @@ function getRectangleObject(left,top,width,height){
     return rect;
 }
 
+function getSelectionRectObject(left,top,right,bottom,width,height){
+    var rect={'left':left,'top':top,'right':right,'bottom':bottom,'width':width,'height':height};
+    return rect;
+}
 function getElementRect(element) {
     return getRectangleObject(element.offsetLeft,element.offsetTop,element.offsetWidth,element.offsetHeight);
 }
@@ -3535,11 +3539,7 @@ function setMoveRange(x,y) {
     var currentElement = document.elementFromPoint(x, y);
     var moveRange = document.caretRangeFromPoint(x, y);
 
-    var currentLeft = window.scrollX;
-    var checkValue = moveRange.getBoundingClientRect().right+currentLeft;
-    if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
-        return;
-    }
+    var prevTotalRange = totalRange.cloneRange();
 
     if(!checkSelectionAvailable(currentElement, moveRange)){
         var rectList = getSelectedTextNodeRectList(totalRange);
@@ -3581,6 +3581,13 @@ function setMoveRange(x,y) {
             currentSelectionInfo.isExistHandler = false;
         } else {
             currentSelectionInfo.isExistHandler = true;
+        }
+
+        var currentLeft = window.scrollX;
+        var checkValue = totalRange.getBoundingClientRect().right+currentLeft;
+        if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+            totalRange = prevTotalRange.cloneRange();
+            return;
         }
 
         var rectList = getSelectedTextNodeRectList(totalRange);
@@ -3683,11 +3690,7 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
     var currentElement = document.elementFromPoint(x, y);
     var moveRange = document.caretRangeFromPoint(x, y);
 
-    var currentLeft = window.scrollX;
-    var checkValue = moveRange.getBoundingClientRect().right+currentLeft;
-    if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
-         return;
-    }
+    var prevTotalRange = totalRange.cloneRange();
 
     if(!checkSelectionAvailable(currentElement, moveRange)){
         var rectList = getSelectedTextNodeRectList(totalRange);
@@ -3732,6 +3735,14 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
                 totalRange.setEnd(movingRange.endContainer, movingRange.endOffset);
             }
         }
+
+        var currentLeft = window.scrollX;
+        var checkValue = totalRange.getBoundingClientRect().right+currentLeft;
+        if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+            totalRange = prevTotalRange.cloneRange();
+            return;
+        }
+
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
@@ -3836,45 +3847,50 @@ function showCurrentHighlightSelection(highlightID){
     if(annotationElms.length == 0)
         return;
 
-    textSelectionMode = true;
+    try{
+        textSelectionMode = true;
 
-    currentSelectedHighlightId = highlightID;
+        currentSelectedHighlightId = highlightID;
 
-    var tempRange = document.createRange();
-    tempRange.setStart(annotationElms[0], 0);
-    var endElement = annotationElms[annotationElms.length-1];
-    tempRange.setEnd(endElement, endElement.childNodes.length);
+        var tempRange = document.createRange();
+        tempRange.setStart(annotationElms[0], 0);
+        var endElement = annotationElms[annotationElms.length-1];
+        tempRange.setEnd(endElement, endElement.childNodes.length);
 
-    var nodesToSelected=new Array();
-    findAllFullTextNodesInRange(nodesToSelected, tempRange);
+        var nodesToSelected=new Array();
+        findAllFullTextNodesInRange(nodesToSelected, tempRange);
 
-    totalRange = document.createRange();
-    totalRange.setStart(nodesToSelected[0], 0);
-    totalRange.setEnd(nodesToSelected[nodesToSelected.length-1],nodesToSelected[nodesToSelected.length-1].textContent.length);
+        totalRange = document.createRange();
+        totalRange.setStart(nodesToSelected[0], 0);
+        totalRange.setEnd(nodesToSelected[nodesToSelected.length-1],nodesToSelected[nodesToSelected.length-1].textContent.length);
 
-    currentSelectionInfo=requestAnnotationInfo(totalRange, true);
+        currentSelectionInfo=requestAnnotationInfo(totalRange, true);
 
-    var touchRectList = getSelectedTextNodeRectList(totalRange);
+        var touchRectList = getSelectedTextNodeRectList(totalRange);
 
-    // rect 중복 제거
-    for(var i=0; i<touchRectList.length; i++) {
-        var j=i+1;
-        while(j<touchRectList.length) {
-            if(touchRectList[i].left == touchRectList[j].left && touchRectList[i].top == touchRectList[j].top) {
-                touchRectList.splice(j, 1);
-            } else {
-                j++;
+        // rect 중복 제거
+        for(var i=0; i<touchRectList.length; i++) {
+            var j=i+1;
+            while(j<touchRectList.length) {
+                if(touchRectList[i].left == touchRectList[j].left && touchRectList[i].top == touchRectList[j].top) {
+                    touchRectList.splice(j, 1);
+                } else {
+                    j++;
+                }
             }
         }
+
+        drawSelectionRect(touchRectList, currentSelectionInfo.isExistHandler);
+
+        totalRangeTemp = totalRange.cloneRange();
+
+        setSelectedText(totalRange.toString());
+
+        setTimeout(function () {window.selection.showContextMenu(highlightID, 2, contextMenuTargetPosition);}, 100);
+
+    } catch(error){
+        console.log("showCurrentHighlightSelection error : "+error+ " / highlightID : "+ highlightID);
     }
-
-    drawSelectionRect(touchRectList, currentSelectionInfo.isExistHandler);
-
-    totalRangeTemp = totalRange.cloneRange();
-
-    setSelectedText(totalRange.toString());
-
-    setTimeout(function () {window.selection.showContextMenu(highlightID, 2, contextMenuTargetPosition);}, 100);
 }
 /***************************************************** e : new custom selection - make totalRange with user action */
 
@@ -4033,7 +4049,13 @@ function getSelectedTextNodeRectList(totalRange) {
 }
 
 function drawSelectionRect(rectList, isExistHandler){
-    window.selection.drawSelectionRect(JSON.stringify(rectList), isExistHandler);
+    var rects = new Array();
+    for(var i=0; i<rectList.length; i++){
+        var rect = getSelectionRectObject(rectList[i].left, rectList[i].top,  rectList[i].right, rectList[i].bottom, rectList[i].width, rectList[i].height);
+        if (rect != null)
+            rects.push(rect);
+    }
+    window.selection.drawSelectionRect(JSON.stringify(rects), isExistHandler);
 }
 
 function checkNextPageContinuable(range) {

@@ -106,6 +106,8 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
                             twoFingerDistantX = moveDistx;
                             twoFingerDistantY = moveDisty;
 
+                            //smaller
+
                             mViewer.onTwoFingerMove(-1);
                         }
                     }

@@ -1807,7 +1807,7 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, callback) {
         window.selection.setAsidePopupStatus(false);
     }
 
-    if( $(document).scrollLeft() == gPosition || moveById){
+    if( pageNumber == 0 || moveById){
         moveById = false;
         window.selection.updatePosition(gCurrentPage, gPosition);
     }

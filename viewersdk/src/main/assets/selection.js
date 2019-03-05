@@ -1812,9 +1812,6 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, callback) {
         window.selection.updatePosition(gCurrentPage, gPosition);
     }
 
-    if(!textSelectionMode && totalRange!=undefined)
-        totalRange.detach();
-
     return gPosition;
 }
 /**************************************************** e:move page*/
@@ -3508,7 +3505,7 @@ function setStartSelectionRange(x,y) {
         while (endOffset <= nodeLength) {
             totalRange.setEnd(startContainer, endOffset);
             if (/\s$|\)$/.test(totalRange.toString())) {
-                totalRange.setEnd(startContainer, endOffset -= 1);
+                totalRange.setEnd(startContainer, endOffset - 1);
                 break;
             }
             endOffset += 1;
@@ -3523,7 +3520,7 @@ function setStartSelectionRange(x,y) {
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
         console.log("setStartSelectionRange error : "+error);
-        window.selection.reportError(1);
+        window.selection.finishTextSelectionMode();
     }
 }
 
@@ -3583,11 +3580,14 @@ function setMoveRange(x,y) {
             currentSelectionInfo.isExistHandler = true;
         }
 
-        var currentLeft = window.scrollX;
-        var checkValue = totalRange.getBoundingClientRect().right+currentLeft;
-        if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
-            totalRange = prevTotalRange.cloneRange();
-            return;
+        if(gCurrentViewMode!=3){
+            var selectedTextRects= totalRange.getClientRects();
+            var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+            var checkValue = lastRectRight + $(document).scrollLeft();
+            if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                totalRange = prevTotalRange.cloneRange();
+                return;
+            }
         }
 
         var rectList = getSelectedTextNodeRectList(totalRange);
@@ -3736,11 +3736,14 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
             }
         }
 
-        var currentLeft = window.scrollX;
-        var checkValue = totalRange.getBoundingClientRect().right+currentLeft;
-        if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
-            totalRange = prevTotalRange.cloneRange();
-            return;
+        if(gCurrentViewMode!=3){
+            var selectedTextRects= totalRange.getClientRects();
+            var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+            var checkValue = lastRectRight + $(document).scrollLeft();
+            if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                totalRange = prevTotalRange.cloneRange();
+                return;
+            }
         }
 
         var rectList = getSelectedTextNodeRectList(totalRange);

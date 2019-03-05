@@ -3736,7 +3736,7 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
             }
         }
 
-        if(gCurrentViewMode!=3){
+        if(gCurrentViewMode!=3 && !isSameStartCharacter){
             var selectedTextRects= totalRange.getClientRects();
             var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
             var checkValue = lastRectRight + $(document).scrollLeft();

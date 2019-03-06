@@ -944,7 +944,7 @@ public class BaseBookActivity extends Activity implements Runnable {
 
         });
 
-        ViewerActionListener inputListener = new ViewerActionListener(BaseBookActivity.this, mViewer);
+        ViewerActionListener inputListener = new ViewerActionListener(BaseBookActivity.this, mViewer);      // TODO :: new custom selection - modified
         mViewer.setOnTouchListener(inputListener);
         mViewer.setOnKeyListener(inputListener);
 

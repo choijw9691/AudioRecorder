@@ -52,7 +52,7 @@ public class BookHelper {
     public static Integer backgroundColor = null;
     public static String[] Colors = { "#fbdab9", "#f8c9cd", "#f9f0ab", "#a8e3c7", "#d0c6f5"};
     public static int lastHighlightColor =2;
-    public static int lastMemoHighlightColor = 4;
+//    public static int lastMemoHighlightColor = 4;
     public static int focusTextColor = 0x809e9e9e;          // light gray
     public static int ttsHighlightColor = 0x4D0087ff;       // TTS 하이라이트 색상
     public static int textSelectionColor = 0x4D0087ff;      // default 0x4D0087ff ( front 설정값 )

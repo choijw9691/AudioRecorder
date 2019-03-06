@@ -3161,10 +3161,12 @@ public class EPubViewer extends ViewerBase {
                 int colorIndex;
                 if( jobj.isNull(AnnotationConst.FLK_ANNOTATION_COLOR) ) {
                     colorIndex = BookHelper.lastHighlightColor;
-                } else if(jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR) == 5){
-                    colorIndex = BookHelper.lastMemoHighlightColor;
-                    uniqueID = addColorIndexHistory(uniqueID, i);
-                } else {
+                }
+//                else if(jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR) == 5){
+//                    colorIndex = BookHelper.lastMemoHighlightColor;
+//                    uniqueID = addColorIndexHistory(uniqueID, i);
+//                }
+                else {
                     colorIndex = jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR);
                 }
 
@@ -3337,8 +3339,8 @@ public class EPubViewer extends ViewerBase {
 
             if( object.isNull("highlightColor") )
                 BookHelper.lastHighlightColor = 0;
-            else
-                BookHelper.lastHighlightColor = object.getInt("highlightColor");
+//            else
+//                BookHelper.lastHighlightColor = object.getInt("highlightColor");
 
             if( object.isNull("viewStyleType") && BookHelper.getViewStyleType()==BookHelper.VIEW_STYLE_ORIGINAL){
                 BookHelper.setViewStyleType(BookHelper.VIEW_STYLE_ORIGINAL);
@@ -4471,9 +4473,6 @@ public class EPubViewer extends ViewerBase {
                         endPath = h.endPath;
                         endChildIndex = h.endChild;
                         endCharOffset = h.endChar;
-                        if(colorIndex==-1){
-                            colorIndex = h.colorIndex;
-                        }
                         continue;
                     }
                 }
@@ -4737,7 +4736,7 @@ public class EPubViewer extends ViewerBase {
 
         String script = (new StringBuilder())
                 .append("javascript:addAnnotationWithMemo(")
-                .append(BookHelper.lastMemoHighlightColor).append(",")
+                .append(BookHelper.lastHighlightColor).append(",")
                 .append(array.toString())
                 .append(")").toString();
 
@@ -4785,11 +4784,11 @@ public class EPubViewer extends ViewerBase {
 
         EPubViewer.this.loadUrl(script);
 
-        if( highlight.memo.length()>0 ) {
-            BookHelper.lastMemoHighlightColor = colorIndex;
-        } else {
+//        if( highlight.memo.length()>0 ) {
+//            BookHelper.lastMemoHighlightColor = colorIndex;
+//        } else {
             BookHelper.lastHighlightColor = colorIndex;
-        }
+//        }
 
         finishTextSelectionMode();
     }

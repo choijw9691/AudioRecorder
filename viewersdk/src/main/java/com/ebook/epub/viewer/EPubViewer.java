@@ -4471,6 +4471,9 @@ public class EPubViewer extends ViewerBase {
                         endPath = h.endPath;
                         endChildIndex = h.endChild;
                         endCharOffset = h.endChar;
+                        if(colorIndex==-1){
+                            colorIndex = h.colorIndex;
+                        }
                         continue;
                     }
                 }

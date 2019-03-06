@@ -3452,6 +3452,7 @@ var isStartWordOverNextPage=false;      // 첫 단어가 다음페이지 걸쳐 
 
 var currentSelectionInfo;
 var currentSelectedHighlightId=null;    // 실제 움직임을 판단하기 위한 첫 글자 range
+var orgSelectedRange;                   // 재활성화 후 메모만 추가하는 케이스 비교 range
 
 var contextMenuTargetPosition = "END";  // 컨텍스트 메뉴 기준 핸들러 포지션
 /***************************************************** s : new custom selection - make totalRange with user action */
@@ -3898,6 +3899,8 @@ function showCurrentHighlightSelection(highlightID){
         drawSelectionRect(touchRectList, currentSelectionInfo.isExistHandler);
 
         totalRangeTemp = totalRange.cloneRange();
+
+        orgSelectedRange = totalRange.cloneRange();
 
         setSelectedText(totalRange.toString());
 
@@ -4415,6 +4418,14 @@ function addAnnotationWithMemo(colorIndex, memoContent){
 
     if(totalRange == undefined || totalRange == null || totalRange.toString().length==0)
         return;
+
+    if(currentSelectedHighlightId!=null){
+        var startCompare = totalRange.compareBoundaryPoints(Range.START_TO_START, orgSelectedRange);
+        var endCompare = totalRange.compareBoundaryPoints(Range.END_TO_END, orgSelectedRange);
+        if(startCompare == 0 && endCompare == 0) {
+            colorIndex = -1;
+        }
+    }
 
     var currentSelectionInfo=requestAnnotationInfo(totalRange, false);
     highlightFromSelectionWithMemo(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex, memoContent[0]);

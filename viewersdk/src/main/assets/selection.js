@@ -3446,9 +3446,9 @@ var totalRangeTemp;                     // 핸들러 움직임 체크를 위한 
 var totalRangeContinuable;              // 이어긋기 시 참조할 셀렉션 range
 
 var startRange;                         // 롱프레스 시 단어 판단을 위한 단어 range
-
 var selectionStartCharacterRange;       // 실제 움직임을 판단하기 위한 첫 글자 range
-var isSameStartCharacter=true;
+var isSameStartCharacter=true;          // 시작 글자에서 움직였는지 여부
+var isStartWordOverNextPage=false;      // 첫 단어가 다음페이지 걸쳐 있는지 여부
 
 var currentSelectionInfo;
 var currentSelectedHighlightId=null;    // 실제 움직임을 판단하기 위한 첫 글자 range
@@ -3479,6 +3479,8 @@ function setStartSelectionRange(x,y) {
         textSelectionMode = true;
 
         isSameStartCharacter = true;
+
+        isStartWordOverNextPage = false;
 
         totalRange=document.createRange();
 
@@ -3518,6 +3520,16 @@ function setStartSelectionRange(x,y) {
 
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
+
+        if(gCurrentViewMode!=3){
+           var selectedTextRects= totalRange.getClientRects();
+           var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+           var checkValue = lastRectRight + $(document).scrollLeft();
+           if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                isStartWordOverNextPage = true;
+           }
+        }
+
     } catch(error){
         console.log("setStartSelectionRange error : "+error);
         window.selection.finishTextSelectionMode();
@@ -3736,7 +3748,7 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
             }
         }
 
-        if(gCurrentViewMode!=3 && !isSameStartCharacter){
+        if(gCurrentViewMode!=3 && !isStartWordOverNextPage){
             var selectedTextRects= totalRange.getClientRects();
             var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
             var checkValue = lastRectRight + $(document).scrollLeft();

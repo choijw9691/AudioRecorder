@@ -481,6 +481,11 @@ public class EPubViewer extends ViewerBase {
     class MyJavaScriptObject {
 
         @JavascriptInterface
+        public void overflowedTextSelection(){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_OVERFLOW_TEXT_SELECTION));
+        }
+
+        @JavascriptInterface
         public void invalidateSelectionDraw(){
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_VIEWER_REFRESH));
         }
@@ -5727,6 +5732,12 @@ public class EPubViewer extends ViewerBase {
 
                 if( mOnViewerState != null ) {
                     mOnViewerState.onEnd();
+                }
+                break;
+
+            case Defines.REF_OVERFLOW_TEXT_SELECTION :
+                if(mOnTextSelection != null){
+                    mOnTextSelection.onOverflowTextSelection();
                 }
                 break;
 

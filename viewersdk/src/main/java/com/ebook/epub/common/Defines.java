@@ -51,6 +51,7 @@ public class Defines {
     public static final int REF_IMAGE_TAG_CLICK = 143;
     public static final int REF_LINK_TAG_CLICK = 144;
     public static final int REF_SCROLL_AUTO = 145;
+    public static final int REF_OVERFLOW_TEXT_SELECTION = 146;
 
     public static final int REF_VIDEO_TAG_CLICK = 160;
     public static final int REF_VIDEO_CONTROL = 161;

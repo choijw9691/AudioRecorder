@@ -1078,6 +1078,11 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             }
 
+            @Override
+            public void onOverflowTextSelection() {
+                Toast.makeText(BaseBookActivity.this, "1000자 넘음", Toast.LENGTH_SHORT).show();
+            }
+
 //            @Override
 //            public void onStart() {
 //                Log.d(TAG, "onTextSelection start ................. ");

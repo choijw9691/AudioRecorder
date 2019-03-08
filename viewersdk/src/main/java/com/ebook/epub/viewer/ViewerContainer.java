@@ -291,6 +291,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
          * onEnd - text selection end
          */
         void onEndTextSelection();
+        void onOverflowTextSelection();
     }
 
 //    public void setOnActionModeListener(OnActionModeListener listener) {      // TODO :: new custom selection - deleted

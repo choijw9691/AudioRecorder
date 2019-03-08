@@ -3435,25 +3435,26 @@ function log(text) {
 }
 
 /************************************************************************************ [s : new custom selection]  */
-const MOVE_PREV = 1;                    // 핸들러 움직이는 방향
+const MOVE_PREV = 1;                        // 핸들러 움직이는 방향
 const MOVE_MIDDLE = 2;
 const MOVE_NEXT = 3;
 
-var textSelectionMode=false;            // 셀렉션 모드 여부
+var textSelectionMode=false;                // 셀렉션 모드 여부
 
-var totalRange;                         // 실제 저장 될 셀렉션 range
-var totalRangeTemp;                     // 핸들러 움직임 체크를 위한 임시 셀렉션 range
-var totalRangeContinuable;              // 이어긋기 시 참조할 셀렉션 range
+var totalRange;                             // 실제 저장 될 셀렉션 range
+var totalRangeTemp;                         // 핸들러 움직임 체크를 위한 임시 셀렉션 range
+var totalRangeContinuable;                  // 이어긋기 시 참조할 셀렉션 range
+var notifyOverflowedTextSelection=false;    // 1000자 제한 notify 여부
 
-var startRange;                         // 롱프레스 시 단어 판단을 위한 단어 range
-var selectionStartCharacterRange;       // 실제 움직임을 판단하기 위한 첫 글자 range
-var isSameStartCharacter=true;          // 시작 글자에서 움직였는지 여부
-var isStartWordOverNextPage=false;      // 첫 단어가 다음페이지 걸쳐 있는지 여부
+var startRange;                             // 롱프레스 시 단어 판단을 위한 단어 range
+var selectionStartCharacterRange;           // 실제 움직임을 판단하기 위한 첫 글자 range
+var isSameStartCharacter=true;              // 시작 글자에서 움직였는지 여부
+var isStartWordOverNextPage=false;          // 첫 단어가 다음페이지 걸쳐 있는지 여부
 
 var currentSelectionInfo;
-var currentSelectedHighlightId=null;    // 실제 움직임을 판단하기 위한 첫 글자 range
+var currentSelectedHighlightId=null;        // 실제 움직임을 판단하기 위한 첫 글자 range
 
-var contextMenuTargetPosition = "END";  // 컨텍스트 메뉴 기준 핸들러 포지션
+var contextMenuTargetPosition = "END";      // 컨텍스트 메뉴 기준 핸들러 포지션
 /***************************************************** s : new custom selection - make totalRange with user action */
 function setStartSelectionRange(x,y) {
 
@@ -3481,6 +3482,8 @@ function setStartSelectionRange(x,y) {
         isSameStartCharacter = true;
 
         isStartWordOverNextPage = false;
+
+        notifyOverflowedTextSelection = false;
 
         totalRange=document.createRange();
 
@@ -3600,6 +3603,17 @@ function setMoveRange(x,y) {
                 totalRange = prevTotalRange.cloneRange();
                 return;
             }
+        }
+
+        if(currentSelectedHighlightId==null && totalRange.toString().length >= 1000){
+            totalRange = prevTotalRange.cloneRange();
+            if(!notifyOverflowedTextSelection){
+                notifyOverflowedTextSelection=true;
+                window.selection.overflowedTextSelection();
+                return;
+            }
+        } else {
+            notifyOverflowedTextSelection=false;
         }
 
         var rectList = getSelectedTextNodeRectList(totalRange);
@@ -3758,6 +3772,30 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
             }
         }
 
+        if(currentSelectedHighlightId==null && totalRange.toString().length > 1000){
+            if(prevTotalRange.toString().length>1000){
+                if(prevTotalRange.toString().length < totalRange.toString().length){
+                    totalRange = prevTotalRange.cloneRange();
+                    if(!notifyOverflowedTextSelection){
+                        notifyOverflowedTextSelection=true;
+                        window.selection.overflowedTextSelection();
+                    }
+                    return;
+                } else {
+                    notifyOverflowedTextSelection = false;
+                }
+            } else {
+                totalRange = prevTotalRange.cloneRange();
+                if(!notifyOverflowedTextSelection){
+                    notifyOverflowedTextSelection=true;
+                    window.selection.overflowedTextSelection();
+                    return;
+                }
+            }
+        } else {
+            notifyOverflowedTextSelection=false;
+        }
+
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
@@ -3900,6 +3938,15 @@ function showCurrentHighlightSelection(highlightID){
         totalRangeTemp = totalRange.cloneRange();
 
         setSelectedText(totalRange.toString());
+
+        if(gCurrentViewMode!=3){
+           var selectedTextRects= totalRange.getClientRects();
+           var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+           var checkValue = lastRectRight + $(document).scrollLeft();
+           if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                isStartWordOverNextPage = true;
+           }
+        }
 
         setTimeout(function () {window.selection.showContextMenu(highlightID, 2, contextMenuTargetPosition);}, 100);
 
@@ -4245,7 +4292,7 @@ function selectionContinue(isHighlight, colorIndex){
         drawSelectionRect(rectList, true);
         textSelectionMode=true;
 
-        setTimeout(function () {window.selection.showContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 100);
+        setTimeout(function () {window.selection.showContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 150);
     }
 }
 
@@ -4527,6 +4574,7 @@ function setSelectedText(selectedText){
 function finishTextSelection(){
     textSelectionMode = false;
     selectionScrolling = false;
+    notifyOverflowedTextSelection=false;
     contextMenuTargetPosition="END";
 }
 /********************************************************* e : selection common function test  */

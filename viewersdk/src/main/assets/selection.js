@@ -4274,18 +4274,10 @@ function selectionContinue(isHighlight, colorIndex){
 //        var x = currentRect.right;
 //        var y = currentRect.top;
         var menuTypeIndex = -1;
-        if(currentSelectedHighlightId!=null){
-            if(isExistAnnotationInRange(totalRange)){
-                menuTypeIndex = 2;
-            } else {
-                menuTypeIndex = 0;
-            }
+        if(isExistAnnotationInRange(totalRange)){
+            menuTypeIndex = 2;
         } else {
-            if(checkInnerSelection(totalRange)){
-                menuTypeIndex = 2;
-            } else {
-                menuTypeIndex = 0;
-            }
+            menuTypeIndex = 0;
         }
 
         var rectList = getSelectedTextNodeRectList(totalRange);

@@ -4270,9 +4270,8 @@ function selectionContinue(isHighlight, colorIndex){
         highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
         textSelectionMode=false;
     } else {
-//        var currentRect = totalRange.getBoundingClientRect();
-//        var x = currentRect.right;
-//        var y = currentRect.top;
+        contextMenuTargetPosition = "END";
+
         var menuTypeIndex = -1;
         if(isExistAnnotationInRange(totalRange)){
             menuTypeIndex = 2;

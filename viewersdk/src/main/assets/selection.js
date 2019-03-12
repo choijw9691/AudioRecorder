@@ -3605,7 +3605,7 @@ function setMoveRange(x,y) {
             }
         }
 
-        if(currentSelectedHighlightId==null && totalRange.toString().length >= 1000){
+        if(currentSelectedHighlightId==null && totalRange.toString().length > 1000){
             totalRange = prevTotalRange.cloneRange();
             if(!notifyOverflowedTextSelection){
                 notifyOverflowedTextSelection=true;

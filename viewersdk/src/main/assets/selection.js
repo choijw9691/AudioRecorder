@@ -1413,8 +1413,11 @@ function findTagUnderPoint(x,y,singleTap) {
      		return;
      	}
 
-     	if( $(element).hasClass(HIGHLIGHT_CLASS) )
-     		findHighlight(x, y, element);
+        var isHighlight=false;
+     	if( $(element).hasClass(HIGHLIGHT_CLASS) ){
+     	    isHighlight = true;
+            findHighlight(x, y, element);
+        }
 
         if(element.hasAttribute('onclick')){
             return;
@@ -1484,7 +1487,7 @@ function findTagUnderPoint(x,y,singleTap) {
  	    console.log('findTagUnderPoint = ' + err);
  	    url=null;
  	}
-    window.selection.HitTestResult(url, tagType, x, y, singleTap);
+    window.selection.HitTestResult(url, tagType, x, y, singleTap, isHighlight);
 }
 
 

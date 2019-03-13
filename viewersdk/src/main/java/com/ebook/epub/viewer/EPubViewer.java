@@ -615,7 +615,7 @@ public class EPubViewer extends ViewerBase {
          * @param singleTap : click or double click
          */
         @JavascriptInterface
-        public void HitTestResult(final String url, final int type, final int x, final int y, final boolean singleTap) {
+        public void HitTestResult(final String url, final int type, final int x, final int y, final boolean singleTap, final boolean isHighlight) {
             DebugSet.w(TAG, "HittestResult ========================== "  + type + "| " + url);
 
             if(asidePopupStatus)
@@ -658,8 +658,10 @@ public class EPubViewer extends ViewerBase {
                     }
                     {
 //                        MotionEvent event = EPubViewerInputListener.touchEvent;
-                        MotionEvent event = ViewerActionListener.touchEvent;
-                        mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SCROLL_BY_CLICK,event));
+                        if(!isHighlight) {
+                            MotionEvent event = ViewerActionListener.touchEvent;
+                            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SCROLL_BY_CLICK, event));
+                        }
                     }
                 }
             });

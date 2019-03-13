@@ -1413,74 +1413,75 @@ function findTagUnderPoint(x,y,singleTap) {
      		return;
      	}
 
-     	if( $(element).hasClass(HIGHLIGHT_CLASS) ) {
+     	if( $(element).hasClass(HIGHLIGHT_CLASS) )
      		findHighlight(x, y, element);
-     		return;
-     	} else {
-     		if(element.hasAttribute('onclick')){
-     			return;
-     		} else {
-     			var role = element.getAttribute('role');
-     			if(role!=null && role!=undefined){
-					if(role.toLowerCase().indexOf("button") != -1){
-						return;
-					}
-     			}
-     		}
 
-     		if( element.nodeType == ELEMENT_NODE ) {
-     			if( element.tagName.toUpperCase() =='IMG'
-     				|| element.tagName.toUpperCase() =='A'
-     					|| element.tagName.toUpperCase() =='AUDIO'
-     						|| element.tagName.toUpperCase() =='VIDEO') {
-     				url = element.outerHTML;
+        if(element.hasAttribute('onclick')){
+            return;
+        } else {
+            var role = element.getAttribute('role');
+            if(role!=null && role!=undefined){
+                if(role.toLowerCase().indexOf("button") != -1){
+                    return;
+                }
+            }
+        }
 
-     				if(element.tagName.toUpperCase() =='IMG' ){
-     					tagType = 1;
-     					url = element.src;
+        if( element.nodeType == ELEMENT_NODE ) {
+            if( element.tagName.toUpperCase() =='IMG'
+                || element.tagName.toUpperCase() =='A'
+                    || element.tagName.toUpperCase() =='AUDIO'
+                        || element.tagName.toUpperCase() =='VIDEO') {
+                url = element.outerHTML;
 
-     					while(element.id != "feelingk_bookcontent"){	// img 태그 부모가 a tag 인 경우를 위해 부모 검사
-     						element = element.parentNode;
-     						if(element.tagName.toUpperCase()=='A'){
-     							tagType = 2;
-     	     					url = element.href;
-     							break;
-     						}
-     					}
-     				} else if(element.tagName.toUpperCase() =='A'){
-     					tagType = 2;
-     					url = element.href;
-     				} else if(element.tagName.toUpperCase() =='AUDIO'){
-     					tagType = 3;
-     				} else if(element.tagName.toUpperCase() =='VIDEO'){
-     					tagType = 4;
-     					url = element.src;
-     				}
-     			} else {
-     				var parent = firstSibling(element);
-     				if( parent.tagName.toUpperCase() =='IMG'
-     					|| parent.tagName.toUpperCase() =='A'
-     						|| parent.tagName.toUpperCase() =='AUDIO'
-     							|| parent.tagName.toUpperCase() =='VIDEO') {
-     					url = parent.outerHTML;
+                if(element.tagName.toUpperCase() =='IMG' ){
+                    tagType = 1;
+                    url = element.src;
 
-     					if(parent.tagName.toUpperCase() =='IMG' ){
-     						tagType = 1;
-     						url = parent.src;
-     					} else if(parent.tagName.toUpperCase() =='A'){
-     						tagType = 2;
-     						url = parent.href;
-     					} else if(parent.tagName.toUpperCase() =='AUDIO'){
-     						tagType = 3;
-     					} else if(parent.tagName.toUpperCase() =='VIDEO'){
-     						tagType = 4;
-     					}
-     				}
-     			}
-     		}
-     	}
+                    while(element.id != "feelingk_bookcontent"){	// img 태그 부모가 a tag 인 경우를 위해 부모 검사
+                        element = element.parentNode;
+                        if(element.tagName.toUpperCase()=='A'){
+                            tagType = 2;
+                            url = element.href;
+                            break;
+                        }
+                    }
+                } else if(element.tagName.toUpperCase() =='A'){
+                    tagType = 2;
+                    url = element.href;
+                } else if(element.tagName.toUpperCase() =='AUDIO'){
+                    tagType = 3;
+                } else if(element.tagName.toUpperCase() =='VIDEO'){
+                    tagType = 4;
+                    url = element.src;
+                }
+            } else {
+//                var parent = firstSibling(element);
+                var parent = element.parentElement;
+                if(parent != null){
+                    if( parent.tagName.toUpperCase() =='IMG'
+                        || parent.tagName.toUpperCase() =='A'
+                            || parent.tagName.toUpperCase() =='AUDIO'
+                                || parent.tagName.toUpperCase() =='VIDEO') {
+                        url = parent.outerHTML;
+
+                        if(parent.tagName.toUpperCase() =='IMG' ){
+                            tagType = 1;
+                            url = parent.src;
+                        } else if(parent.tagName.toUpperCase() =='A'){
+                            tagType = 2;
+                            url = parent.href;
+                        } else if(parent.tagName.toUpperCase() =='AUDIO'){
+                            tagType = 3;
+                        } else if(parent.tagName.toUpperCase() =='VIDEO'){
+                            tagType = 4;
+                        }
+                    }
+                }
+            }
+        }
     } catch(err) {
- 	    log('findTagUnderPoint = ' + err);
+ 	    console.log('findTagUnderPoint = ' + err);
  	    url=null;
  	}
     window.selection.HitTestResult(url, tagType, x, y, singleTap);

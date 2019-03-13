@@ -1505,13 +1505,13 @@ public class BaseBookActivity extends Activity implements Runnable {
         mIndicator = (TextView) findViewById(R.id.bookIndicator);
 
         mBookmark = (ImageView) findViewById(R.id.bookMarkSelector);
-        mBookmarkDefault = (ImageView) findViewById(R.id.bookMarkDefault);
-        mBookmarkDefault.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewer.doBookmark();
-            }
-        });
+//        mBookmarkDefault = (ImageView) findViewById(R.id.bookMarkDefault);
+//        mBookmarkDefault.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mViewer.doBookmark();
+//            }
+//        });
 
         mNotes = (Button) findViewById(R.id.noteSelector);
         mNotes.setOnClickListener(new OnClickListener() {

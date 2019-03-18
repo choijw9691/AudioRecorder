@@ -26,12 +26,14 @@ var gColumnWidth=0;
 var gDeviceType;
 var gDirectionType = 0; // 0: ltr , 1 : rtl
 var gCurrentViewMode;
+var gTwoPageViewMode;
 var gOsVersion;
 var gNoteRefArray = new Array;
 var audioTimerID;
 var fontfaceLoadingDone=true;
 var chromeAgent;
 var currentChromeVersion;
+var isPageMoveRequest = false;
 var imageDataInfo= new Array();
 /********************************************************************************************* s:ready */
 $(document).ready(function(){
@@ -384,14 +386,14 @@ function setupChapter(	highlights,
 						pMargin,
 						lineHeight,
 						fontName,
+						maxSelectionLength,
 						bodyMargin) {
     try {
-
-        console.log("SSIN setupchapter in");
 
     	gDeviceType = deviceType;
         gOsVersion = osVersion;
         gCurrentViewMode = currentViewMode;
+        gTwoPageViewMode = twoPageViewMode;
         gWebviewWidth = webviewWidth;
         gWebviewHeight = webviewHeight;
         gDisplayDensity = density;
@@ -399,6 +401,7 @@ function setupChapter(	highlights,
         gMarginRight = marginRight;
         gMarginTop = marginTop;
         gMarginBottom = marginBottom;
+        gMaxSelectionLength = maxSelectionLength;
 
         noteref.setCurrentState(currentViewMode, twoPageViewMode, isNightMode, bodyMargin);
 
@@ -1683,9 +1686,10 @@ function getTextFromSearchWord(node, pat, pos, maxLen) {
 }
 
 /**************************************************** s:move page*/
-var moveById = false;
 function gotoID(inputid, twoPageViewMode) {
-	moveById = true;
+
+	isPageMoveRequest = true;
+
 	resetBodyStatus();
 
 	if(gCurrentViewMode!=3){
@@ -1811,8 +1815,8 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, callback) {
         window.selection.setAsidePopupStatus(false);
     }
 
-    if( pageNumber == 0 || moveById){
-        moveById = false;
+    if( pageNumber == 0 || isPageMoveRequest){
+        isPageMoveRequest = false;
         window.selection.updatePosition(gCurrentPage, gPosition);
     }
 
@@ -2730,39 +2734,12 @@ function setTTSHighlight(ttsData) {
     var clientRects = range.getClientRects();
 
     var rects = new Array();
-
     for( var i=0; i < clientRects.length; i++ ){
-
     	var clientRect = clientRects[i];
-    	var valid = true;
-    	var exist = false;
-
-//    	for( var j = 0; j < rects.length; j++ ){
-//    		var rect = rects[j];
-//    		if( (document.body.scrollLeft + clientRect.left) == rect.left && clientRect.top == rect.top && clientRect.width == rect.width && clientRect.height == rect.height ){ //똑같은 rect 값을 걸러주기 위함
-//    			exist = true;
-//    			break;
-//    		}
-//    	}
-//
-//    	if ( notSame && !exist ){
-//	    	for( var j = 0; j < endRects.length; j++ ) {
-//	    		var rect = endRects[j];
-//
-//	    		if( clientRect.left == rect.left && clientRect.top == rect.top && clientRect.width == rect.width && clientRect.height == rect.height ){ //end element rect와 똑같은 rect 값을 걸러주기 위함
-//	    			endRects.splice(j,1);
-//	    			valid = false;
-//	    			break;
-//	    		}
-//	    	}
-//    	}
-//
-//    	if( valid && !exist ){
-    		if(gCurrentViewMode==3)
-        		rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, document.body.scrollTop+clientRect.top, clientRect.width, clientRect.height) );
-    		else
-        		rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
-//    	}
+        if(gCurrentViewMode==3)
+            rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, document.body.scrollTop+clientRect.top, clientRect.width, clientRect.height) );
+        else
+            rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
 	}
 
 	var result = new Object();
@@ -2770,131 +2747,41 @@ function setTTSHighlight(ttsData) {
     result.filePath = ttsData.filePath;
 
 	var pageNum=0;
-    try {
-    	var nextPage = false;
-    	var leftVal = clientRects[0].left;
-    	var twoPageViewMode = 0;
-
-    	if( $('#feelingk_booktable').css('-webkit-column-width') != $('#feelingk_booktable').css('width') )
-    		twoPageViewMode = 1;
-
-    	if( clientRects[0].left > getWindowWidth(twoPageViewMode)  ){
-	    	nextPage = true;
-	    }
-    	pageNum = Math.floor((leftVal / getWindowWidth(twoPageViewMode)));
-    } catch(err) {
-    	log("setTTSHighlight err :  : "+err);
-        pageNum = 0;
-    }
 
     if(gCurrentViewMode==3){
    		var $target = $('body');
         if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
     		$target.animate({scrollTop: (document.body.scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
     	}
+    } else {
+        try {
+            var nextPage = false;
+            var leftVal = clientRects[0].left;
+            var twoPageViewMode = 0;
+            if( $('#feelingk_booktable').css('-webkit-column-width') != $('#feelingk_booktable').css('width') )
+                twoPageViewMode = 1;
+
+            if(clientRects[0].left < 0){
+                isPageMoveRequest = true;
+                var left = $(ttsData.path).offset().left;
+
+                if( gDirectionType == 1 )
+                    left = left - getWindowWidth(twoPageViewMode);
+
+                var retval = Math.abs(left);
+                pageNum = Math.floor((retval / getWindowWidth(gTwoPageViewMode)));
+                goPage(pageNum, gTwoPageViewMode);
+            } else if( clientRects[0].left > getWindowWidth(twoPageViewMode)){
+                nextPage = true;
+            }
+            pageNum = Math.floor((leftVal / getWindowWidth(twoPageViewMode)));
+        } catch(err) {
+            log("setTTSHighlight err :  : "+err);
+            pageNum = 0;
+        }
     }
     window.highlighter.requestHighlightRect(JSON.stringify(result), nextPage);
 }
-
-//function setTTSHighlightFromSelection(startElementPath, endElementPath, startCharOffset, endCharOffset) {
-//
-//	startElementPath = stringDotRevision(startElementPath);
-//	endElementPath = stringDotRevision(endElementPath);
-//
-//	var snippetStartNodeElement=getNodeFromElementPath(startElementPath.replace(/epub:/gi, 'epub\\:'), 0);
-//    var snippetEndNodeElement=getNodeFromElementPath(endElementPath.replace(/epub:/gi, 'epub\\:'), 0);
-//
-//    if(snippetStartNodeElement===null) {
-//        throw("No snippet start element");
-//
-//    } else if(startCharOffset>=0) {
-//
-//        var range=document.createRange();
-//
-//        if(!setPointInRange(snippetStartNodeElement, startCharOffset, range, setRangeStart)) {
-//            throw("Could not set start of selection range");
-//        }
-//
-//        if(!setPointInRange(snippetEndNodeElement, endCharOffset, range, setRangeEnd)) {
-//            throw("Could not set end of selection range");
-//        }
-//
-//        var containElementArray = [];
-//
-//        var startElement = $(startElementPath)[0];
-//        var endElement = $(endElementPath)[0];
-//
-//        containElementArray.push(startElement);
-//
-//        var nextElement = startElement.nextElementSibling;
-//
-//        while(nextElement != null){
-//        	containElementArray.push(nextElement);
-//        	if( nextElement == endElement )
-//        		break;
-//        	nextElement = nextElement.nextElementSibling;
-//        }
-//
-//        var clientRects = range.getClientRects();
-//    	var rects = new Array();
-//    	for ( var i = 0; i < clientRects.length; i++) {
-//    		var clientRect = clientRects[i];
-//    		var valid = true;
-//    		var exist = false;
-//
-//    		for ( var j = 0; j < rects.length; j++) {
-//    			var rect = rects[j];
-//    			if ((document.body.scrollLeft + clientRect.left) == rect.left
-//    					&& clientRect.top == rect.top
-//    					&& clientRect.width == rect.width
-//    					&& clientRect.height == rect.height) { // 똑같은 rect 값을 걸러주기 위함
-//    				exist = true;
-//    				break;
-//    			}
-//    		}
-//
-//    		if (!exist) {
-//    			for ( var j = 0; j < containElementArray.length; j++) {
-//    				var rect = containElementArray[j].getClientRects()[0];
-//
-//    				if (clientRect.left == rect.left && clientRect.top == rect.top
-//    						&& clientRect.width == rect.width
-//    						&& clientRect.height == rect.height) {
-//    					containElementArray.splice(j, 1);
-//    					valid = false;
-//    					break;
-//    				}
-//    			}
-//    		}
-//
-//    		if (valid && !exist)
-//    			rects.push(getRectangleObject(document.body.scrollLeft + clientRect.left, clientRect.top, clientRect.width, clientRect.height));
-//    	}
-//
-//    	var result = new Object();
-//    	result.bounds = rects;
-//
-//    	var pageNum=0;
-//    	var nextPage = false;
-//
-//        try {
-//        	var leftVal = clientRects[0].left;
-//        	var twoPageViewMode = 0;
-//
-//        	if( $('#feelingk_booktable').css('-webkit-column-width') != $('#feelingk_booktable').css('width') )
-//        		twoPageViewMode = 1;
-//
-//        	if( clientRects[0].left > getWindowWidth(twoPageViewMode)  ){
-//    	    	nextPage = true;
-//    	    }
-//        	pageNum = Math.floor((leftVal / getWindowWidth(twoPageViewMode)));
-//        } catch(err) {
-//            pageNum = 0;
-//        }
-//        window.highlighter.requestHighlightRect(JSON.stringify(result), nextPage);
-//    }
-//}
-
 /**************************************************** e:TTS */
 
 function getCharElement(elems, range, len) {
@@ -3443,22 +3330,27 @@ const MOVE_PREV = 1;                        // 핸들러 움직이는 방향
 const MOVE_MIDDLE = 2;
 const MOVE_NEXT = 3;
 
-var textSelectionMode=false;                // 셀렉션 모드 여부
+var textSelectionMode=false;                    // 셀렉션 모드 여부
 
-var totalRange;                             // 실제 저장 될 셀렉션 range
-var totalRangeTemp;                         // 핸들러 움직임 체크를 위한 임시 셀렉션 range
-var totalRangeContinuable;                  // 이어긋기 시 참조할 셀렉션 range
-var notifyOverflowedTextSelection=false;    // 1000자 제한 notify 여부
+var totalRange;                                 // 실제 저장 될 셀렉션 range
+var totalRangeTemp;                             // 핸들러 움직임 체크를 위한 임시 셀렉션 range
+var totalRangeContinuable;                      // 이어긋기 시 참조할 셀렉션 range
 
-var startRange;                             // 롱프레스 시 단어 판단을 위한 단어 range
-var selectionStartCharacterRange;           // 실제 움직임을 판단하기 위한 첫 글자 range
-var isSameStartCharacter=true;              // 시작 글자에서 움직였는지 여부
-var isStartWordOverNextPage=false;          // 첫 단어가 다음페이지 걸쳐 있는지 여부
+var startRange;                                 // 롱프레스 시 단어 판단을 위한 단어 range
+var selectionStartCharacterRange;               // 실제 움직임을 판단하기 위한 첫 글자 range
+var isSameStartCharacter=true;                  // 시작 글자에서 움직였는지 여부
+var isStartWordOverNextPage=false;              // 첫 단어가 다음페이지 걸쳐 있는지 여부
 
-var currentSelectionInfo;
-var currentSelectedHighlightId=null;        // 실제 움직임을 판단하기 위한 첫 글자 range
+var currentSelectionInfo;                       // 셀렉션 관련 정보
 
-var contextMenuTargetPosition = "END";      // 컨텍스트 메뉴 기준 핸들러 포지션
+var currentSelectedHighlightId=null;            // 재활성화 아이디
+
+var contextMenuTargetPosition = "END";          // 컨텍스트 메뉴 기준 핸들러 포지션
+
+var notifyOverflowedTextSelection=false;        // 셀렉션 글자 수 제한 notify 여부
+var notifyMergeOverflowedTextSelection=false;   // 셀렉션 병합 후 글자 수 제한 notify 여부
+
+var gMaxSelectionLength = 1000;                 // 셀렉션 글자 제한 기준 값
 /***************************************************** s : new custom selection - make totalRange with user action */
 function setStartSelectionRange(x,y) {
 
@@ -3488,6 +3380,8 @@ function setStartSelectionRange(x,y) {
         isStartWordOverNextPage = false;
 
         notifyOverflowedTextSelection = false;
+
+        notifyMergeOverflowedTextSelection = false;
 
         totalRange=document.createRange();
 
@@ -3609,19 +3503,11 @@ function setMoveRange(x,y) {
             }
         }
 
-        if(currentSelectedHighlightId==null && totalRange.toString().length > 1000){
-            totalRange = prevTotalRange.cloneRange();
-            if(!notifyOverflowedTextSelection){
-                notifyOverflowedTextSelection=true;
-                window.selection.overflowedTextSelection();
-                return;
-            }
-        } else {
-            notifyOverflowedTextSelection=false;
+        var isOverflowTotalRange = checkSelectionMaxLength(prevTotalRange, 1);
+        if(isOverflowTotalRange){
+            var rectList = getSelectedTextNodeRectList(totalRange);
+            drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
         }
-
-        var rectList = getSelectedTextNodeRectList(totalRange);
-        drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
 
     } catch(error){
         console.log("setMoveRange error : "+error);
@@ -3651,10 +3537,34 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
         var nextPageContinuable = checkNextPageContinuable(totalRange);
 
         if(!currentSelectionInfo.isExistHandler){
-            // 롱프레스 시작 단어 밖에서 셀렉션 끝난 경우 - 하이라이트
-            // check. 이너 셀렉션 여부 * 병합의 대상으로 보고 하이라이트 시도
+            // 롱프레스 시작 단어 밖에서 셀렉션 끝난 경우 - 퀵하이라이트
+            // check. 퀵하이라이트 내 주석 포함 여부
+            // - 포함 : 병합 시 메모 2000자 여부 체크
             // check. 다음페이지 이어긋기 대상 여부
-//            if(!checkInnerSelection(totalRange)){
+            var isMergeMemoAvailable=true;
+            if(isExistAnnotationInRange(totalRange)){
+                isMergeMemoAvailable = window.selection.checkMemoMaxLength(JSON.stringify( getAnnotationIdList()));
+                if(isMergeMemoAvailable){
+                    if(nextPageContinuable){
+                        window.selection.showContextMenu( null, 4, contextMenuTargetPosition);
+                    } else {
+                        currentSelectionInfo=requestAnnotationInfo(totalRange, true);
+                        highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+                        textSelectionMode = false;
+                    }
+                } else {
+                    currentSelectionInfo.isExistHandler = true;
+                    var rectList = getSelectedTextNodeRectList(totalRange);
+                    drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
+                    window.selection.overflowedMemoContent();
+                    contextMenuTargetPosition = "END"
+                    if(nextPageContinuable){
+                        window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
+                    } else {
+                        window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
+                    }
+                }
+            } else {
                 if(nextPageContinuable){
                     if(!selectionContinueCheck)
                         window.selection.showContextMenu( null, 4, contextMenuTargetPosition);
@@ -3663,11 +3573,7 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
                     highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
                     textSelectionMode = false;
                 }
-//            }
-//            else {
-//                textSelectionMode = false;
-//                window.selection.finishTextSelectionMode();
-//            }
+            }
         } else {
             // 롱프레스 시작 단어 내에서 셀렉션 끝난 경우 - 셀렉션
             // check. 셀렉션 내 주석 포함 여부
@@ -3696,6 +3602,10 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
 
 function autoScroll(scrollToTop, scrollToBottom){
 
+    if(notifyOverflowedTextSelection || notifyMergeOverflowedTextSelection){
+        return;
+    }
+
     if(scrollToTop){
          window.scrollBy(0, -20);
     }
@@ -3721,6 +3631,14 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
     var moveRange = document.caretRangeFromPoint(x, y);
 
     var prevTotalRange = totalRange.cloneRange();
+
+     if(isStartHandlerTouched){
+        contextMenuTargetPosition = "START";
+     }
+
+     if(isEndHandlerTouched){
+        contextMenuTargetPosition = "END";
+     }
 
     if(!checkSelectionAvailable(currentElement, moveRange)){
         var rectList = getSelectedTextNodeRectList(totalRange);
@@ -3776,32 +3694,11 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
             }
         }
 
-        if(currentSelectedHighlightId==null && totalRange.toString().length > 1000){
-            if(prevTotalRange.toString().length>1000){
-                if(prevTotalRange.toString().length < totalRange.toString().length){
-                    totalRange = prevTotalRange.cloneRange();
-                    if(!notifyOverflowedTextSelection){
-                        notifyOverflowedTextSelection=true;
-                        window.selection.overflowedTextSelection();
-                    }
-                    return;
-                } else {
-                    notifyOverflowedTextSelection = false;
-                }
-            } else {
-                totalRange = prevTotalRange.cloneRange();
-                if(!notifyOverflowedTextSelection){
-                    notifyOverflowedTextSelection=true;
-                    window.selection.overflowedTextSelection();
-                    return;
-                }
-            }
-        } else {
-            notifyOverflowedTextSelection=false;
+        var isOverflowTotalRange = checkSelectionMaxLength(prevTotalRange, 0);
+        if(isOverflowTotalRange){
+            var rectList = getSelectedTextNodeRectList(totalRange);
+            drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
         }
-
-        var rectList = getSelectedTextNodeRectList(totalRange);
-        drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
         console.log("setMoveRangeWithHandler error : "+error);
         window.selection.reportError(1);
@@ -3855,46 +3752,178 @@ function setEndRangeWithHandler(x,y, colorIndex) {
 
     var nextPageContinuable = checkNextPageContinuable(totalRange);
 
-    if(currentSelectedHighlightId!=null){
-        // 재활성화 후 핸들러 이동 완료 시
-        // check. 셀렉션 내 주석 포함 여부
-        // check. 다음페이지 이어 긋기 여부
-        // - 포함 : 수정 메뉴 (+페이지넘김)보여주기
-        // - 미포함 : 신규 메뉴 (+페이지넘김)보여주기
-        if(isExistAnnotationInRange(totalRange)){
-            if(nextPageContinuable){
-                window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
-            } else {
-                window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
-            }
+    // 이동 완료 시
+    // check. 셀렉션 내 주석 포함 여부
+    // check. 다음페이지 이어 긋기 여부
+    // - 포함 : 수정 메뉴 (+페이지넘김)보여주기
+    // - 미포함 : 신규 메뉴 (+페이지넘김)보여주기
+    if(isExistAnnotationInRange(totalRange)){
+        if(nextPageContinuable && contextMenuTargetPosition == "END"){
+            window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
         } else {
-            if(nextPageContinuable){
-               window.selection.showContextMenu( null, 1, contextMenuTargetPosition);
-            } else {
-                window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
-            }
+            window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
         }
     } else {
-        // 신규 핸들러 이동 완료 시
-        // check. 셀렉션 내 주석 포함 여부
-        // check. 다음페이지 이어 긋기 여부
-        // - 포함 : 수정 메뉴 (+페이지넘김)보여주기
-        // - 미포함 : 신규 메뉴 (+페이지넘김)보여주기
-        if(isExistAnnotationInRange(totalRange)){
-            if(nextPageContinuable){
-                window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
-            } else {
-                window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
-            }
+        if(nextPageContinuable && contextMenuTargetPosition == "END"){
+            window.selection.showContextMenu( null, 1, contextMenuTargetPosition);
         } else {
-            if(nextPageContinuable){
-                window.selection.showContextMenu( null, 1, contextMenuTargetPosition);
-            } else {
-                window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
-            }
+            window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
         }
     }
     setSelectedText(totalRange.toString());
+}
+
+
+function checkSelectionMaxLength(prevTotalRange, selectionType){
+
+    var isOverflowAfterMoveRange = false;
+
+    if(currentSelectedHighlightId!=null
+        && totalRange.startContainer.parentElement.tagName == "flk"&& totalRange.startContainer.parentElement.title == currentSelectedHighlightId
+        && totalRange.endContainer.parentElement.tagName == "flk"&& totalRange.endContainer.parentElement.title == currentSelectedHighlightId ){
+        return true;
+    } else {
+        var prevOverflowedTextSelection = notifyOverflowedTextSelection;
+        var prevMergeOverflowedTextSelection = notifyMergeOverflowedTextSelection;
+
+        // #1. 실제 moveRange를 반영한 totalRange ( only 현재 셀렉션 된 영역 ) 글자 수 체크
+        if(totalRange.startContainer.parentElement.tagName != 'flk' && totalRange.endContainer.parentElement.tagName != 'flk'){
+            if(selectionType == 0 ){
+                // 셀렉션
+                if(totalRange.toString().length > gMaxSelectionLength){
+                    if(prevTotalRange.toString().length > gMaxSelectionLength){                 // 페이지 넘김 후 움직이는 케이스
+                        if(prevTotalRange.toString().length < totalRange.toString().length){    // 더 크게 범위 확장 불가
+                            isOverflowAfterMoveRange = true;
+                            if(!notifyOverflowedTextSelection){
+                                notifyOverflowedTextSelection=true;
+                            }
+                        } else {
+                            notifyOverflowedTextSelection = false;
+                        }
+                    } else {
+                        isOverflowAfterMoveRange = true;
+                        if(!notifyOverflowedTextSelection){
+                            notifyOverflowedTextSelection=true;
+                        }
+                    }
+                }  else {
+                    notifyOverflowedTextSelection=false;
+                }
+            } else if(selectionType == 1 ){
+                // 퀵
+                if(totalRange.toString().length > gMaxSelectionLength){
+                     isOverflowAfterMoveRange = true;
+                    if(!notifyOverflowedTextSelection){
+                        notifyOverflowedTextSelection=true;
+                    }
+                } else {
+                    notifyOverflowedTextSelection=false;
+                }
+            }
+        }
+
+        // #2. 실제 moveRange를 반영한 totalRange가 기하이라이트에 걸친 경우 병합 후 글자 수 체크
+        if(totalRange.startContainer.parentElement.tagName == 'flk' && totalRange.endContainer.parentElement.tagName == 'flk'){
+
+            var tempTotalRange = totalRange.cloneRange();
+
+            var highlights = $("." + totalRange.startContainer.parentElement.title);
+            var range = document.createRange();
+            range.setStart(highlights[0].childNodes[0], 0);
+            highlights =  $("." + totalRange.endContainer.parentElement.title);
+            range.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
+
+            if(tempTotalRange.toString().length > gMaxSelectionLength) {
+                isOverflowAfterMoveRange = true;
+                if(!notifyMergeOverflowedTextSelection){
+                    notifyMergeOverflowedTextSelection = true;
+                } else {
+                    notifyMergeOverflowedTextSelection = false;
+                }
+            }
+        }
+
+        if(totalRange.startContainer.parentElement.tagName == 'flk'){
+
+            var tempTotalRange = totalRange.cloneRange();
+
+            var highlights = $("." + totalRange.startContainer.parentElement.title);
+            var range = document.createRange();
+            range.setStart(highlights[0].childNodes[0], 0);
+            range.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
+
+            var compareStart = range.compareBoundaryPoints(Range.START_TO_START, tempTotalRange);
+            var compareEnd = range.compareBoundaryPoints(Range.END_TO_END, tempTotalRange);
+            var compareStartEnd = range.compareBoundaryPoints(Range.START_TO_END, tempTotalRange);
+            var compareEndStart = range.compareBoundaryPoints(Range.END_TO_START, tempTotalRange);
+
+            if(compareStart == 1 && compareEnd == 1 && compareEndStart!=0) {
+                tempTotalRange.setEnd(range.endContainer, range.endOffset);
+            } else if(compareStart == -1 && compareEnd == -1 && compareStartEnd!=0) {
+                tempTotalRange.setStart(range.startContainer, range.startOffset);
+            }
+
+            if(tempTotalRange.toString().length > gMaxSelectionLength) {
+                 isOverflowAfterMoveRange = true;
+                if(!notifyMergeOverflowedTextSelection){
+                    notifyMergeOverflowedTextSelection = true;
+                } else {
+                    notifyMergeOverflowedTextSelection = false;
+                }
+            }
+        }
+
+        if(totalRange.endContainer.parentElement.tagName == 'flk' ){
+
+            var tempTotalRange = totalRange.cloneRange();
+
+            var highlights = $("." + totalRange.endContainer.parentElement.title);
+            var range = document.createRange();
+            range.setStart(highlights[0].childNodes[0], 0);
+            range.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
+
+            var compareStart = range.compareBoundaryPoints(Range.START_TO_START, tempTotalRange);
+            var compareEnd = range.compareBoundaryPoints(Range.END_TO_END, tempTotalRange);
+            var compareStartEnd = range.compareBoundaryPoints(Range.START_TO_END, tempTotalRange);
+            var compareEndStart = range.compareBoundaryPoints(Range.END_TO_START, tempTotalRange);
+
+            if(compareStart == 1 && compareEnd == 1 && compareEndStart!=0) {
+                tempTotalRange.setEnd(range.endContainer, range.endOffset);
+            } else if(compareStart == -1 && compareEnd == -1 && compareStartEnd!=0) {
+                tempTotalRange.setStart(range.startContainer, range.startOffset);
+            }
+
+            if(tempTotalRange.toString().length > gMaxSelectionLength) {
+                isOverflowAfterMoveRange = true;
+                if(!notifyMergeOverflowedTextSelection){
+                    notifyMergeOverflowedTextSelection = true;
+                }
+            } else {
+                notifyMergeOverflowedTextSelection = false;
+            }
+        }
+
+        if(isOverflowAfterMoveRange){
+            totalRange = prevTotalRange.cloneRange();
+        } else {
+            notifyOverflowedTextSelection = false;
+            notifyMergeOverflowedTextSelection = false;
+        }
+
+        if(!prevOverflowedTextSelection && prevOverflowedTextSelection != notifyOverflowedTextSelection){
+            window.selection.overflowedTextSelection(0);
+        }
+
+        if(!notifyOverflowedTextSelection && !prevMergeOverflowedTextSelection && prevMergeOverflowedTextSelection != notifyMergeOverflowedTextSelection){
+            window.selection.overflowedTextSelection(1);
+        }
+
+        if(!notifyOverflowedTextSelection && !notifyOverflowedTextSelection){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 function showCurrentHighlightSelection(highlightID){
@@ -4218,11 +4247,15 @@ function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
     var tempRange = totalRangeContinuable.cloneRange();
 
     for(var endOffset=currentEndOffset; endOffset<textNode.textContent.length; endOffset+=1){
-        tempRange.setEnd(textNode, endOffset);
+        tempRange.setStart(textNode, endOffset);
         tempRange.setEnd(textNode, endOffset+1);
 
-        if (/\.$|\!$|\?$/.test(tempRange.toString())){
+        if(tempRange.startContainer.parentElement.tagName!='flk'){
             totalRange.setEnd(tempRange.endContainer, tempRange.endOffset);
+        }
+
+        if (/\.$|\!$|\?$/.test(tempRange.toString())){
+            totalRangeContinuable.setEnd(tempRange.endContainer, tempRange.endOffset);
             return findEndPosition = true;
         }
 
@@ -4233,7 +4266,7 @@ function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
     return findEndRangeAndOffset(landingRight, getNextTextNode(tempRange.endContainer), 0);
 }
 
-function getSelectionLandingPage(){
+function getSelectionLandingPage(isHighlight, highlightColorIndex){
 
     var tempRange = totalRangeContinuable.cloneRange();
     if(tempRange.endOffset<tempRange.endContainer.textContent.length){
@@ -4252,18 +4285,65 @@ function getSelectionLandingPage(){
         }
     }
 
-    var findEndPosition = findEndRangeAndOffset(checkValue+gWindowInnerWidth, tempRange.endContainer, tempRange.endOffset)
+    var findEndPosition = findEndRangeAndOffset(checkValue+gWindowInnerWidth, tempRange.endContainer, tempRange.endOffset);
     if(!findEndPosition){
         var tempRange = totalRangeContinuable.cloneRange();
         while(tempRange.endOffset<tempRange.endContainer.textContent.length){
             tempRange.setEnd(tempRange.endContainer, tempRange.endOffset+1);
             if (/\s$/.test(tempRange.toString())) {
-                totalRange = tempRange.cloneRange();
+                totalRangeContinuable = tempRange.cloneRange();
                 break;
             }
-			 totalRange = tempRange.cloneRange();
+			 totalRangeContinuable = tempRange.cloneRange();
         }
     }
+
+    var mergeCheckRange = totalRangeContinuable.cloneRange();
+
+    if(totalRangeContinuable.startContainer.parentElement.tagName=='flk'){
+        var highlights = $("." + totalRangeContinuable.startContainer.parentElement.title);
+        mergeCheckRange.setStart(highlights[0].childNodes[0], 0);
+    }
+
+    if(totalRangeContinuable.endContainer.parentElement.tagName=='flk'){
+        var highlights = $("." + totalRangeContinuable.endContainer.parentElement.title);
+        mergeCheckRange.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
+    }
+
+    if(mergeCheckRange.toString().length>gMaxSelectionLength){
+        mergeCheckRange.setEnd(totalRange.endContainer, totalRange.endOffset);
+        if(mergeCheckRange.toString().length>gMaxSelectionLength){
+            targetPage = gCurrentPage;
+        } else {
+            targetPage = gCurrentPage;
+            var checkValue = totalRange.getBoundingClientRect().right+currentLeft;
+            while(currentLeft<checkValue){
+                if(currentLeft+gWindowInnerWidth<checkValue){
+                    targetPage+=1;
+                    currentLeft = currentLeft+gWindowInnerWidth;
+                } else {
+                    currentLeft = currentLeft+gWindowInnerWidth;
+                }
+            }
+        }
+    } else {
+        totalRange=totalRangeContinuable.cloneRange();
+    }
+
+    if(targetPage == gCurrentPage){
+        window.selection.overflowedTextSelection(2);
+        if(isHighlight){
+            addAnnotation(highlightColorIndex);
+        } else {
+            contextMenuTargetPosition = "END";
+            if(isExistAnnotationInRange(totalRange)){
+                window.selection.showContextMenu( null, 2, contextMenuTargetPosition);  // TODO :: 메뉴타입 어떻게 해야하는지 확인하기 - 페이지 넘김 포함?
+            } else {
+                window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
+            }
+        }
+    }
+
     window.selection.setLandingPage(targetPage);
 }
 
@@ -4285,10 +4365,16 @@ function selectionContinue(isHighlight, colorIndex){
 
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, true);
+
         textSelectionMode=true;
 
         setTimeout(function () {window.selection.showContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 150);
     }
+}
+
+function requestAllMemoText(){
+    var containTarget = getAnnotationIdList();
+    window.selection.mergeAllMemoText(JSON.stringify(containTarget));
 }
 
 function getAnnotationIdList(){
@@ -4301,7 +4387,7 @@ function getAnnotationIdList(){
                 containTarget.push(flkTags[i].title);
         }
     }
-    window.selection.setAnnotationIdList(JSON.stringify(containTarget));
+    return containTarget;
 }
 
 function highlightFromSelection(startElementPath, endElementPath, startCharOffset, endCharOffset, clrIndex){
@@ -4323,16 +4409,6 @@ function highlightFromSelectionWithMemo(startElementPath, endElementPath, startC
             throw("No snippet start element");
 
         } else if(startCharOffset>=0) {
-
-//            var range=document.createRange();
-
-//            if(!setPointInRange(snippetStartNodeElement, startCharOffset, range, setRangeStart)) {
-//                throw("Could not set start of selection range");
-//            }
-//
-//            if(!setPointInRange(snippetEndNodeElement, endCharOffset, range, setRangeEnd)) {
-//                throw("Could not set end of selection range");
-//            }
 
             if( checkContainSVG(totalRange) ){
             	throw("selction range has svg tag");
@@ -4367,8 +4443,6 @@ function highlightFromSelectionWithMemo(startElementPath, endElementPath, startC
             highlightToSave.isMemo = false;
             if(memoContent.length>0)
                 highlightToSave.isMemo = true;
-
-//            range.detach();
 
         	window.selection.checkMergeAnnotation( JSON.stringify(highlightToSave) );
         } else {
@@ -4567,9 +4641,10 @@ function setSelectedText(selectedText){
 }
 
 function finishTextSelection(){
-    textSelectionMode = false;
-    selectionScrolling = false;
+    textSelectionMode=false;
+    selectionScrolling=false;
     notifyOverflowedTextSelection=false;
+    notifyMergeOverflowedTextSelection=false;
     contextMenuTargetPosition="END";
 }
 /********************************************************* e : selection common function test  */

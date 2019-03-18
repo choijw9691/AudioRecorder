@@ -57,6 +57,8 @@ public class BookHelper {
     public static int ttsHighlightColor = 0x4D0087ff;       // TTS 하이라이트 색상
     public static int textSelectionColor = 0x4D0087ff;      // default 0x4D0087ff ( front 설정값 )
 
+    public static int maxSelectionLength = 1000;            // 셀렉션 글자 수 제한값 (default 1000)
+
     /**
      * 사용자 클릭 영역에 대한 정보 값 (Left, Right, Middle, Top, Bottom, Left_Corner)
      */
@@ -78,6 +80,15 @@ public class BookHelper {
         TYPE_MODIFY_CONTINUE,   // 재활성화 수정 및 이어긋기 대상 3
         TYPE_CONTINUE,          // 퀵하이라이트 이어긋기 대상 4
         TYPE_EXTRA              // 기타 5
+    }
+
+    /**
+     * 셀렉션 관련 에러 값
+     */
+    public enum SelectionErrorType {
+        TYPE_NEW_OVERFLOW,              // 실제 셀렉션 글자 수 제한 시
+        TYPE_MERGE_OVERFLOW,            // 병합 후 글자 수 제한 시
+        TYPE_CONTINUE_DISABLE,          // 페이지 넘김 제한 시
     }
 
     public static boolean fontStyleChanged = false;

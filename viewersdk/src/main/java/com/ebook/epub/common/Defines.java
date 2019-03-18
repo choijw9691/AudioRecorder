@@ -11,7 +11,7 @@ public class Defines {
     public static final int REF_FORCE_CHAPTER_CHANGING = 103;
     public static final int REF_CHECK_MERGE_ANNOTATION = 104;
     public static final int REF_DRAW_SELECTION_RECT = 105;
-    public static final int REF_SET_ANNOTATION_ID_LIST = 106;
+    public static final int REF_MERGE_ALL_MEMO = 106;
     public static final int REF_SET_LANDING_PAGE = 107;
     public static final int REF_ADD_HIGHLIGHTED_DATA = 108;
     public static final int REF_CONTEXT_MENU_SHOW = 109;
@@ -52,6 +52,7 @@ public class Defines {
     public static final int REF_LINK_TAG_CLICK = 144;
     public static final int REF_SCROLL_AUTO = 145;
     public static final int REF_OVERFLOW_TEXT_SELECTION = 146;
+    public static final int REF_OVERFLOW_MEMO_CONTENT = 147;
 
     public static final int REF_VIDEO_TAG_CLICK = 160;
     public static final int REF_VIDEO_CONTROL = 161;

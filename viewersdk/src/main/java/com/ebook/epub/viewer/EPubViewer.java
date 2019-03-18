@@ -460,29 +460,27 @@ public class EPubViewer extends ViewerBase {
     private static final int EPUB_HIGHLIGHTING_ERROR = 5;
 
     /**
-     * PopupData class - context menu 용 데이타 객체
-     */
-//    class PopupData {   // TODO :: fixed도 쓰니까 공통으로 묶기
-//        String highlightId = "";
-//        int x;
-//        int y;
-//        BookHelper.ContextMenuType menuType;
-//        PopupData(String highlightId, int x, int y, BookHelper.ContextMenuType menuType) {
-//            this.highlightId = highlightId;
-//            this.x = x;
-//            this.y = y;
-//            this.menuType = menuType;
-//        }
-//    }
-
-    /**
      * MyJavaScriptObject class - javascript interface용 클래스
      */
     class MyJavaScriptObject {
 
         @JavascriptInterface
-        public void overflowedTextSelection(){
-            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_OVERFLOW_TEXT_SELECTION));
+        public void overflowedMemoContent(){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_OVERFLOW_MEMO_CONTENT));
+        }
+
+        @JavascriptInterface
+        public boolean checkMemoMaxLength(String ids){
+            String allMemoText = getAllMemoText(ids);
+            if(allMemoText.length() > 2000){
+                return false;
+            }
+            return true;
+        }
+
+        @JavascriptInterface
+        public void overflowedTextSelection(int overflowType){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_OVERFLOW_TEXT_SELECTION, overflowType));
         }
 
         @JavascriptInterface
@@ -496,8 +494,8 @@ public class EPubViewer extends ViewerBase {
         }
 
         @JavascriptInterface
-        public void setAnnotationIdList(String ids){
-            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SET_ANNOTATION_ID_LIST, ids));
+        public void mergeAllMemoText(String ids){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_MERGE_ALL_MEMO, ids));
         }
 
         @JavascriptInterface
@@ -1484,6 +1482,7 @@ public class EPubViewer extends ViewerBase {
         script.append("'").append(BookHelper.paraSpace + "%").append("',");
         script.append("'").append(BookHelper.lineSpace + "%").append("',");
         script.append("'").append(BookHelper.faceName).append("',");
+        script.append(BookHelper.maxSelectionLength).append(",");
         script.append("").append(bodyTopBottomMargin).append(")");
 
         DebugSet.d(TAG, "setupChapter >>>>>>>>>>> " + script.toString());
@@ -4435,7 +4434,7 @@ public class EPubViewer extends ViewerBase {
         else
             isContinueSelection = true;
 
-        loadUrl("javascript:getSelectionLandingPage()");
+        loadUrl("javascript:getSelectionLandingPage("+isHighlight+","+BookHelper.lastHighlightColor+")");
     }
     /******************************************************************** e : do annotation continue */
 
@@ -4471,7 +4470,7 @@ public class EPubViewer extends ViewerBase {
                 // 이너셀렉션 - 20181113 정책변경 허용
                 if(startChildIndex > h.startChild || (startChildIndex == h.startChild && startCharOffset >= h.startChar )){
                     if(endChildIndex < h.endChild || (endChildIndex == h.endChild && endCharOffset <= h.endChar)){
-                        Log.d("SSIN","inner selection");
+                        DebugSet.d(TAG, "INNER");
                         erases.add(h);
 
                         startPath = h.startPath;
@@ -4502,7 +4501,7 @@ public class EPubViewer extends ViewerBase {
                         //기셀렉션도 한 문단인 경우 : Jeong, 2013-06-28 : iOS 추가병합로직
                         if( endChildIndex == h.endChild ){
                             //뉴셀렉션이 기셀렉션 앞쪽이나 같은지점에서 시작해 기셀렉션안에서 끝난경우.
-                            if( startCharOffset <= h.startChar && endCharOffset >= h.startChar && endCharOffset <= h.endChar ) {    // TODO :: 0129 수정건
+                            if( startCharOffset <= h.startChar && endCharOffset > h.startChar && endCharOffset <= h.endChar ) {    // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 DebugSet.d(TAG, "PARTIAL startChild");
                                 erases.add(h);
 
@@ -4511,7 +4510,7 @@ public class EPubViewer extends ViewerBase {
                                 endCharOffset = h.endChar;
                             }
                             //뉴셀렉션이 기셀렉션 안쪽이나 끝나는지점에서 시작해 기셀렉션보다 뒤쪽에서 끝난경우.
-                            else if( startCharOffset <= h.endChar && endCharOffset >= h.endChar ) {  // TODO :: 0129 수정건
+                            else if( startCharOffset < h.endChar && endCharOffset >= h.endChar ) {  // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 DebugSet.d(TAG, "PARTIAL endChild");
                                 erases.add(h);
 
@@ -4526,7 +4525,7 @@ public class EPubViewer extends ViewerBase {
                             //기셀렉션이 멀티인 경우 : Jeong, 2013-06-28 : iOS 추가병합로직
                         } else {
                             //셀렉션의 시작이 기셀렉션 의 시작보다 앞이고 셀렉션의 끝이 기셀렉션의 시작보다 앞인 경우
-                            if (startCharOffset <= h.startChar && endCharOffset >= h.startChar) {   // TODO :: 0129 수정건
+                            if (startCharOffset <= h.startChar && endCharOffset > h.startChar) {   // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 erases.add(h);
 
                                 endPath = h.endPath;
@@ -4541,7 +4540,7 @@ public class EPubViewer extends ViewerBase {
                         if( startCharOffset <= h.endChar && endCharOffset <= h.endChar ) {
                             DebugSet.d(TAG, "INCLUDE 1");
                             erases.add(h);
-                        } else if( startCharOffset <= h.endChar ) { // TODO :: 0129 수정건
+                        } else if( startCharOffset < h.endChar ) { // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                             DebugSet.d(TAG, "PARTIAL endChar");
                             erases.add(h);
 
@@ -4558,7 +4557,7 @@ public class EPubViewer extends ViewerBase {
                             if( startCharOffset < h.startChar ) {
                                 DebugSet.d(TAG, "INCLUDE 1");
                                 erases.add(h);
-                            } else if( h.endChar >= startCharOffset ) { // TODO :: 0129 수정건
+                            } else if( h.endChar > startCharOffset ) { // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 DebugSet.d(TAG, "PARTIAL 1");
                                 erases.add(h);
 
@@ -4593,7 +4592,7 @@ public class EPubViewer extends ViewerBase {
                                 endCharOffset = h.endChar;
                             }
                         } else {
-                            if( startCharOffset <= h.endChar ) {    // TODO :: 0129 수정건
+                            if( startCharOffset < h.endChar ) {    // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 DebugSet.d(TAG, "PARTIAL 4");
                                 erases.add(h);
 
@@ -4611,7 +4610,7 @@ public class EPubViewer extends ViewerBase {
                             if( endCharOffset > h.endChar ) {
                                 DebugSet.d(TAG, "INCLUDE 4");
                                 erases.add(h);
-                            } else if( h.startChar <= endCharOffset ) { // TODO :: 0129 수정건
+                            } else if( h.startChar < endCharOffset ) { // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 DebugSet.d(TAG, "PARTIAL 5");
                                 erases.add(h);
 
@@ -4620,7 +4619,7 @@ public class EPubViewer extends ViewerBase {
                                 endCharOffset = h.endChar;
                             }
                         } else {
-                            if( endCharOffset >= h.startChar ) {
+                            if( endCharOffset > h.startChar ) { // TODO :: 0129 수정건 - 0314 재수정 (인접제외)
                                 DebugSet.d(TAG, "PARTIAL 6");
                                 erases.add(h);
 
@@ -4751,7 +4750,7 @@ public class EPubViewer extends ViewerBase {
     }
 
     public void requestAllMemoText(){
-        loadUrl("javascript:getAnnotationIdList()");
+        loadUrl("javascript:requestAllMemoText()");
     }
 
     private void highlightAnnotation(Highlight highlight){      // NOTI : do after merging
@@ -4833,6 +4832,8 @@ public class EPubViewer extends ViewerBase {
 
         selectionRectList.clear();
         EPubViewer.this.invalidate();
+
+        contextMenuType = null;
 
         mStartHandle.setVisible(false, true);
         mEndHandle.setVisible(false, true);
@@ -5239,17 +5240,39 @@ public class EPubViewer extends ViewerBase {
                 drawSelectionRect(currentSelectedRectList);
                 break;
 
-            case Defines.REF_SET_ANNOTATION_ID_LIST :
-                DebugSet.d(TAG, "REF_SET_ANNOTATION_ID_LIST");
+            case Defines.REF_MERGE_ALL_MEMO :
+                DebugSet.d(TAG, "REF_MERGE_ALL_MEMO");
                 String annotationIdList = (String)msg.obj;
-                setCurrentSelectedAnnotationIdList(annotationIdList);
+                String allMemoText = getAllMemoText(annotationIdList);
+                if( mOnMemoSelection!=null ) {
+                    mOnMemoSelection.onGetAllMemoText(allMemoText);
+                }
                 break;
 
             case Defines.REF_SET_LANDING_PAGE :
                 DebugSet.d(TAG, "REF_SET_LANDING_PAGE");
                 landingPage = (Integer)msg.obj;
-                if(landingPage!=mCurrentPageIndexInChapter){
+                if(landingPage == mCurrentPageIndexInChapter){
+                    landingPage =-1;
+                    isContinueHighlight = false;
+                    isContinueSelection = false;
+                } else if(landingPage!=mCurrentPageIndexInChapter){
                     scrollNext();
+                }
+                break;
+
+            case Defines.REF_OVERFLOW_TEXT_SELECTION :
+                DebugSet.d(TAG, "REF_OVERFLOW_TEXT_SELECTION");
+                int overflowType = (Integer)msg.obj;
+                if(mOnTextSelection != null){
+                    mOnTextSelection.onOverflowTextSelection(BookHelper.SelectionErrorType.values()[overflowType]);
+                }
+                break;
+
+            case Defines.REF_OVERFLOW_MEMO_CONTENT :
+                DebugSet.d(TAG, "REF_OVERFLOW_MEMO_CONTENT");
+                if(mOnTextSelection != null){
+                    mOnTextSelection.onOverflowMemoContent();
                 }
                 break;
 
@@ -5737,12 +5760,6 @@ public class EPubViewer extends ViewerBase {
                 }
                 break;
 
-            case Defines.REF_OVERFLOW_TEXT_SELECTION :
-                if(mOnTextSelection != null){
-                    mOnTextSelection.onOverflowTextSelection();
-                }
-                break;
-
             case Defines.REF_VIEWER_REFRESH :
                 EPubViewer.this.invalidate();
                 break;
@@ -5840,11 +5857,11 @@ public class EPubViewer extends ViewerBase {
         EPubViewer.this.invalidate();
     }
 
-    private void setCurrentSelectedAnnotationIdList(String annotationIdList){
+    private String getAllMemoText(String annotationIdList){
 
-        try {
-            String allMemoText = "";
+        String allMemoText = "";
 
+        try{
             JSONArray jsonarray = new JSONArray(annotationIdList);
             String[] idArr = new String[jsonarray.length()];
 
@@ -5860,13 +5877,10 @@ public class EPubViewer extends ViewerBase {
                     }
                 }
             }
-
-            if( mOnMemoSelection!=null ) {
-                mOnMemoSelection.onGetAllMemoText(allMemoText);
-            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return allMemoText.trim();
     }
 
     private void addHighlightingData(String highlightedData){

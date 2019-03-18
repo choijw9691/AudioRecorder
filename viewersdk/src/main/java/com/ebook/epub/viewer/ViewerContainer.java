@@ -291,7 +291,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
          * onEnd - text selection end
          */
         void onEndTextSelection();
-        void onOverflowTextSelection();
+        void onOverflowTextSelection(BookHelper.SelectionErrorType selectionErrorType);
+        void onOverflowMemoContent();
     }
 
 //    public void setOnActionModeListener(OnActionModeListener listener) {      // TODO :: new custom selection - deleted
@@ -790,6 +791,10 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
 //        else if( mLayoutMode == LayoutMode.FixedLayout ){
 //            mFixedLayoutView.setContextMenuSize(height, topMargin, bottomMargin);
 //        }
+    }
+
+    public void setSelectionMaxLength(int maxSelectionLength){  // TODO : new
+        BookHelper.maxSelectionLength = maxSelectionLength;
     }
 
     public void setTextSelectionColor(int color){   // TODO :: new custom selection - modified

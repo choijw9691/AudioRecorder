@@ -955,6 +955,8 @@ public class BaseBookActivity extends Activity implements Runnable {
 
         mViewer.setContextMenuSize(36, 10, 5);     // TODO :: new custom selection added - dp
 
+        mViewer.setSelectionMaxLength(1000);        // TODO :: new custom selection added
+
         mViewer.setMemoIconPath("file:///android_asset/btn_body_memo_nor.png");
 
         mViewer.setSlideResource(true, R.anim.reader_ani_push_left_in, R.anim.reader_ani_push_left_out);
@@ -1079,8 +1081,17 @@ public class BaseBookActivity extends Activity implements Runnable {
             }
 
             @Override
-            public void onOverflowTextSelection() {
-                Toast.makeText(BaseBookActivity.this, "1000자 넘음", Toast.LENGTH_SHORT).show();
+            public void onOverflowTextSelection(BookHelper.SelectionErrorType selectionErrorType) {
+                if(selectionErrorType == BookHelper.SelectionErrorType.TYPE_NEW_OVERFLOW || selectionErrorType == BookHelper.SelectionErrorType.TYPE_MERGE_OVERFLOW){
+                    Toast.makeText(BaseBookActivity.this, "최대 1,000자까지 선택 가능합니다.", Toast.LENGTH_SHORT).show();
+                } else if(selectionErrorType == BookHelper.SelectionErrorType.TYPE_CONTINUE_DISABLE) {
+                    Toast.makeText(BaseBookActivity.this, "최대 1,000자까지만 형광펜이 가능하여 페이지 넘김이 제한됩니다", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onOverflowMemoContent() {
+                Toast.makeText(BaseBookActivity.this, "메모는 2,000자를 초과할 수 없습니다.", Toast.LENGTH_SHORT).show();
             }
 
 //            @Override

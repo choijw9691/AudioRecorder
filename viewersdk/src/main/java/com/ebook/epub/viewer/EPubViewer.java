@@ -264,9 +264,6 @@ public class EPubViewer extends ViewerBase {
     private ArrayList<Rect> selectionRectList = new ArrayList<>();
     private ArrayList<Rect> modifiedSelectionRect = new ArrayList<>();
 
-    private Rect startRect;
-    private Rect endRect;
-
     private int targetX;
     private int targetY;
 
@@ -901,15 +898,23 @@ public class EPubViewer extends ViewerBase {
          * @param contextMenuPosition 컨텍스트 그릴 기준 핸들러 포지션 ( START : 시작핸들러 / END : 종료핸들러 / CENTER : 시작,종료 다 안보이는 경우 )
          */
         @JavascriptInterface
-        public void showContextMenu(String highlightID, int menuTypeIndex, String contextMenuPosition) {
+        public void showContextMenu(String highlightID, int menuTypeIndex, String contextMenuPosition,
+                                    int endRight, int endTop, int endBottom, int startLeft, int startTop, int startBottom) {
             mTextSelectionMode = true;
+
+            endRight = Web2Scr(endRight) + EPubViewer.this.getScrollX();
+            endTop = Web2Scr(endTop) + EPubViewer.this.getScrollY();
+            endBottom = Web2Scr(endBottom) + EPubViewer.this.getScrollY();
+            startLeft = Web2Scr(startLeft) + EPubViewer.this.getScrollX();
+            startTop = Web2Scr(startTop) + EPubViewer.this.getScrollY();
+            startBottom = Web2Scr(startBottom) + EPubViewer.this.getScrollY();
 
             // #1. handler가 보이는지 체크
             // #2. context menu draw 가능 여부 체크
             // #3. 위치 보정 및 전달
-            if(endRect.right - getScrollX() >  getWidth() || endRect.top -  getScrollY() > getHeight()){
+            if(endRight - getScrollX() >  getWidth() || endTop -  getScrollY() > getHeight()){
                 contextMenuPosition = "START";
-                if(startRect.left - getScrollX() < 0 || startRect.top - getScrollY() <  0){
+                if(startLeft - getScrollX() < 0 || startTop - getScrollY() <  0){
                     contextMenuPosition = "CENTER";
                 }
             }
@@ -918,24 +923,21 @@ public class EPubViewer extends ViewerBase {
 
             PopupData contextMenuData;
             if(contextMenuPosition.equalsIgnoreCase("START")) {
-                if(startRect.top - getScrollY() - mContextMenuTopMargin - mContextMenuHeight < 0) { // 시작 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
-                    contextMenuData = new PopupData(highlightID, startRect.left - getScrollX(), startRect.bottom - getScrollY() + handlerHeight + mContextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex]);
+                if(startTop - getScrollY() - mContextMenuTopMargin - mContextMenuHeight < 0) { // 시작 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
+                    contextMenuData = new PopupData(highlightID, startLeft - getScrollX(), startBottom - getScrollY() + handlerHeight + mContextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex]);
                 } else {
-                    contextMenuData = new PopupData(highlightID, startRect.left - getScrollX(), (int) (startRect.top - getScrollY() - mContextMenuTopMargin - mContextMenuHeight), BookHelper.ContextMenuType.values()[menuTypeIndex]);
+                    contextMenuData = new PopupData(highlightID, startLeft - getScrollX(), (int) (startTop - getScrollY() - mContextMenuTopMargin - mContextMenuHeight), BookHelper.ContextMenuType.values()[menuTypeIndex]);
                 }
             } else if (contextMenuPosition.equalsIgnoreCase("END")){
-                if(endRect.top - getScrollY() - mContextMenuTopMargin - mContextMenuHeight < 0) { // 종료 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
-                    contextMenuData = new PopupData(highlightID, endRect.right - getScrollX(), endRect.bottom - getScrollY() + handlerHeight + mContextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex]);
+                if(endTop - getScrollY() - mContextMenuTopMargin - mContextMenuHeight < 0) { // 종료 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
+                    contextMenuData = new PopupData(highlightID, endRight - getScrollX(), endBottom - getScrollY() + handlerHeight + mContextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex]);
                 } else {
-                    contextMenuData = new PopupData(highlightID, endRect.right - getScrollX(), (int) (endRect.top - getScrollY() - mContextMenuTopMargin - mContextMenuHeight), BookHelper.ContextMenuType.values()[menuTypeIndex]);
+                    contextMenuData = new PopupData(highlightID, endRight - getScrollX(), (int) (endTop - getScrollY() - mContextMenuTopMargin - mContextMenuHeight), BookHelper.ContextMenuType.values()[menuTypeIndex]);
                 }
             } else {
                 contextMenuData = new PopupData(highlightID, getWidth()/2, (int) (getHeight()/2 - mContextMenuHeight/2), BookHelper.ContextMenuType.values()[menuTypeIndex]);
             }
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_CONTEXT_MENU_SHOW, contextMenuData));
-
-//            PopupData contextMenuData = new PopupData(highlightID, Web2Scr(x),Web2Scr(y), BookHelper.ContextMenuType.values()[menuTypeIndex]);
-//            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_CONTEXT_MENU_SHOW, contextMenuData));
         }
 
         /**
@@ -3672,8 +3674,6 @@ public class EPubViewer extends ViewerBase {
         canvas.save();
 
         if(selectionRectList.size()>0){
-            startRect = selectionRectList.get(0);
-            endRect = selectionRectList.get(selectionRectList.size()-1);
             for(Rect rcSpan: modifiedSelectionRect) {
                 Rect r = rcSpan;
                 if(selectionHandler){

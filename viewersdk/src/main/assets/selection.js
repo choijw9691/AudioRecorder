@@ -3546,7 +3546,7 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
                 isMergeMemoAvailable = window.selection.checkMemoMaxLength(JSON.stringify( getAnnotationIdList()));
                 if(isMergeMemoAvailable){
                     if(nextPageContinuable){
-                        window.selection.showContextMenu( null, 4, contextMenuTargetPosition);
+                        showCurrentContextMenu(null, 4, contextMenuTargetPosition);
                     } else {
                         currentSelectionInfo=requestAnnotationInfo(totalRange, true);
                         highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
@@ -3559,15 +3559,16 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
                     window.selection.overflowedMemoContent();
                     contextMenuTargetPosition = "END"
                     if(nextPageContinuable){
-                        window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
+                        showCurrentContextMenu(null, 3, contextMenuTargetPosition);
                     } else {
-                        window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
+                        showCurrentContextMenu(null, 2, contextMenuTargetPosition);
                     }
                 }
             } else {
                 if(nextPageContinuable){
-                    if(!selectionContinueCheck)
-                        window.selection.showContextMenu( null, 4, contextMenuTargetPosition);
+                    if(!selectionContinueCheck){
+                        showCurrentContextMenu(null, 4, contextMenuTargetPosition);
+                    }
                 } else {
                     currentSelectionInfo=requestAnnotationInfo(totalRange, true);
                     highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
@@ -3582,15 +3583,15 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
             // - 미포함 : 신규 메뉴 (+페이지넘김)보여주기
             if(isExistAnnotationInRange(totalRange)){
                 if(nextPageContinuable){
-                    window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
+                    showCurrentContextMenu(null, 3, contextMenuTargetPosition);
                 } else {
-                    window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
+                    showCurrentContextMenu(null, 2, contextMenuTargetPosition);
                 }
             } else {
                 if(nextPageContinuable){
-                    window.selection.showContextMenu( null, 1, contextMenuTargetPosition);
+                    showCurrentContextMenu(null, 1, contextMenuTargetPosition);
                 } else {
-                    window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
+                    showCurrentContextMenu(null, 0, contextMenuTargetPosition);
                 }
             }
         }
@@ -3745,8 +3746,8 @@ function setEndRangeWithHandler(x,y, colorIndex) {
         return;
     }
 
-    var rectList = getSelectedTextNodeRectList(totalRange);
-    drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
+//    var rectList = getSelectedTextNodeRectList(totalRange);
+//    drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
 
     totalRangeTemp = totalRange.cloneRange();
 
@@ -3759,15 +3760,15 @@ function setEndRangeWithHandler(x,y, colorIndex) {
     // - 미포함 : 신규 메뉴 (+페이지넘김)보여주기
     if(isExistAnnotationInRange(totalRange)){
         if(nextPageContinuable && contextMenuTargetPosition == "END"){
-            window.selection.showContextMenu( null, 3, contextMenuTargetPosition);
+            showCurrentContextMenu(null, 3, contextMenuTargetPosition);
         } else {
-            window.selection.showContextMenu( null, 2, contextMenuTargetPosition);
+            showCurrentContextMenu(null, 2, contextMenuTargetPosition);
         }
     } else {
         if(nextPageContinuable && contextMenuTargetPosition == "END"){
-            window.selection.showContextMenu( null, 1, contextMenuTargetPosition);
+            showCurrentContextMenu(null, 1, contextMenuTargetPosition);
         } else {
-            window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
+            showCurrentContextMenu(null, 0, contextMenuTargetPosition);
         }
     }
     setSelectedText(totalRange.toString());
@@ -3926,6 +3927,13 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
     }
 }
 
+function showCurrentContextMenu(highlightID, menuTypeIndex, contextMenuPosition){
+    var currentSelectedRect = totalRange.getClientRects();
+    var startRect = currentSelectedRect[0];
+    var endRect = currentSelectedRect[currentSelectedRect.length-1];
+    window.selection.showContextMenu( highlightID, menuTypeIndex, contextMenuPosition, endRect.right, endRect.top, endRect.bottom, startRect.left, startRect.top, startRect.bottom);
+}
+
 function showCurrentHighlightSelection(highlightID){
 
     var annotationElms = document.getElementsByClassName(highlightID);
@@ -3981,7 +3989,7 @@ function showCurrentHighlightSelection(highlightID){
            }
         }
 
-        setTimeout(function () {window.selection.showContextMenu(highlightID, 2, contextMenuTargetPosition);}, 100);
+        setTimeout(function () { showCurrentContextMenu(highlightID, 2, contextMenuTargetPosition);}, 100);
 
     } catch(error){
         console.log("showCurrentHighlightSelection error : "+error+ " / highlightID : "+ highlightID);
@@ -4337,9 +4345,9 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         } else {
             contextMenuTargetPosition = "END";
             if(isExistAnnotationInRange(totalRange)){
-                window.selection.showContextMenu( null, 2, contextMenuTargetPosition);  // TODO :: 메뉴타입 어떻게 해야하는지 확인하기 - 페이지 넘김 포함?
+                showCurrentContextMenu(null, 2, contextMenuTargetPosition);
             } else {
-                window.selection.showContextMenu( null, 0, contextMenuTargetPosition);
+                showCurrentContextMenu(null, 0, contextMenuTargetPosition);
             }
         }
     }
@@ -4368,7 +4376,7 @@ function selectionContinue(isHighlight, colorIndex){
 
         textSelectionMode=true;
 
-        setTimeout(function () {window.selection.showContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 150);
+        setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 100);
     }
 }
 

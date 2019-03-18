@@ -2386,16 +2386,13 @@ public class BaseBookActivity extends Activity implements Runnable {
 
         if( pw == null ) return;
 
-        View ctxView = pw.getContentView();
-        int cx = ctxView.getMeasuredWidth();
-        int cy = ctxView.getMeasuredHeight();
-
-        if( coords == null )
-            coords = new int[2];
-        mViewer.getLocationInWindow(coords);
-
-        // TODO :: new custom selection
-        // TODO :: FRONT - x,y,를 기준으로 메뉴가 가운데 놓이도록 구현 필요
+//        View ctxView = pw.getContentView();
+//        int cx = ctxView.getMeasuredWidth();
+//        int cy = ctxView.getMeasuredHeight();
+//
+//        if( coords == null )
+//            coords = new int[2];
+//        mViewer.getLocationInWindow(coords);
 
 //        int screenY = y - (cy + 50);
 //        screenY += coords[1];

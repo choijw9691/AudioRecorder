@@ -71,9 +71,7 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
                 break;
 
             case MotionEvent.ACTION_MOVE:
-
-                if(touchCount == 2) {
-
+                if(touchCount == 2 && !mViewer.mTextSelectionMode) {
                     int slop = ViewConfiguration.get(mViewer.getContext()).getScaledTouchSlop();
                     boolean userMoveConfirmed = Math.abs(multiX[0] - motionEvent.getX(0)) > slop
                             ||  Math.abs(multiX[1] - motionEvent.getX(1)) > slop
@@ -106,30 +104,30 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
                             twoFingerDistantX = moveDistx;
                             twoFingerDistantY = moveDisty;
 
-                            //smaller
-
                             mViewer.onTwoFingerMove(-1);
                         }
                     }
-                } else {
-                    if(mViewer.mTextSelectionMode){
-                        int slop = ViewConfiguration.get(mViewer.getContext()).getScaledTouchSlop();
-                        final boolean userMoveConfirmed = Math.abs(pressDownX - motionEvent.getX()) > slop || Math.abs(pressDownY - motionEvent.getY()) > slop;
-                        if(userMoveConfirmed){
-                            float moveDistx = motionEvent.getX() - pressDownX;
-                            float moveDisty = motionEvent.getY() - pressDownY;
-                            if (isLongPressed){
-                                mViewer.onTouchMoveAfterLongPress((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
-                            } else {
-                                mViewer.onTouchMove((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
-                            }
+                } else if(touchCount == 1 && mViewer.mTextSelectionMode) {
+                    int slop = ViewConfiguration.get(mViewer.getContext()).getScaledTouchSlop();
+                    final boolean userMoveConfirmed = Math.abs(pressDownX - motionEvent.getX()) > slop || Math.abs(pressDownY - motionEvent.getY()) > slop;
+                    if(userMoveConfirmed){
+                        float moveDistx = motionEvent.getX() - pressDownX;
+                        float moveDisty = motionEvent.getY() - pressDownY;
+                        if (isLongPressed){
+                            mViewer.onTouchMoveAfterLongPress((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
+                        } else {
+                            mViewer.onTouchMove((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
                         }
-                        return true;
                     }
+                    return true;
                 }
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
+
+                if(mViewer.mTextSelectionMode)
+                    return true;
+
                 if (touchCount == 2){
                     for(int i=0; i<touchCount; i++) {
                         multiX[i] = motionEvent.getX(i);

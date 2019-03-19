@@ -3337,6 +3337,8 @@ var notifyOverflowedTextSelection=false;        // 셀렉션 글자 수 제한 n
 var notifyMergeOverflowedTextSelection=false;   // 셀렉션 병합 후 글자 수 제한 notify 여부
 
 var gMaxSelectionLength = 1000;                 // 셀렉션 글자 제한 기준 값
+
+var isConfirmedOverflowCallback=false;
 /***************************************************** s : new custom selection - make totalRange with user action */
 function setStartSelectionRange(x,y) {
 
@@ -3760,57 +3762,46 @@ function setEndRangeWithHandler(x,y, colorIndex) {
     setSelectedText(totalRange.toString());
 }
 
-
 function checkSelectionMaxLength(prevTotalRange, selectionType){
 
     var isOverflowAfterMoveRange = false;
 
     if(currentSelectedHighlightId!=null
-        && totalRange.startContainer.parentElement.tagName == "flk"&& totalRange.startContainer.parentElement.title == currentSelectedHighlightId
-        && totalRange.endContainer.parentElement.tagName == "flk"&& totalRange.endContainer.parentElement.title == currentSelectedHighlightId ){
+        && totalRange.startContainer.parentElement.tagName.toLowerCase() == "flk"&& totalRange.startContainer.parentElement.title == currentSelectedHighlightId
+        && totalRange.endContainer.parentElement.tagName.toLowerCase() == "flk"&& totalRange.endContainer.parentElement.title == currentSelectedHighlightId ){
         return true;
     } else {
         var prevOverflowedTextSelection = notifyOverflowedTextSelection;
         var prevMergeOverflowedTextSelection = notifyMergeOverflowedTextSelection;
 
         // #1. 실제 moveRange를 반영한 totalRange ( only 현재 셀렉션 된 영역 ) 글자 수 체크
-        if(totalRange.startContainer.parentElement.tagName != 'flk' && totalRange.endContainer.parentElement.tagName != 'flk'){
+        if(totalRange.startContainer.parentElement.tagName.toLowerCase() != 'flk' && totalRange.endContainer.parentElement.tagName.toLowerCase() != 'flk'){
             if(selectionType == 0 ){
                 // 셀렉션
                 if(totalRange.toString().length > gMaxSelectionLength){
                     if(prevTotalRange.toString().length > gMaxSelectionLength){                 // 페이지 넘김 후 움직이는 케이스
                         if(prevTotalRange.toString().length < totalRange.toString().length){    // 더 크게 범위 확장 불가
                             isOverflowAfterMoveRange = true;
-                            if(!notifyOverflowedTextSelection){
-                                notifyOverflowedTextSelection=true;
-                            }
-                        } else {
-                            notifyOverflowedTextSelection = false;
+                            notifyOverflowedTextSelection = true;
+                            notifyMergeOverflowedTextSelection = false;
                         }
                     } else {
                         isOverflowAfterMoveRange = true;
-                        if(!notifyOverflowedTextSelection){
-                            notifyOverflowedTextSelection=true;
-                        }
+                        notifyOverflowedTextSelection = true;
                     }
-                }  else {
-                    notifyOverflowedTextSelection=false;
                 }
             } else if(selectionType == 1 ){
                 // 퀵
                 if(totalRange.toString().length > gMaxSelectionLength){
-                     isOverflowAfterMoveRange = true;
-                    if(!notifyOverflowedTextSelection){
-                        notifyOverflowedTextSelection=true;
-                    }
-                } else {
-                    notifyOverflowedTextSelection=false;
+                    isOverflowAfterMoveRange = true;
+                    notifyOverflowedTextSelection = true;
+                    notifyMergeOverflowedTextSelection = false;
                 }
             }
         }
 
         // #2. 실제 moveRange를 반영한 totalRange가 기하이라이트에 걸친 경우 병합 후 글자 수 체크
-        if(totalRange.startContainer.parentElement.tagName == 'flk' && totalRange.endContainer.parentElement.tagName == 'flk'){
+        if(!isOverflowAfterMoveRange && totalRange.startContainer.parentElement.tagName.toLowerCase() == 'flk' && totalRange.endContainer.parentElement.tagName.toLowerCase() == 'flk'){
 
             var tempTotalRange = totalRange.cloneRange();
 
@@ -3822,15 +3813,12 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
 
             if(tempTotalRange.toString().length > gMaxSelectionLength) {
                 isOverflowAfterMoveRange = true;
-                if(!notifyMergeOverflowedTextSelection){
-                    notifyMergeOverflowedTextSelection = true;
-                } else {
-                    notifyMergeOverflowedTextSelection = false;
-                }
+                notifyOverflowedTextSelection = false;
+                notifyMergeOverflowedTextSelection = true;
             }
         }
 
-        if(totalRange.startContainer.parentElement.tagName == 'flk'){
+        if(!isOverflowAfterMoveRange && totalRange.startContainer.parentElement.tagName.toLowerCase() == 'flk'){
 
             var tempTotalRange = totalRange.cloneRange();
 
@@ -3851,16 +3839,13 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
             }
 
             if(tempTotalRange.toString().length > gMaxSelectionLength) {
-                 isOverflowAfterMoveRange = true;
-                if(!notifyMergeOverflowedTextSelection){
-                    notifyMergeOverflowedTextSelection = true;
-                } else {
-                    notifyMergeOverflowedTextSelection = false;
-                }
+                isOverflowAfterMoveRange = true;
+                notifyOverflowedTextSelection = false;
+                notifyMergeOverflowedTextSelection = true;
             }
         }
 
-        if(totalRange.endContainer.parentElement.tagName == 'flk' ){
+        if(!isOverflowAfterMoveRange && totalRange.endContainer.parentElement.tagName.toLowerCase() == 'flk' ){
 
             var tempTotalRange = totalRange.cloneRange();
 
@@ -3882,33 +3867,31 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
 
             if(tempTotalRange.toString().length > gMaxSelectionLength) {
                 isOverflowAfterMoveRange = true;
-                if(!notifyMergeOverflowedTextSelection){
-                    notifyMergeOverflowedTextSelection = true;
-                }
-            } else {
-                notifyMergeOverflowedTextSelection = false;
+                notifyOverflowedTextSelection = false;
+                notifyMergeOverflowedTextSelection = true;
             }
         }
 
         if(isOverflowAfterMoveRange){
             totalRange = prevTotalRange.cloneRange();
+            notifyOverflowToFront();
+            return false;
         } else {
+            isConfirmedOverflowCallback = false;
             notifyOverflowedTextSelection = false;
             notifyMergeOverflowedTextSelection = false;
-        }
-
-        if(!prevOverflowedTextSelection && prevOverflowedTextSelection != notifyOverflowedTextSelection){
-            window.selection.overflowedTextSelection(0);
-        }
-
-        if(!notifyOverflowedTextSelection && !prevMergeOverflowedTextSelection && prevMergeOverflowedTextSelection != notifyMergeOverflowedTextSelection){
-            window.selection.overflowedTextSelection(1);
-        }
-
-        if(!notifyOverflowedTextSelection && !notifyOverflowedTextSelection){
             return true;
-        } else {
-            return false;
+        }
+    }
+}
+
+function notifyOverflowToFront(){
+    if(!isConfirmedOverflowCallback){
+        isConfirmedOverflowCallback = true;
+        if(notifyOverflowedTextSelection){
+             window.selection.overflowedTextSelection(0);
+        } else if(notifyMergeOverflowedTextSelection){
+             window.selection.overflowedTextSelection(1);
         }
     }
 }
@@ -4246,7 +4229,7 @@ function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
         tempRange.setStart(textNode, endOffset);
         tempRange.setEnd(textNode, endOffset+1);
 
-        if(tempRange.startContainer.parentElement.tagName!='flk'){
+        if(tempRange.startContainer.parentElement.tagName.toLowerCase()!='flk'){
             totalRange.setEnd(tempRange.endContainer, tempRange.endOffset);
         }
 
@@ -4296,12 +4279,12 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
 
     var mergeCheckRange = totalRangeContinuable.cloneRange();
 
-    if(totalRangeContinuable.startContainer.parentElement.tagName=='flk'){
+    if(totalRangeContinuable.startContainer.parentElement.tagName.toLowerCase()=='flk'){
         var highlights = $("." + totalRangeContinuable.startContainer.parentElement.title);
         mergeCheckRange.setStart(highlights[0].childNodes[0], 0);
     }
 
-    if(totalRangeContinuable.endContainer.parentElement.tagName=='flk'){
+    if(totalRangeContinuable.endContainer.parentElement.tagName.toLowerCase()=='flk'){
         var highlights = $("." + totalRangeContinuable.endContainer.parentElement.title);
         mergeCheckRange.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
     }

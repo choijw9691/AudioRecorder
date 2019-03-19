@@ -1445,7 +1445,6 @@ function findTagUnderPoint(x,y,singleTap) {
                 } else if(element.tagName.toUpperCase() =='A'){
                     tagType = 2;
                     url = element.href;
-                    if(a)
                 } else if(element.tagName.toUpperCase() =='AUDIO'){
                     tagType = 3;
                 } else if(element.tagName.toUpperCase() =='VIDEO'){

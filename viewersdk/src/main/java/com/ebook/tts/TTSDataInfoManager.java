@@ -34,6 +34,7 @@ import javax.xml.xpath.XPathFactory;
 
 public class TTSDataInfoManager {
 
+    private final int MSG_GET_START_POSITION = 0;
     private final int MSG_GET_FIRST_SENTENCE = 1;
     private final int MSG_GET_SELECTED_DATA = 2;
 
@@ -453,16 +454,7 @@ public class TTSDataInfoManager {
     }
 
     public void requestStartPosition() {
-//        SendMessage(MSG_GET_START_POSITION, null);
-        if(isTwoPageMode)
-            leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
-        else {
-            if(leftWebView!=null) {
-                leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
-            } else {
-                rightWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
-            }
-        }
+        SendMessage(MSG_GET_START_POSITION, null);
     }
 
     public void requestTTSDataFromSelection(int touchedposition){   // TODO :: new custom selection - modified
@@ -526,6 +518,19 @@ public class TTSDataInfoManager {
 
                 case MSG_GET_SELECTED_DATA : {
                     getTTSDataFromSelection();
+                    break;
+                }
+
+                case MSG_GET_START_POSITION: {
+                    if(isTwoPageMode) {
+                        leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
+                    } else {
+                        if(leftWebView!=null) {
+                            leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
+                        } else {
+                            rightWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
+                        }
+                    }
                     break;
                 }
 

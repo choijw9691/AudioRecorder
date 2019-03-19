@@ -610,7 +610,7 @@ public class EPubViewer extends ViewerBase {
          * @param singleTap : click or double click
          */
         @JavascriptInterface
-        public void HitTestResult(final String url, final int type, final int x, final int y, final boolean singleTap, final boolean isHighlight) {
+        public void HitTestResult(final String url, final int type, final int x, final int y, final boolean singleTap, final boolean isExceptionalTagOrAttr) {
             DebugSet.w(TAG, "HittestResult ========================== "  + type + "| " + url);
 
             if(asidePopupStatus)
@@ -653,7 +653,7 @@ public class EPubViewer extends ViewerBase {
                     }
                     {
 //                        MotionEvent event = EPubViewerInputListener.touchEvent;
-                        if(!isHighlight) {
+                        if(!isExceptionalTagOrAttr) {
                             MotionEvent event = ViewerActionListener.touchEvent;
                             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SCROLL_BY_CLICK, event));
                         }
@@ -900,6 +900,10 @@ public class EPubViewer extends ViewerBase {
         @JavascriptInterface
         public void showContextMenu(String highlightID, int menuTypeIndex, String contextMenuPosition,
                                     int endRight, int endTop, int endBottom, int startLeft, int startTop, int startBottom) {
+            if(__forceChapterChanging){
+                return;
+            }
+
             mTextSelectionMode = true;
 
             endRight = Web2Scr(endRight) + EPubViewer.this.getScrollX();
@@ -5816,6 +5820,10 @@ public class EPubViewer extends ViewerBase {
             if(BookHelper.animationType==3 && mTTSHighlightRectList.size()>0){
                 removeTTSHighlightRect();
             }
+
+            if(mTextSelectionMode)
+                finishTextSelectionMode();
+
             mOnChapterChange.onChangeBefore();
         }
         __reloadFlag = CHANGE_BEFORE;

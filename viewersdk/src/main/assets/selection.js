@@ -581,37 +581,32 @@ function findHighlight(x, y, element) {
 
     contextMenuTargetPosition="END";
 
-    var highlightID=null;
+    var highlightID = null;
+    var isHighlight = false;
 
 	try {
-	    while(element!==null&&element!==document&&!$(element).hasClass(HIGHLIGHT_CLASS)){
+
+        if( element!==null && $(element).hasClass(HIGHLIGHT_CLASS) ){
+            highlightID=element.title;
+            isHighlight = true;
+        }
+
+	    while(!isHighlight && element!==null && element.id !== "feelingk_bookcontent"){
 	        element=element.parentNode;
+            if( element!==null && $(element).hasClass(HIGHLIGHT_CLASS) ){
+                highlightID=element.title;
+                isHighlight = true;
+                break;
+            }
 	    }
 
-	    if( element!==null && $(element).hasClass(HIGHLIGHT_CLASS) ){
-	        highlightID=element.title;
-	    }
-
-//	    var l=x;
-//	    var t=y;
-//	    var w=0;
-//	    var h=0;
-	    if( highlightID !== null ) {
-//	        var highlightSpans=$("[title=\""+highlightID+"\"]");
-//	        if(highlightSpans) {
-//	            l = $(highlightSpans).offset().left;
-//	            t = $(highlightSpans).offset().top;
-//	            if(gCurrentViewMode==3)
-//	            	t = $(highlightSpans).offset().top-$(document).scrollTop();
-//	            w = $(highlightSpans).width();
-//	            h = $(highlightSpans).height();
-//	         }
+	    if( isHighlight && highlightID !== null ) {
 	         showCurrentHighlightSelection(highlightID);
 	    }
-//	    window.selection.showContextMenu( highlightID, 2, contextMenuTargetPosition);
 
-	} catch(err) {
-	    log("Error finding highlight: "+err);
+	    return isHighlight;
+	} catch(error) {
+	    console.log("findHighlight error : "+error);
 	}
 }
 
@@ -1369,6 +1364,7 @@ function findTagUnderPoint(x,y,singleTap) {
     var tagType=-1;
 
     try {
+        // aside popup 영역 예외처리
     	var element = document.elementFromPoint(x, y);
     	if(element.className == "flk_inner")
     		return;
@@ -1416,37 +1412,31 @@ function findTagUnderPoint(x,y,singleTap) {
      		return;
      	}
 
-        var isHighlight=false;
-     	if( $(element).hasClass(HIGHLIGHT_CLASS) ){
-     	    isHighlight = true;
-            findHighlight(x, y, element);
-        }
+        // 재활성화 여부를 위해 flk 검사
+        var isExceptionalTagOrAttr = findHighlight(x, y, element);
 
         if(element.hasAttribute('onclick')){
-            return;
-        } else {
-            var role = element.getAttribute('role');
-            if(role!=null && role!=undefined){
-                if(role.toLowerCase().indexOf("button") != -1){
-                    return;
-                }
-            }
+            isExceptionalTagOrAttr = true;
+        }
+
+        var role = element.getAttribute('role');
+        if(role!=null && role!=undefined && role.toLowerCase().indexOf("button") != -1){
+            isExceptionalTagOrAttr = true;
         }
 
         if( element.nodeType == ELEMENT_NODE ) {
-            if( element.tagName.toUpperCase() =='IMG'
-                || element.tagName.toUpperCase() =='A'
-                    || element.tagName.toUpperCase() =='AUDIO'
-                        || element.tagName.toUpperCase() =='VIDEO') {
+            if( element.tagName.toUpperCase() =='IMG' || element.tagName.toUpperCase() =='A'|| element.tagName.toUpperCase() =='AUDIO'|| element.tagName.toUpperCase() =='VIDEO') {
                 url = element.outerHTML;
-
                 if(element.tagName.toUpperCase() =='IMG' ){
                     tagType = 1;
                     url = element.src;
-
                     while(element.id != "feelingk_bookcontent"){	// img 태그 부모가 a tag 인 경우를 위해 부모 검사
                         element = element.parentNode;
                         if(element.tagName.toUpperCase()=='A'){
+                            var role = element.getAttribute('role');
+                            if(role!=null && role!=undefined && role.toLowerCase().indexOf("button") != -1){
+                                isExceptionalTagOrAttr = true;
+                            }
                             tagType = 2;
                             url = element.href;
                             break;
@@ -1455,6 +1445,7 @@ function findTagUnderPoint(x,y,singleTap) {
                 } else if(element.tagName.toUpperCase() =='A'){
                     tagType = 2;
                     url = element.href;
+                    if(a)
                 } else if(element.tagName.toUpperCase() =='AUDIO'){
                     tagType = 3;
                 } else if(element.tagName.toUpperCase() =='VIDEO'){
@@ -1462,15 +1453,10 @@ function findTagUnderPoint(x,y,singleTap) {
                     url = element.src;
                 }
             } else {
-//                var parent = firstSibling(element);
                 var parent = element.parentElement;
                 if(parent != null){
-                    if( parent.tagName.toUpperCase() =='IMG'
-                        || parent.tagName.toUpperCase() =='A'
-                            || parent.tagName.toUpperCase() =='AUDIO'
-                                || parent.tagName.toUpperCase() =='VIDEO') {
+                    if( parent.tagName.toUpperCase() =='IMG' || parent.tagName.toUpperCase() =='A' || parent.tagName.toUpperCase() =='AUDIO' || parent.tagName.toUpperCase() =='VIDEO') {
                         url = parent.outerHTML;
-
                         if(parent.tagName.toUpperCase() =='IMG' ){
                             tagType = 1;
                             url = parent.src;
@@ -1481,6 +1467,7 @@ function findTagUnderPoint(x,y,singleTap) {
                             tagType = 3;
                         } else if(parent.tagName.toUpperCase() =='VIDEO'){
                             tagType = 4;
+                              url = element.src;
                         }
                     }
                 }
@@ -1490,7 +1477,7 @@ function findTagUnderPoint(x,y,singleTap) {
  	    console.log('findTagUnderPoint = ' + err);
  	    url=null;
  	}
-    window.selection.HitTestResult(url, tagType, x, y, singleTap, isHighlight);
+    window.selection.HitTestResult(url, tagType, x, y, singleTap, isExceptionalTagOrAttr);
 }
 
 
@@ -3935,6 +3922,8 @@ function showCurrentContextMenu(highlightID, menuTypeIndex, contextMenuPosition)
 }
 
 function showCurrentHighlightSelection(highlightID){
+
+    console.log("showCurrentHighlightSelection highlightID : "+highlightID);
 
     var annotationElms = document.getElementsByClassName(highlightID);
 

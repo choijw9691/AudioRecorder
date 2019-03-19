@@ -3492,7 +3492,7 @@ function setMoveRange(x,y) {
         }
 
         var isOverflowTotalRange = checkSelectionMaxLength(prevTotalRange, 1);
-        if(isOverflowTotalRange){
+        if(!isOverflowTotalRange){
             var rectList = getSelectedTextNodeRectList(totalRange);
             drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
         }
@@ -3684,7 +3684,7 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
         }
 
         var isOverflowTotalRange = checkSelectionMaxLength(prevTotalRange, 0);
-        if(isOverflowTotalRange){
+        if(!isOverflowTotalRange){
             var rectList = getSelectedTextNodeRectList(totalRange);
             drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
         }
@@ -3769,7 +3769,7 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
     if(currentSelectedHighlightId!=null
         && totalRange.startContainer.parentElement.tagName.toLowerCase() == "flk"&& totalRange.startContainer.parentElement.title == currentSelectedHighlightId
         && totalRange.endContainer.parentElement.tagName.toLowerCase() == "flk"&& totalRange.endContainer.parentElement.title == currentSelectedHighlightId ){
-        return true;
+        return false;
     } else {
         var prevOverflowedTextSelection = notifyOverflowedTextSelection;
         var prevMergeOverflowedTextSelection = notifyMergeOverflowedTextSelection;
@@ -3875,12 +3875,12 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
         if(isOverflowAfterMoveRange){
             totalRange = prevTotalRange.cloneRange();
             notifyOverflowToFront();
-            return false;
+            return true;
         } else {
             isConfirmedOverflowCallback = false;
             notifyOverflowedTextSelection = false;
             notifyMergeOverflowedTextSelection = false;
-            return true;
+            return false;
         }
     }
 }
@@ -3906,6 +3906,8 @@ function showCurrentContextMenu(highlightID, menuTypeIndex, contextMenuPosition)
 function showCurrentHighlightSelection(highlightID){
 
     console.log("showCurrentHighlightSelection highlightID : "+highlightID);
+
+    isConfirmedOverflowCallback = false;
 
     var annotationElms = document.getElementsByClassName(highlightID);
 
@@ -4622,6 +4624,7 @@ function setSelectedText(selectedText){
 function finishTextSelection(){
     textSelectionMode=false;
     selectionScrolling=false;
+    isConfirmedOverflowCallback=false;
     notifyOverflowedTextSelection=false;
     notifyMergeOverflowedTextSelection=false;
     contextMenuTargetPosition="END";

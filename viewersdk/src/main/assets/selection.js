@@ -4218,9 +4218,11 @@ function getNextTextNode(currentSelectedEndContainer) {
     }
 }
 
-function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
+function findEndRangeAndOffset(targetPageRight, textNode, currentEndOffset){
 
     var findEndPosition = false;
+
+    var currentLeft = $(document).scrollLeft();
 
     if(textNode==null)
         return findEndPosition = false;
@@ -4236,15 +4238,19 @@ function findEndRangeAndOffset(landingRight, textNode, currentEndOffset){
         }
 
         if (/\.$|\!$|\?$/.test(tempRange.toString())){
-            totalRangeContinuable.setEnd(tempRange.endContainer, tempRange.endOffset);
-            return findEndPosition = true;
+            if(currentLeft+tempRange.getBoundingClientRect().left+tempRange.getBoundingClientRect().width<targetPageRight){      // 마침조건 O
+                totalRangeContinuable.setEnd(tempRange.endContainer, tempRange.endOffset);
+                return findEndPosition = true;
+            } else {
+                return findEndPosition = false;
+            }
         }
 
-        if(tempRange.getBoundingClientRect().left+tempRange.getBoundingClientRect().width>landingRight){      // 마침조건 X
+        if(currentLeft+tempRange.getBoundingClientRect().left+tempRange.getBoundingClientRect().width>targetPageRight){      // 마침조건 X
             return findEndPosition = false;
         }
     }
-    return findEndRangeAndOffset(landingRight, getNextTextNode(tempRange.endContainer), 0);
+    return findEndRangeAndOffset(targetPageRight, getNextTextNode(tempRange.endContainer), 0);
 }
 
 function getSelectionLandingPage(isHighlight, highlightColorIndex){
@@ -4254,19 +4260,20 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         tempRange.setEnd(tempRange.endContainer, tempRange.endOffset+1);
     }
 
-    var targetPage = gCurrentPage;
-    var currentLeft = window.scrollX;
+    var currentLeft = $(document).scrollLeft();
+    var targetPageIdx = gCurrentPage;
+    var targetPageLeft = currentLeft;
     var checkValue = tempRange.getBoundingClientRect().right+currentLeft;
-    while(currentLeft<checkValue){
-        if(currentLeft+gWindowInnerWidth<checkValue){
-            targetPage+=1;
-            currentLeft = currentLeft+gWindowInnerWidth;
+    while(targetPageLeft<checkValue){
+        if(targetPageLeft+gWindowInnerWidth<checkValue){
+            targetPageIdx+=1;
+            targetPageLeft += gWindowInnerWidth;
         } else {
-            currentLeft = currentLeft+gWindowInnerWidth;
+            break;
         }
     }
 
-    var findEndPosition = findEndRangeAndOffset(checkValue+gWindowInnerWidth, tempRange.endContainer, tempRange.endOffset);
+    var findEndPosition = findEndRangeAndOffset(targetPageLeft+gWindowInnerWidth, tempRange.endContainer, tempRange.endOffset);
     if(!findEndPosition){
         var tempRange = totalRangeContinuable.cloneRange();
         while(tempRange.endOffset<tempRange.endContainer.textContent.length){
@@ -4294,16 +4301,17 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
     if(mergeCheckRange.toString().length>gMaxSelectionLength){
         mergeCheckRange.setEnd(totalRange.endContainer, totalRange.endOffset);
         if(mergeCheckRange.toString().length>gMaxSelectionLength){
-            targetPage = gCurrentPage;
+            targetPageIdx = gCurrentPage;
         } else {
-            targetPage = gCurrentPage;
-            var checkValue = totalRange.getBoundingClientRect().right+currentLeft;
-            while(currentLeft<checkValue){
-                if(currentLeft+gWindowInnerWidth<checkValue){
-                    targetPage+=1;
-                    currentLeft = currentLeft+gWindowInnerWidth;
+            targetPageIdx = gCurrentPage;
+            targetPageLeft = currentLeft;
+            var checkValue = totalRange.getBoundingClientRect().right+targetPageLeft;
+            while(targetPageLeft<checkValue){
+                if(targetPageLeft+gWindowInnerWidth<checkValue){
+                    targetPageIdx+=1;
+                    targetPageLeft += gWindowInnerWidth;
                 } else {
-                    currentLeft = currentLeft+gWindowInnerWidth;
+                    break;
                 }
             }
         }
@@ -4311,7 +4319,7 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         totalRange=totalRangeContinuable.cloneRange();
     }
 
-    if(targetPage == gCurrentPage){
+    if(targetPageIdx == gCurrentPage){
         window.selection.overflowedTextSelection(2);
         if(isHighlight){
             addAnnotation(highlightColorIndex);
@@ -4325,7 +4333,7 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         }
     }
 
-    window.selection.setLandingPage(targetPage);
+    window.selection.setLandingPage(targetPageIdx);
 }
 
 function selectionContinue(isHighlight, colorIndex){

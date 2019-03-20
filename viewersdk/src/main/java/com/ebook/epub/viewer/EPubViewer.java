@@ -3292,7 +3292,6 @@ public class EPubViewer extends ViewerBase {
                 }
 
                 if( object.isNull("indent") )
-//    				 BookHelper.indent = false;
                     BookHelper.indent = null;	//[ssin] add : 원본스타일 null
                 else{
                     if(object.getString("indent").equalsIgnoreCase("false")){
@@ -3350,9 +3349,9 @@ public class EPubViewer extends ViewerBase {
 
 
             if( object.isNull("highlightColor") )
-                BookHelper.lastHighlightColor = 0;
-//            else
-//                BookHelper.lastHighlightColor = object.getInt("highlightColor");
+                BookHelper.lastHighlightColor = 2;
+            else
+                BookHelper.lastHighlightColor = object.getInt("highlightColor");
 
             if( object.isNull("viewStyleType") && BookHelper.getViewStyleType()==BookHelper.VIEW_STYLE_ORIGINAL){
                 BookHelper.setViewStyleType(BookHelper.VIEW_STYLE_ORIGINAL);

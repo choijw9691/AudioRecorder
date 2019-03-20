@@ -4951,14 +4951,14 @@ public class EPubViewer extends ViewerBase {
             isStartHandlerTouched=true;
             mTextSelectionMode = true;
             targetX = selectionRectList.get(0).left - getScrollX();
-            targetY = selectionRectList.get(0).top - getScrollY();
+            targetY = selectionRectList.get(0).top - getScrollY() + (selectionRectList.get(0).height()/2);
         }
 
         if(mEndHandle.isVisible() && handlerEndRegion.contains(x+getScrollX(),y+getScrollY())){
             isEndHandlerTouched=true;
             mTextSelectionMode = true;
             targetX = selectionRectList.get(selectionRectList.size()-1).right - getScrollX();
-            targetY = selectionRectList.get(selectionRectList.size()-1).top - getScrollY();
+            targetY = selectionRectList.get(selectionRectList.size()-1).top - getScrollY() + (selectionRectList.get(selectionRectList.size()-1).height()/2);
         }
     }
 

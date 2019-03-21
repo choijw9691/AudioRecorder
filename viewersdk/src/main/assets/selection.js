@@ -4333,6 +4333,9 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         }
     }
 
+    if(totalRange.toString().endsWith(" ")){
+        totalRange.setEnd(totalRange.endContainer, totalRange.endOffset-1);
+    }
     window.selection.setLandingPage(targetPageIdx);
 }
 

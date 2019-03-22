@@ -14,9 +14,6 @@ var gPageCount = 0;
 var gClientHeight = -1;
 var gWindowInnerHeight = 0;
 var gWindowInnerWidth = 0;
-var gWebviewWidth;
-var gWebviewHeight;
-var gDisplayDensity;
 var gRealHeight = 0;
 var gMarginLeft = 0;
 var gMarginRight = 0;
@@ -33,6 +30,7 @@ var audioTimerID;
 var fontfaceLoadingDone=true;
 var chromeAgent;
 var currentChromeVersion;
+var currentAndroidVersion;
 var isPageMoveRequest = false;
 var imageDataInfo= new Array();
 /********************************************************************************************* s:ready */
@@ -48,6 +46,7 @@ $(document).ready(function(){
 
     window.selection.reportDirectionType(gDirectionType);
 
+    currentAndroidVersion = getAndroidOsVersion();
     chromeAgent = ((navigator.userAgent || "").match(/chrome\/[\d]+/gi) || [""])[0];
     currentChromeVersion = parseInt((chromeAgent .match(/[\d]+/g) || [""])[0], 10);
     if(35 < currentChromeVersion){
@@ -72,8 +71,7 @@ $(document).ready(function(){
     	}
     }
 
-    var osVersion = getAndroidOsVersion();
-    if(osVersion == "4.4.2"){
+    if(currentAndroidVersion == "4.4.2"){
 		audios.removeAttr("loop")
 	}
 
@@ -152,8 +150,7 @@ $(document).ready(function(){
 
 	$('video').on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
         var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
-        var osVersion = getAndroidOsVersion();
-        if(state && osVersion.charAt(0)>=5){
+        if(state && currentAndroidVersion.charAt(0)>=5){
         	$(this)[0].pause();
 			document.webkitCancelFullScreen();
 			playVideoFullScreen($(this)[0]);
@@ -166,8 +163,7 @@ $(document).ready(function(){
     		window.selection.didPlayPreventMedia($($(this)[0]).getPath(), "video");
     		return false;
     	} else {
-    		var osVersion = getAndroidOsVersion();
-    		if(osVersion.charAt(0)<=4 && osVersion.charAt(2)<=3){
+    		if(currentAndroidVersion.charAt(0)<=4 && currentAndroidVersion.charAt(2)<=3){
     			playVideoFullScreen($(this)[0]);
     		}
     	}
@@ -394,9 +390,6 @@ function setupChapter(	highlights,
         gOsVersion = osVersion;
         gCurrentViewMode = currentViewMode;
         gTwoPageViewMode = twoPageViewMode;
-        gWebviewWidth = webviewWidth;
-        gWebviewHeight = webviewHeight;
-        gDisplayDensity = density;
         gMarginLeft = marginLeft;
         gMarginRight = marginRight;
         gMarginTop = marginTop;
@@ -3099,8 +3092,7 @@ function playVideoFullScreen(videoElement){
 		}
 	}
 
-	var osVersion = getAndroidOsVersion();
-	if(osVersion.charAt(0)>=7){
+	if(currentAndroidVersion.charAt(0)>=7){
 		window.selection.videocontrol(valueSRC);	// 누가 예외처리
 	} else{
 		window.selection.playVideo(valueSRC);
@@ -3476,13 +3468,27 @@ function setMoveRange(x,y) {
             currentSelectionInfo.isExistHandler = true;
         }
 
-        if(gCurrentViewMode!=3){
-            var selectedTextRects= totalRange.getClientRects();
-            var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
-            var checkValue = lastRectRight + $(document).scrollLeft();
-            if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
-                totalRange = prevTotalRange.cloneRange();
-                return;
+        if(gCurrentViewMode!=3 && !isStartWordOverNextPage){
+            if(currentAndroidVersion.charAt(0)<=4){
+                if(totalRange.endOffset>0){
+                    var tempTotalRange = totalRange.cloneRange();
+                    tempTotalRange.setEnd(tempTotalRange.endContainer, tempTotalRange.endOffset-1);
+                    var selectedTextRects= tempTotalRange.getClientRects();
+                    var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+                    var checkValue = lastRectRight + $(document).scrollLeft();
+                    if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                        totalRange = prevTotalRange.cloneRange();
+                        return;
+                    }
+                }
+            } else {
+                var selectedTextRects= totalRange.getClientRects();
+                var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+                var checkValue = lastRectRight + $(document).scrollLeft();
+                if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                    totalRange = prevTotalRange.cloneRange();
+                    return;
+                }
             }
         }
 
@@ -3669,12 +3675,26 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
         }
 
         if(gCurrentViewMode!=3 && !isStartWordOverNextPage){
-            var selectedTextRects= totalRange.getClientRects();
-            var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
-            var checkValue = lastRectRight + $(document).scrollLeft();
-            if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
-                totalRange = prevTotalRange.cloneRange();
-                return;
+            if(currentAndroidVersion.charAt(0)<=4){
+                if(totalRange.endOffset>0){
+                    var tempTotalRange = totalRange.cloneRange();
+                    tempTotalRange.setEnd(tempTotalRange.endContainer, tempTotalRange.endOffset-1);
+                    var selectedTextRects= tempTotalRange.getClientRects();
+                    var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+                    var checkValue = lastRectRight + $(document).scrollLeft();
+                    if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                        totalRange = prevTotalRange.cloneRange();
+                        return;
+                    }
+                }
+            } else {
+                var selectedTextRects= totalRange.getClientRects();
+                var lastRectRight = selectedTextRects[selectedTextRects.length-1].right;
+                var checkValue = lastRectRight + $(document).scrollLeft();
+                if(checkValue > $(document).scrollLeft() + gWindowInnerWidth){
+                    totalRange = prevTotalRange.cloneRange();
+                    return;
+                }
             }
         }
 

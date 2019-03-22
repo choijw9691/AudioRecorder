@@ -4328,7 +4328,8 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         }
     }
 
-    if(totalRange.toString().endsWith(" ")){
+    var totalRangeStr = totalRange.toString();
+    if(totalRangeStr.lastIndexOf(" ", totalRangeStr.length) == totalRangeStr.length){   // endsWith() 36부터 지원해서 못씀
         totalRange.setEnd(totalRange.endContainer, totalRange.endOffset-1);
     }
     window.selection.setLandingPage(targetPageIdx);

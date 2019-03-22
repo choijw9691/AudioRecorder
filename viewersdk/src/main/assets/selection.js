@@ -3749,9 +3749,6 @@ function setEndRangeWithHandler(x,y, colorIndex) {
         return;
     }
 
-//    var rectList = getSelectedTextNodeRectList(totalRange);
-//    drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
-
     totalRangeTemp = totalRange.cloneRange();
 
     var nextPageContinuable = checkNextPageContinuable(totalRange);
@@ -4349,7 +4346,7 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
     }
 
     var totalRangeStr = totalRange.toString();
-    if(totalRangeStr.lastIndexOf(" ", totalRangeStr.length) == totalRangeStr.length){   // endsWith() 36부터 지원해서 못씀
+    if(totalRangeStr.lastIndexOf(" ", totalRangeStr.length) == totalRangeStr.length-1){   // endsWith() 36부터 지원해서 못씀
         totalRange.setEnd(totalRange.endContainer, totalRange.endOffset-1);
     }
     window.selection.setLandingPage(targetPageIdx);

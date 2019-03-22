@@ -1918,6 +1918,15 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
     }
 
+    public void changeMemoText(String currentMemoId, String memoContent){
+        // TODO : new custom selection
+        if( mLayoutMode == LayoutMode.Reflowable ){
+            mEPubViewer.changeMemoText(currentMemoId, memoContent);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+//            mFixedLayoutView.changeMemoText(currentMemoId, memoContent);
+        }
+    }
+
     public void requestAllMemoText(){
         // TODO : new custom selection
         if( mLayoutMode == LayoutMode.Reflowable ){

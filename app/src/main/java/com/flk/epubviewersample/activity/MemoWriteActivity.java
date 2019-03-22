@@ -15,7 +15,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.ebook.epub.viewer.Highlight;
 import com.ebook.epub.viewer.ViewerContainer;
 import com.flk.epubviewersample.R;
 
@@ -23,18 +22,15 @@ public class MemoWriteActivity extends Activity {
 
     private ViewerContainer mEPubViewer;
 
-    private Highlight mHighlight;
-
     private String mPressedMemoText="";
+
+    private String mPressedMemoId="";
 
     private boolean mEditMode = false;
 
     private EditText mEditText;
 
     private InputMethodManager inputMethodManager;
-
-    private boolean mIsHighlight;
-    private boolean isHighlightToMemo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,23 +39,13 @@ public class MemoWriteActivity extends Activity {
         setContentView(R.layout.viewer_comment_memo_write);
 
         if(getIntent().getExtras() != null) {
-//            mIsHighlight = getIntent().getExtras().getBoolean("mIsHighlight");
-//            isHighlightToMemo = getIntent().getExtras().getBoolean("isHighlightToMemo");
+            mPressedMemoId = getIntent().getExtras().getString("SELECTED_ANNOTATION");
             mPressedMemoText = getIntent().getExtras().getString("MEMO_CONTENT");
         }
 
         mEPubViewer = BaseBookActivity.mViewer;
-//
-//        mHighlight = ViewerEpubMainActivity.mMemoHighlight;
-
-//        mPressedMemoText = mHighlight.memo;
 
         mEditMode = !(mPressedMemoText==null || mPressedMemoText.isEmpty());
-
-//		if(mPressedMemoText==null || mPressedMemoText.length() == 0)
-//			mEditMode = false;
-//		else
-//			mEditMode = true;
 
         inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -234,7 +220,7 @@ public class MemoWriteActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //메모삭제
-                mEPubViewer.deleteHighlight(mHighlight);
+                mEPubViewer.deleteAnnotation();
                 memoFinish();
                 Toast.makeText(getApplicationContext(),"메모가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
             }
@@ -279,20 +265,13 @@ public class MemoWriteActivity extends Activity {
 
     /** 메모저장 */
     private void memoSave() {
-//        mHighlight.memo = mEditText.getText().toString();
-//        mPressedMemoText = mEditText.getText().toString();
         String currentMemo = mEditText.getText().toString();
-//        if(mIsHighlight){
-//            mEPubViewer.changeIntoMemo(mHighlight, mPressedMemoText);
-//        }else {
-//            mEPubViewer.requestShowMemo(mHighlight, mEditMode);
-//        }
-
-
         // TODO :: new custom selection modified
-        // - 범위가 바뀌고 메모는 동일할 수 있으므로 무조건 태워야함
-//        mEpubVIewer.doMemo();
-        mEPubViewer.addAnnotationWithMemo(currentMemo, mEditMode);
+        if(mPressedMemoId.isEmpty()){
+            mEPubViewer.addAnnotationWithMemo(currentMemo, mEditMode);   // 범위가 바뀐경우
+        } else {
+            mEPubViewer.changeMemoText(mPressedMemoId, currentMemo);    // 메모만 바뀐경우
+        }
 
         String text  = mEditMode ? "메모가 수정되었습니다." : "메모가 저장되었습니다";
         inputMethodManager.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);

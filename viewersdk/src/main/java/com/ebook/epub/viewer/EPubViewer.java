@@ -4814,6 +4814,25 @@ public class EPubViewer extends ViewerBase {
     public void  modifyAnnotationColorAndRange(int colorIndex){
         loadUrl("javascript:modifyAnnotationColorAndRange("+colorIndex+")");
     }
+
+    public void  changeMemoText(String memoId, String currentMemo){
+        for(int idx=0; idx<mHighlights.size(); idx++){
+            Highlight targetHighlight = mHighlights.get(idx);
+            if(targetHighlight.highlightID.equalsIgnoreCase(memoId)){
+                targetHighlight.memo = currentMemo;
+                if( BookHelper.useHistory ){ //메모 변경도 히스토리에 변경항목으로 추가(동기화를 위함)
+                    long newID = System.currentTimeMillis() / 1000L;
+                    __hlHistory.modifyRemove(targetHighlight.uniqueID, newID);
+                    __hlHistory.modifyAdd(newID);
+                    targetHighlight.uniqueID = newID;
+                }
+                break;
+            }
+        }
+
+        saveHighlights();
+        finishTextSelectionMode();
+    }
     /******************************************************************** e : modify annotation */
 
     /******************************************************************** s : context menu */

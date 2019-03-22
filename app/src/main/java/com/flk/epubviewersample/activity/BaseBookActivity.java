@@ -1003,6 +1003,7 @@ public class BaseBookActivity extends Activity implements Runnable {
             @Override
             public void onGetAllMemoText(String allMemoText) {
                 Intent intent = new Intent(getApplicationContext(), MemoWriteActivity.class);
+                intent.putExtra("SELECTED_ANNOTATION",mCurrentHighlight == null ? "" : mCurrentHighlight.highlightID);
                 intent.putExtra("MEMO_CONTENT",allMemoText);
                 startActivityForResult(intent, REQUEST_MEMO_ACTIVITY);
             }
@@ -1113,6 +1114,7 @@ public class BaseBookActivity extends Activity implements Runnable {
                     toggleLayoutVisible();
                 }
                 boolean hasMemo=false;
+                mCurrentHighlight=null;
 
                 mContextMenu = createPopup(R.layout.context_popup, contextMenuType);
 
@@ -1121,9 +1123,9 @@ public class BaseBookActivity extends Activity implements Runnable {
                     if(highlightID != null){
                         for( Highlight h: mViewer.getHighlights() ) {
                             if(highlightID.equals(h.highlightID)) { // h.chapterFile.toLowerCase().equals(fileName) &&
-                                mCurrentHighlight = h;
                                 if(h.isMemo()){
                                     hasMemo = true;
+                                    mCurrentHighlight = h;
                                     mContextMenu = showMemoPopup(R.layout.memo_popup, h.memo, h.colorIndex );
                                 } else {
                                     mContextMenu = createPopup2(R.layout.context_popup2, contextMenuType);
@@ -2144,7 +2146,7 @@ public class BaseBookActivity extends Activity implements Runnable {
 //                    do_memo();
                     // TODO :: new custom selection modified
                     Intent intent = new Intent(getApplicationContext(), MemoWriteActivity.class);
-                    intent.putExtra("SELECTED_ANNOTATION","");
+                    intent.putExtra("SELECTED_ANNOTATION",mCurrentHighlight == null ? "" : mCurrentHighlight.highlightID);
                     intent.putExtra("MEMO_CONTENT","");
                     startActivityForResult(intent, REQUEST_MEMO_ACTIVITY);
                     break;

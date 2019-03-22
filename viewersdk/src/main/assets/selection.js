@@ -3431,9 +3431,6 @@ function setMoveRange(x,y) {
 
     if(!textSelectionMode || currentSelectedHighlightId!=null) return;
 
-    var rectList = getSelectedTextNodeRectList(totalRange);
-    drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
-
     var currentElement = document.elementFromPoint(x, y);
     var moveRange = document.caretRangeFromPoint(x, y);
 
@@ -3446,10 +3443,6 @@ function setMoveRange(x,y) {
     }
 
     try {
-        var compare = startRange.compareBoundaryPoints(Range.START_TO_END, moveRange);   // 값은 startRange 기준으로 조건에 따라 나옴
-        var startCompare = selectionStartCharacterRange.compareBoundaryPoints(Range.START_TO_START, moveRange);
-        var endCompare = selectionStartCharacterRange.compareBoundaryPoints(Range.END_TO_END, moveRange);
-
         if(isSameStartCharacter && selectionStartCharacterRange.startOffset==moveRange.startOffset && selectionStartCharacterRange.endOffset==moveRange.endOffset){
             // 시작 글자랑 같은 글자 머무른 경우 움직이지 않음으로 판단
             currentSelectionInfo.isExistHandler=true;
@@ -3460,6 +3453,8 @@ function setMoveRange(x,y) {
             // 한번이라도 시작 글자랑 다르면 움직인 것으로 판단
             isSameStartCharacter=false;
         }
+
+        var compare = startRange.compareBoundaryPoints(Range.START_TO_END, moveRange);   // 값은 startRange 기준으로 조건에 따라 나옴
 
         if(compare==0){
             return;

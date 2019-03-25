@@ -4302,7 +4302,9 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
 
     if(totalRangeContinuable.startContainer.parentElement.tagName.toLowerCase()=='flk'){
         var highlights = $("." + totalRangeContinuable.startContainer.parentElement.title);
-        mergeCheckRange.setStart(highlights[0].childNodes[0], 0);
+        if(totalRangeContinuable.startOffset !== highlights[highlights.length-1].textContent.length){
+            mergeCheckRange.setStart(highlights[0].childNodes[0], 0);
+        }
     }
 
     if(totalRangeContinuable.endContainer.parentElement.tagName.toLowerCase()=='flk'){

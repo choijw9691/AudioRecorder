@@ -6172,7 +6172,7 @@ public class EPubViewer extends ViewerBase {
                         public void run() {
                             EPubViewer.this.loadUrl(script);
                         }
-                    }, 300);
+                    }, 200);
                 }
                 isContinueSelection = false;
                 isContinueHighlight = false;

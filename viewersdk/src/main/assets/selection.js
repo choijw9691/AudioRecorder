@@ -4354,9 +4354,27 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
 function selectionContinue(isHighlight, colorIndex){
 
     if(isHighlight){
-        var currentSelectionInfo=requestAnnotationInfo(totalRange, false);
-        highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
-        textSelectionMode=false;
+        var isMergeMemoAvailable=true;
+        if(isExistAnnotationInRange(totalRange)){
+            isMergeMemoAvailable = window.selection.checkMemoMaxLength(JSON.stringify( getAnnotationIdList()));
+            if(isMergeMemoAvailable){
+                currentSelectionInfo=requestAnnotationInfo(totalRange, false);
+                highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+                textSelectionMode = false;
+            } else {
+                currentSelectionInfo=requestAnnotationInfo(totalRange, true);
+                var rectList = getSelectedTextNodeRectList(totalRange);
+                drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
+                window.selection.overflowedMemoContent();
+                contextMenuTargetPosition = "END"
+                window.selection.invalidateSelectionDraw();
+                setTimeout(function () { showCurrentContextMenu(null, 2, contextMenuTargetPosition);}, 100);
+            }
+        } else {
+            var currentSelectionInfo=requestAnnotationInfo(totalRange, false);
+            highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+            textSelectionMode=false;
+        }
     } else {
         contextMenuTargetPosition = "END";
 
@@ -4526,9 +4544,21 @@ function addAnnotation(colorIndex){
     if(totalRange == undefined || totalRange == null || totalRange.toString().length==0)
         return;
 
-    var currentSelectionInfo=requestAnnotationInfo(totalRange, false);
-    highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
-    textSelectionMode = false;
+    var isMergeMemoAvailable=true;
+    if(isExistAnnotationInRange(totalRange)){
+        isMergeMemoAvailable = window.selection.checkMemoMaxLength(JSON.stringify( getAnnotationIdList()));
+        if(isMergeMemoAvailable){
+            var currentSelectionInfo=requestAnnotationInfo(totalRange, false);
+            highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+            textSelectionMode = false;
+        } else {
+            window.selection.overflowedMemoContent();
+        }
+    } else {
+        var currentSelectionInfo=requestAnnotationInfo(totalRange, false);
+        highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+        textSelectionMode = false;
+    }
 }
 
 function addAnnotationWithMemo(colorIndex, memoContent){
@@ -4542,9 +4572,25 @@ function addAnnotationWithMemo(colorIndex, memoContent){
 }
 
 function modifyAnnotationColorAndRange(colorIndex){
-    var currentSelectionInfo = requestAnnotationInfo(totalRange, false);
-    highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
-    textSelectionMode = false;
+
+    if(totalRange == undefined || totalRange == null || totalRange.toString().length==0)
+        return;
+
+    var isMergeMemoAvailable=true;
+    if(isExistAnnotationInRange(totalRange)){
+         isMergeMemoAvailable = window.selection.checkMemoMaxLength(JSON.stringify( getAnnotationIdList()));
+        if(isMergeMemoAvailable){
+            var currentSelectionInfo = requestAnnotationInfo(totalRange, false);
+            highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+            textSelectionMode = false;
+        } else {
+            window.selection.overflowedMemoContent();
+        }
+    } else {
+        var currentSelectionInfo = requestAnnotationInfo(totalRange, false);
+        highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, colorIndex);
+        textSelectionMode = false;
+    }
 }
 
 function deleteAnnotationInRange(){

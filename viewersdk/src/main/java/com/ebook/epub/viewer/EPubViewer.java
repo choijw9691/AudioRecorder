@@ -4700,7 +4700,10 @@ public class EPubViewer extends ViewerBase {
 
             isMergedMemo = false;
 
-            if( isMemo && memoText.length() > 0 ) memoText +="\n";
+            if( isMemo && memoText.length() > 0 ) {
+                memoText=memoText.replace("'","\\'");
+                memoText += "\n";
+            }
 
             newHighlight.highlightID = hID;
             newHighlight.startPath = startPath;
@@ -4710,7 +4713,7 @@ public class EPubViewer extends ViewerBase {
             newHighlight.endChild = endChildIndex;
             newHighlight.endChar = endCharOffset;
             newHighlight.colorIndex = colorIndex;
-            newHighlight.memo = Uri.encode(memoText);
+            newHighlight.memo = memoText;
             newHighlight.deviceModel = DeviceInfoUtil.getDeviceModel();
             newHighlight.osVersion = DeviceInfoUtil.getOSVersion();
 
@@ -4734,11 +4737,11 @@ public class EPubViewer extends ViewerBase {
         EPubViewer.this.loadUrl(script);
     }
 
-    public void addAnnotationWithMemo(String memoContent, boolean modifyMerged){
+    public void addAnnotationWithMemo(String memoContent, boolean memoMerged){
 
 //        hideAnnotationMenu();
 
-        isMergedMemo = modifyMerged;
+        isMergedMemo = memoMerged;
 
         JSONArray array = new JSONArray();
         array.put(memoContent);
@@ -4786,7 +4789,8 @@ public class EPubViewer extends ViewerBase {
                 .append("'"+highlight.highlightID+"'").append(",")
                 .append(colorIndex).append(",")
                 .append(array.toString()).append(",'")
-                .append(Uri.encode(highlight.memo)).append("'")
+//                .append(Uri.encode(highlight.memo)).append("'")
+                .append(highlight.memo).append("'")
                 .append(")").toString();
 
         DebugSet.d(TAG, "script >>>>>>>>>>>>> " + script);

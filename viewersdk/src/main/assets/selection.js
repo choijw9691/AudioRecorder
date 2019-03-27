@@ -3831,47 +3831,24 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
         }
 
         var tempTotalRange = totalRange.cloneRange();
-        if(!isOverflowAfterMoveRange && totalRange.startContainer.parentElement.tagName.toLowerCase() == 'flk'){
+        if(!isOverflowAfterMoveRange && isExistAnnotationInRange(tempTotalRange)){
+            var containTarget = getAnnotationIdList();
+            for(var idx=0; idx<containTarget.length; idx++){
+                var highlights = $("." + containTarget[idx]);
+                var range = document.createRange();
+                range.setStart(highlights[0].childNodes[0], 0);
+                range.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
 
-            var highlights = $("." + totalRange.startContainer.parentElement.title);
-            var range = document.createRange();
-            range.setStart(highlights[0].childNodes[0], 0);
-            range.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
+                var compareStart = range.compareBoundaryPoints(Range.START_TO_START, tempTotalRange);
+                var compareEnd = range.compareBoundaryPoints(Range.END_TO_END, tempTotalRange);
+                var compareStartEnd = range.compareBoundaryPoints(Range.START_TO_END, tempTotalRange);
+                var compareEndStart = range.compareBoundaryPoints(Range.END_TO_START, tempTotalRange);
 
-            var compareStart = range.compareBoundaryPoints(Range.START_TO_START, tempTotalRange);
-            var compareEnd = range.compareBoundaryPoints(Range.END_TO_END, tempTotalRange);
-            var compareStartEnd = range.compareBoundaryPoints(Range.START_TO_END, tempTotalRange);
-            var compareEndStart = range.compareBoundaryPoints(Range.END_TO_START, tempTotalRange);
-
-            if(compareStart == 1 && compareEnd == 1 && compareEndStart!=0) {
-                tempTotalRange.setEnd(range.endContainer, range.endOffset);
-            } else if(compareStart == -1 && compareEnd == -1 && compareStartEnd!=0) {
-                tempTotalRange.setStart(range.startContainer, range.startOffset);
-            }
-
-            if(tempTotalRange.toString().length > gMaxSelectionLength) {
-                isOverflowAfterMoveRange = true;
-                notifyOverflowedTextSelection = false;
-                notifyMergeOverflowedTextSelection = true;
-            }
-        }
-
-        if(!isOverflowAfterMoveRange && totalRange.endContainer.parentElement.tagName.toLowerCase() == 'flk' ){
-
-            var highlights = $("." + totalRange.endContainer.parentElement.title);
-            var range = document.createRange();
-            range.setStart(highlights[0].childNodes[0], 0);
-            range.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
-
-            var compareStart = range.compareBoundaryPoints(Range.START_TO_START, tempTotalRange);
-            var compareEnd = range.compareBoundaryPoints(Range.END_TO_END, tempTotalRange);
-            var compareStartEnd = range.compareBoundaryPoints(Range.START_TO_END, tempTotalRange);
-            var compareEndStart = range.compareBoundaryPoints(Range.END_TO_START, tempTotalRange);
-
-            if(compareStart == 1 && compareEnd == 1 && compareEndStart!=0) {
-                tempTotalRange.setEnd(range.endContainer, range.endOffset);
-            } else if(compareStart == -1 && compareEnd == -1 && compareStartEnd!=0) {
-                tempTotalRange.setStart(range.startContainer, range.startOffset);
+                if(compareStart == 1 && compareEnd == 1 && compareEndStart!=0) {
+                    tempTotalRange.setEnd(range.endContainer, range.endOffset);
+                } else if(compareStart == -1 && compareEnd == -1 && compareStartEnd!=0) {
+                    tempTotalRange.setStart(range.startContainer, range.startOffset);
+                }
             }
 
             if(tempTotalRange.toString().length > gMaxSelectionLength) {

@@ -3830,9 +3830,8 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
             }
         }
 
+        var tempTotalRange = totalRange.cloneRange();
         if(!isOverflowAfterMoveRange && totalRange.startContainer.parentElement.tagName.toLowerCase() == 'flk'){
-
-            var tempTotalRange = totalRange.cloneRange();
 
             var highlights = $("." + totalRange.startContainer.parentElement.title);
             var range = document.createRange();
@@ -3858,8 +3857,6 @@ function checkSelectionMaxLength(prevTotalRange, selectionType){
         }
 
         if(!isOverflowAfterMoveRange && totalRange.endContainer.parentElement.tagName.toLowerCase() == 'flk' ){
-
-            var tempTotalRange = totalRange.cloneRange();
 
             var highlights = $("." + totalRange.endContainer.parentElement.title);
             var range = document.createRange();

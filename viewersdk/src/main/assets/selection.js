@@ -3622,14 +3622,6 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
 
     var prevTotalRange = totalRange.cloneRange();
 
-     if(isStartHandlerTouched){
-        contextMenuTargetPosition = "START";
-     }
-
-     if(isEndHandlerTouched){
-        contextMenuTargetPosition = "END";
-     }
-
     if(!checkSelectionAvailable(currentElement, moveRange)){
         var rectList = getSelectedTextNodeRectList(totalRange);
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
@@ -3645,7 +3637,6 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
         }
         var movingRange = movePositionResult.movingRange;
         if(movePositionResult.movePosition == MOVE_PREV) {
-            contextMenuTargetPosition = "START";
             if(isStartHandlerTouched) {
                 totalRange.setStart(movingRange.startContainer, movingRange.startOffset);
                 totalRange.setEnd(totalRangeTemp.endContainer, totalRangeTemp.endOffset);
@@ -3654,7 +3645,6 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
                 totalRange.setEnd(totalRangeTemp.startContainer, totalRangeTemp.startOffset);
             }
         } else if(movePositionResult.movePosition == MOVE_NEXT) {
-             contextMenuTargetPosition = "END";
             if(isStartHandlerTouched) {
                 totalRange.setStart(totalRangeTemp.endContainer, totalRangeTemp.endOffset);
                 totalRange.setEnd(movingRange.endContainer, movingRange.endOffset);
@@ -3722,8 +3712,10 @@ function positionCheck(x,y, movingRange) {
 
         if(startCompare == -1 && endCompare == -1) {
             move_position = MOVE_PREV;
+            contextMenuTargetPosition = "START";
         } else if(startCompare == 1 && endCompare == 1) {
             move_position = MOVE_NEXT;
+            contextMenuTargetPosition = "END";
         } else {
             move_position = MOVE_MIDDLE;
         }

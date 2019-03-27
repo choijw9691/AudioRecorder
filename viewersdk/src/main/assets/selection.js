@@ -4233,6 +4233,8 @@ function findEndRangeAndOffset(targetPageRight, textNode, currentEndOffset){
 
 function getSelectionLandingPage(isHighlight, highlightColorIndex){
 
+    var lastRangeInCurrentPage = totalRange.cloneRange();
+
     var tempRange = totalRangeContinuable.cloneRange();
     if(tempRange.endOffset<tempRange.endContainer.textContent.length){
         tempRange.setEnd(tempRange.endContainer, tempRange.endOffset+1);
@@ -4300,11 +4302,12 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
     }
 
     if(targetPageIdx == gCurrentPage){
+        totalRange = lastRangeInCurrentPage.cloneRange();
+        contextMenuTargetPosition = "END";
         window.selection.overflowedTextSelection(2);
         if(isHighlight){
             addAnnotation(highlightColorIndex);
         } else {
-            contextMenuTargetPosition = "END";
             if(isExistAnnotationInRange(totalRange)){
                 showCurrentContextMenu(null, 2, contextMenuTargetPosition);
             } else {
@@ -4313,8 +4316,7 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         }
     }
 
-    var totalRangeStr = totalRange.toString();
-    if(totalRangeStr.lastIndexOf(" ", totalRangeStr.length) == totalRangeStr.length-1){   // endsWith() 36부터 지원해서 못씀
+    if(/\s$/.test(totalRange.toString())){   // endsWith() 36부터 지원해서 못씀
         totalRange.setEnd(totalRange.endContainer, totalRange.endOffset-1);
     }
     window.selection.setLandingPage(targetPageIdx);

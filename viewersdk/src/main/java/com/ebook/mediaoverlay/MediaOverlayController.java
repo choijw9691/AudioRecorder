@@ -8,6 +8,7 @@ import android.os.Message;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.ebook.epub.fixedlayoutviewer.view.FixedLayoutWebview;
 import com.ebook.epub.parser.mediaoverlays.SmilSync;
 import com.ebook.epub.viewer.EPubViewer;
 import com.ebook.epub.viewer.ViewerContainer;
@@ -93,14 +94,14 @@ public class MediaOverlayController {
 
         mLayoutMode = layoutMode;
 
-//        if(mLayoutMode== ViewerContainer.LayoutMode.FixedLayout){
-//            if(!isLGetIdFinished){
-//                leftWebView.loadUrl("javascript:getIDList('"+((FixedLayoutWebview)leftWebView).getCurrentPageData().getContentsFilePath()+ "')");
-//            }else if(rightWebView!=null && !isRGetIdFinished)
-//                rightWebView.loadUrl("javascript:getIDList('"+((FixedLayoutWebview)rightWebView).getCurrentPageData().getContentsFilePath()+ "')");
-//        } else{
+        if(mLayoutMode== ViewerContainer.LayoutMode.FixedLayout){
+            if(!isLGetIdFinished){
+                leftWebView.loadUrl("javascript:getIDList('"+((FixedLayoutWebview)leftWebView).getCurrentPageData().getContentsFilePath()+ "')");
+            }else if(rightWebView!=null && !isRGetIdFinished)
+                rightWebView.loadUrl("javascript:getIDList('"+((FixedLayoutWebview)rightWebView).getCurrentPageData().getContentsFilePath()+ "')");
+        } else{
             leftWebView.loadUrl("javascript:getIDList('"+((EPubViewer)leftWebView).getCurrentChapterFile()+ "')");
-//        }
+        }
     }
 
     public void getIDofFirstVisibleElement(WebView webView){
@@ -112,9 +113,9 @@ public class MediaOverlayController {
             array.put(currentInfo[1]);
         }
 
-//        if(mLayoutMode== ViewerContainer.LayoutMode.FixedLayout)
-//            webView.loadUrl("javascript:getIDofFirstVisibleElement('"+((FixedLayoutWebview)webView).getCurrentPageData().getContentsFilePath()+ "',"+array.toString()+")");
-//        else
+        if(mLayoutMode== ViewerContainer.LayoutMode.FixedLayout)
+            webView.loadUrl("javascript:getIDofFirstVisibleElement('"+((FixedLayoutWebview)webView).getCurrentPageData().getContentsFilePath()+ "',"+array.toString()+")");
+        else
             webView.loadUrl("javascript:getIDofFirstVisibleElement('"+((EPubViewer)webView).getCurrentChapterFile()+ "',"+array.toString()+")");
     }
 

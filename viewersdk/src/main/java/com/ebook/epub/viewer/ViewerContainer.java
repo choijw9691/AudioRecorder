@@ -9,6 +9,8 @@ import android.widget.PopupWindow;
 
 import com.ebook.bgm.BGMMediaPlayer;
 import com.ebook.bgm.BGMPlayer;
+import com.ebook.epub.fixedlayoutviewer.data.FixedLayoutPageData;
+import com.ebook.epub.fixedlayoutviewer.view.FixedLayoutScrollView;
 import com.ebook.epub.parser.common.PackageVersion;
 import com.ebook.epub.parser.common.PageDirectionType;
 import com.ebook.epub.parser.common.RenditionLayoutType;
@@ -16,6 +18,7 @@ import com.ebook.epub.parser.common.RenditionOrientationType;
 import com.ebook.epub.parser.common.UnModifiableArrayList;
 import com.ebook.epub.parser.mediaoverlays.SmilContentProvider;
 import com.ebook.epub.parser.mediaoverlays.SmilDocumentReader;
+import com.ebook.epub.parser.mediaoverlays.SmilSync;
 import com.ebook.epub.parser.ocf.EpubFile;
 import com.ebook.epub.parser.ocf.EpubFileSystem;
 import com.ebook.epub.parser.ocf.EpubFileSystemException;
@@ -46,6 +49,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 /**
@@ -66,7 +70,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     private PageDirection mPageDirection = PageDirection.LTR;
     private Orientation mOrientation = Orientation.Auto;
     public EPubViewer mEPubViewer;
-//    public FixedLayoutScrollView mFixedLayoutView;
+    public FixedLayoutScrollView mFixedLayoutView;
     private Context mContext;
     private AttributeSet mAttrs;
     private String mInstName;
@@ -332,22 +336,22 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void initView() throws XmlPackageException, XmlContainerException, EpubFileSystemException{
 
         if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView = new FixedLayoutScrollView(mContext, mPageDirection, mEpubFile);
-//            mFixedLayoutView.setChapterInfo(mChapterInfo);
-//            mFixedLayoutView.setSpineInfo(mSpineInfo);
-//            addView(mFixedLayoutView);
-//
-//            ttsHighlighter = new Highlighter();
-//            ttsDataInfoManager = new TTSDataInfoManager();
-//            mFixedLayoutView.setTTSDataInfoManager(ttsDataInfoManager);
-//            mFixedLayoutView.setTTSHighlighter(ttsHighlighter);
-//            mFixedLayoutView.getTTSHighlighter().setOnHighlightRectInfoListener(this);
-//
-//            mediaOverlayController = new MediaOverlayController();
-//            mFixedLayoutView.setMediaOverlayController(mediaOverlayController);
-//
-//            bgmPlayer = new BGMPlayer(mEpubFile);
-//            mFixedLayoutView.setBgmPlayer(bgmPlayer);
+            mFixedLayoutView = new FixedLayoutScrollView(mContext, mPageDirection, mEpubFile);
+            mFixedLayoutView.setChapterInfo(mChapterInfo);
+            mFixedLayoutView.setSpineInfo(mSpineInfo);
+            addView(mFixedLayoutView);
+
+            ttsHighlighter = new Highlighter();
+            ttsDataInfoManager = new TTSDataInfoManager();
+            mFixedLayoutView.setTTSDataInfoManager(ttsDataInfoManager);
+            mFixedLayoutView.setTTSHighlighter(ttsHighlighter);
+            mFixedLayoutView.getTTSHighlighter().setOnHighlightRectInfoListener(this);
+
+            mediaOverlayController = new MediaOverlayController();
+            mFixedLayoutView.setMediaOverlayController(mediaOverlayController);
+
+            bgmPlayer = new BGMPlayer(mEpubFile);
+            mFixedLayoutView.setBgmPlayer(bgmPlayer);
 
         } else if( mLayoutMode == LayoutMode.Reflowable ){
 
@@ -498,7 +502,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         mChapterInfo = null;
         mImageReader = null;
         mEPubViewer = null;
-//        mFixedLayoutView = null;
+        mFixedLayoutView = null;
     }
 
     /**
@@ -599,10 +603,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         mOnDecodeContent = listener;
         if (mLayoutMode == LayoutMode.Reflowable) {
             mEPubViewer.setOnDecodeContent(listener);
+        } else if (mLayoutMode == LayoutMode.FixedLayout) {
+            mFixedLayoutView.setOnDecodeContent(listener);
         }
-//        else if (mLayoutMode == LayoutMode.FixedLayout) {
-//            mFixedLayoutView.setOnDecodeContent(listener);
-//        }
     }
 
     /**
@@ -612,10 +615,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnViewerState(OnViewerState listener) {  // TODO : 프론트에서 안쓰면 없애자
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnViewerState(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnViewerState(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.setOnViewerState(listener);
-//        }
     }
 
     /**
@@ -625,17 +627,16 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnTextSelection(OnTextSelection listener) {  // TODO : 프론트에서 안쓰면 없애자
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnTextSelection(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnTextSelection(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.setOnTextSelection(listener);
-//        }
     }
 
     public void setOnMemoSelection(OnMemoSelection listener) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnMemoSelection(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnMemoSelection(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnMemoSelection(listener);
     }
 
     /**
@@ -645,10 +646,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnReportError(OnReportError listener) {
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnReportError(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnReportError(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.setOnReportError(listener);
-//        }
     }
 
     /**
@@ -658,8 +658,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnCurrentPageInfo(OnCurrentPageInfo listener) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnCurrentPageInfo(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnCurrentPageInfo(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnCurrentPageInfo(listener);
     }
 
     /**
@@ -669,8 +669,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnSearchResult(OnSearchResult listener) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnSearchResult(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnSearchResult(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnSearchResult(listener);
     }
 
     /**
@@ -680,8 +680,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnPageBookmark(OnPageBookmark listener) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnPageBookmark(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnPageBookmark(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnPageBookmark(listener);
     }
 
     /**
@@ -690,8 +690,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnTouchEventListener(OnTouchEventListener listener) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnTouchEventListener(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnTouchEventListener(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnTouchEventListener(listener);
     }
 
     /**
@@ -701,8 +701,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnChapterChange(OnChapterChange listener) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnChapterChange(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnChapterChange(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnChapterChange(listener);
     }
 
     /**
@@ -712,9 +712,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnSelectionMenu(OnContextMenu listener) {
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnSelectionMenu(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnSelectionMenu(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnSelectionMenu(listener);
     }
 
     /**
@@ -722,10 +722,11 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
      *   @param listener : OnPageScroll 리스너 객체
      */
     public void setOnPageScroll(OnPageScroll listener) {
-        if( mLayoutMode == LayoutMode.Reflowable )
+        if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnPageScroll(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnPageScroll(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnPageScroll(listener);
+        }
     }
 
     /**
@@ -733,10 +734,11 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
      *   @param listener : OnTagClick 리스너 객체
      */
     public void setOnTagClick(OnTagClick listener) {
-        if( mLayoutMode == LayoutMode.Reflowable )
+        if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnTagClick(listener);
-//        else if(mLayoutMode == LayoutMode.FixedLayout)
-//            mFixedLayoutView.setOnTagClick(listener);
+        } else if(mLayoutMode == LayoutMode.FixedLayout) {
+            mFixedLayoutView.setOnTagClick(listener);
+        }
     }
 
     /**
@@ -746,10 +748,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnBookStartEnd(OnBookStartEnd listener) {
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setOnBookStartEnd(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnBookStartEnd(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.setOnBookStartEnd(listener);
-//        }
     }
 
 //    public void setOnTTSStateChangeListener(OnTTSStateChangeListener l) {       // TODO : 프론트에서 안쓰면 없애자 deleted
@@ -768,29 +769,26 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public String getSelectedText() {
         if( mLayoutMode == LayoutMode.Reflowable ) {
             return mEPubViewer.getSelectedText();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            return mFixedLayoutView.getSelectedText();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            return mFixedLayoutView.getSelectedText();
-//        }
         return "";
     }
 
     public void setSelectionIcon(Drawable start, Drawable end) {    // TODO :: new custom selection - modified
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setSelectionIcon(start, end);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.setSelectionIcon(start, end);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setSelectionIcon(start, end);
-//        }
     }
 
     public void setContextMenuSize(float height, int topMargin, int bottomMargin) {    // TODO : new
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setContextMenuSize(height, topMargin, bottomMargin);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.setContextMenuSize(height, topMargin, bottomMargin);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setContextMenuSize(height, topMargin, bottomMargin);
-//        }
     }
 
     public void setSelectionMaxLength(int maxSelectionLength){  // TODO : new
@@ -833,10 +831,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         mIgnoreDrm = isIgnore;
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.setIgnoreDrm(isIgnore);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setIgnoreDrm(isIgnore);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.setIgnoreDrm(isIgnore);
-//        }
     }
 
     public void setUseEPUB3Viewer(boolean use){
@@ -846,10 +843,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public boolean loadBook(String path) {
         if( mLayoutMode == LayoutMode.Reflowable ) {
             return mEPubViewer.loadBook(path);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            return mFixedLayoutView.loadBook();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            return mFixedLayoutView.loadBook();
-//        }
         return false;
     }
 
@@ -866,116 +862,111 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void scrollPrior(){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.scrollPrior();
-//        else if( mLayoutMode == LayoutMode.FixedLayout)
-//            mFixedLayoutView.scrollPrior();
+        else if( mLayoutMode == LayoutMode.FixedLayout)
+            mFixedLayoutView.scrollPrior();
     }
 
     public void scrollNext(){
-        if( mLayoutMode == LayoutMode.Reflowable )
+        if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.scrollNext();
-//        else if( mLayoutMode == LayoutMode.FixedLayout){
-//            mFixedLayoutView.scrollNext();
-//        }
+        } else if( mLayoutMode == LayoutMode.FixedLayout){
+            mFixedLayoutView.scrollNext();
+        }
     }
 
     public void goPageByJump() {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPageByJump();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPageByJump();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPageByJump();
     }
 
     public void goPageByLink(String fileName, String id){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPageByLink(fileName, id);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPage(fileName);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPage(fileName);
     }
 
     public void goPage(Highlight high){
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.goPage(high);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.goPage(high);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.goPage(high);
-//        }
     }
 
     public void goPage(Bookmark bmd){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPage(bmd);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPage(bmd);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPage(bmd);
     }
 
     public void goPage(SearchResult sr){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPage(sr);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPage(sr);
-
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPage(sr);
     }
 
     public void goPage(ChapterInfo chapter){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPage(chapter);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPage(chapter);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPage(chapter);
     }
 
     public void goPage(int chapterIndex){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPage(chapterIndex);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPage(chapterIndex);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPage(chapterIndex);
     }
 
     public void goPage(double percent){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.goPage(percent);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.goPage(percent);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.goPage(percent);
     }
 
     public void searchText(String keyword){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.searchText(keyword);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.searchText(keyword);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.searchText(keyword);
     }
 
     public void focusText(SearchResult sr){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.focusText(sr);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.focusText(sr);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.focusText(sr);
     }
 
     public void removeSearchHighlight(){
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.removeSearchHighlight();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.removeSearchHighlight();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.removeSearchHighlight();
-//        }
     }
 
     public void registSelectionMenu(PopupWindow pw){
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.registSelectionMenu(pw);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.registSelectionMenu(pw);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.registSelectionMenu(pw);
-//        }
     }
 
     public ArrayList<Highlight> getHighlights(){
         if( mLayoutMode == LayoutMode.Reflowable ) {
             return mEPubViewer.getHighlights();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            return mFixedLayoutView.getHighlights();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            return mFixedLayoutView.getHighlights();
-//        }
         return new ArrayList<>();
     }
 
@@ -1026,29 +1017,29 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void hasBookmark() {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.hasBookmark();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.hasBookmark();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.hasBookmark();
     }
 
     public void doBookmark() {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.doBookmark();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.doBookmark();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.doBookmark();
     }
 
     public void deleteBookmark(Bookmark bookmark) {
         if( mLayoutMode ==LayoutMode.Reflowable )
             mEPubViewer.deleteBookmark(bookmark);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.deleteBookmark(bookmark);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.deleteBookmark(bookmark);
     }
 
     public ArrayList<Bookmark> getBookMarks() {
         if( mLayoutMode == LayoutMode.Reflowable )
             return mEPubViewer.getBookMarks();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            return mFixedLayoutView.getBookmarkList();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            return mFixedLayoutView.getBookmarkList();
         return new ArrayList<>();
     }
 
@@ -1082,8 +1073,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public int getSpineIndexFromPercent(double percent){
         if( mLayoutMode == LayoutMode.Reflowable )
             return mEPubViewer.getSpineIndexFromPercent(percent);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            return mFixedLayoutView.getSpineIndexFromPercent(percent);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            return mFixedLayoutView.getSpineIndexFromPercent(percent);
         return 0;
     }
 
@@ -1099,8 +1090,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public ChapterInfo getChapterFromSpineIndex(int index){
         if( mLayoutMode == LayoutMode.Reflowable )
             return mEPubViewer.getChapterFromSpineIndex(index);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            return mFixedLayoutView.getChapterFromSpineIndex(index);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            return mFixedLayoutView.getChapterFromSpineIndex(index);
         return null;
     }
 
@@ -1219,83 +1210,79 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void saveAllViewerData() {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.saveAllViewerData();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.saveUserBookData();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.saveUserBookData();
     }
 
     public boolean saveHighlights(){
         if( mLayoutMode == LayoutMode.Reflowable ){
             return mEPubViewer.saveHighlights();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            return mFixedLayoutView.saveHighlights();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            return mFixedLayoutView.saveHighlights();
-//        }
         return false;
     }
 
     public boolean saveBookmarks() {
         if( mLayoutMode == LayoutMode.Reflowable )
             return mEPubViewer.saveBookmarks();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            return mFixedLayoutView.saveBookmarks();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            return mFixedLayoutView.saveBookmarks();
 
         return false;
     }
 
     public void restoreHighlights(){
-        if( mLayoutMode == LayoutMode.Reflowable )
+        if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.restoreHighlights();
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.loadBookmarkData();
-//        }
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.loadBookmarkData();
+        }
     }
 
     public void restoreBookmarks() {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.restoreBookmarks();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.loadBookmarkData();
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.loadBookmarkData();
     }
 
     public void onClose() {
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.onClose();
+        } else if ( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.onClose();
         }
-//        else if ( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.onClose();
-//        }
     }
 
     public void setMoveToLinearNoChapter(OnMoveToLinearNoChapterListener listener) {
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.setMoveToLinearNoChapter(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.setMoveToLinearNochapter(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setMoveToLinearNochapter(listener);
-//        }
     }
 
     public void setOnVideoInfoListener(OnVideoInfoListener listener) {
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.setOnVideoInfoListener(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.setOnVideoInfoListener(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setOnVideoInfoListener(listener);
-//        }
     }
 
     public void setOnMediaControlListener(OnMediaControlListener listener){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setOnMediaControlListener(listener);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setOnMediaControlListener(listener);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.setOnMediaControlListener(listener);
     }
 
     public void preventPageMove(boolean isPrevent) {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.preventPageMove(isPrevent);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.preventPageMove(isPrevent);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            mFixedLayoutView.preventPageMove(isPrevent);
     }
 
     public void setOnTTSHighlighterListener(OnHighlighterListener listener) {
@@ -1322,10 +1309,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( ttsHighlighter != null ){
             if( mLayoutMode == LayoutMode.Reflowable ){
                 ttsHighlighter.add(mEPubViewer, ttsDataInfo);
+            } else if( mLayoutMode == LayoutMode.FixedLayout ){
+                ttsHighlighter.add(mFixedLayoutView.getCurrentWebView(ttsDataInfo.getFilePath()), ttsDataInfo);
             }
-//            else if( mLayoutMode == LayoutMode.FixedLayout ){
-//                ttsHighlighter.add(mFixedLayoutView.getCurrentWebView(ttsDataInfo.getFilePath()), ttsDataInfo);
-//            }
         }
     }
 
@@ -1340,18 +1326,16 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( ttsDataInfoManager != null ) {
             if( mLayoutMode == LayoutMode.Reflowable ){
                 ttsDataInfoManager.requestTTSDataFromSelection(0);
+            } else if(mLayoutMode == LayoutMode.FixedLayout){
+                ttsDataInfoManager.requestTTSDataFromSelection(mFixedLayoutView.getTouchedWebviewPosition());
             }
-//            else if(mLayoutMode == LayoutMode.FixedLayout){
-//                ttsDataInfoManager.requestTTSDataFromSelection(mFixedLayoutView.getTouchedWebviewPosition());
-//            }
         }
 
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.removeSelection();
+        } else if(mLayoutMode == LayoutMode.FixedLayout){
+            mFixedLayoutView.removeSelection();
         }
-//        else if(mLayoutMode == LayoutMode.FixedLayout){
-//            mFixedLayoutView.removeSelection();
-//        }
     }
 
     public void clearAllTTSDataInfo() {
@@ -1367,11 +1351,10 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             if( mLayoutMode == LayoutMode.Reflowable ){
                 ttsDataList = ttsDataInfoManager.readContents(mEPubViewer, mEPubViewer.getCurrentHtmlString(), mEPubViewer.getCurrentChapterFile());
                 return ttsDataList;
+            } else if(mLayoutMode == LayoutMode.FixedLayout){
+                ttsDataList = ttsDataInfoManager.readContents(mFixedLayoutView.getLeftWebView(), mFixedLayoutView.getRightWebView(), mFixedLayoutView.getPageData(false));
+                return ttsDataList;
             }
-//            else if(mLayoutMode == LayoutMode.FixedLayout){
-//                ttsDataList = ttsDataInfoManager.readContents(mFixedLayoutView.getLeftWebView(), mFixedLayoutView.getRightWebView(), mFixedLayoutView.getPageData(false));
-//                return ttsDataList;
-//            }
         }
         return new ArrayList<>();
     }
@@ -1383,13 +1366,12 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
                 if(nextChapterIndex!=-1){
                     return ttsDataInfoManager.readContents(mEPubViewer, mEPubViewer.getCurrentHtmlString(), mEPubViewer.getCurrentChapterFile());
                 }
+            } else if( mLayoutMode == LayoutMode.FixedLayout ){
+                FixedLayoutPageData currentPageData = mFixedLayoutView.getPageData(true);
+                if(currentPageData!=null) {
+                    return ttsDataInfoManager.readContentsFromPageData(mFixedLayoutView.getPageData(true));
+                }
             }
-//            else if( mLayoutMode == LayoutMode.FixedLayout ){
-//                FixedLayoutPageData currentPageData = mFixedLayoutView.getPageData(true);
-//                if(currentPageData!=null) {
-//                    return ttsDataInfoManager.readContentsFromPageData(mFixedLayoutView.getPageData(true));
-//                }
-//            }
         }
         return null;
     }
@@ -1397,10 +1379,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void moveByTTSData(TTSDataInfo ttsDataInfo){
         if(mLayoutMode == LayoutMode.Reflowable){
             mEPubViewer.moveByTTSData(ttsDataInfo);
+        } else if(mLayoutMode == LayoutMode.FixedLayout){
+            mFixedLayoutView.goPage(ttsDataInfo.getFilePath());
         }
-//        else if(mLayoutMode == LayoutMode.FixedLayout){
-//            mFixedLayoutView.goPage(ttsDataInfo.getFilePath());
-//        }
     }
 
     public void requestTTSStartPosition() {
@@ -1417,10 +1398,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.setTTSHighlightRect(rectArray);
             mEPubViewer.invalidate();
+        } else if( mLayoutMode==LayoutMode.FixedLayout){
+            mFixedLayoutView.setTTSHighlightRect(rectArray, currentFilePath);
         }
-//        else if( mLayoutMode==LayoutMode.FixedLayout){
-//            mFixedLayoutView.setTTSHighlightRect(rectArray, currentFilePath);
-//        }
     }
 
     @Override
@@ -1428,10 +1408,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.removeTTSHighlightRect();
             mEPubViewer.invalidate();
+        } else if( mLayoutMode==LayoutMode.FixedLayout){
+            mFixedLayoutView.removeTTSHighlightRect();
         }
-//        else if( mLayoutMode==LayoutMode.FixedLayout){
-//            mFixedLayoutView.removeTTSHighlightRect();
-//        }
     }
 
     public interface OnMediaOverlayStateListener{
@@ -1452,10 +1431,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnMediaOverlayStateListerner(OnMediaOverlayStateListener listener){
         if(mLayoutMode == LayoutMode.Reflowable){
             mEPubViewer.setOnMediaOverlayStateListener(listener);
+        } else if(mLayoutMode == LayoutMode.FixedLayout){
+            mFixedLayoutView.setOnMediaOverlayStateListener(listener);
         }
-//        else if(mLayoutMode == LayoutMode.FixedLayout){
-//            mFixedLayoutView.setOnMediaOverlayStateListener(listener);
-//        }
     }
 
     public void setOnMediaOverlayListener(OnMediaOverlayListener listener) {
@@ -1471,12 +1449,12 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
                 return true;
             }
 
-//            if(mLayoutMode == LayoutMode.FixedLayout && mFixedLayoutView.mPageMode == FixedLayoutScrollView.PageMode.TwoPage){
-//                int nextSpineIndex = mSpineInfo.getCurrentSpineIndex()+1;
-//                if(nextSpineIndex<mSpineInfo.getSpineInfos().size() && mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).isHasMediaOverlay()){
-//                    return true;
-//                }
-//            }
+            if(mLayoutMode == LayoutMode.FixedLayout && mFixedLayoutView.mPageMode == FixedLayoutScrollView.PageMode.TwoPage){
+                int nextSpineIndex = mSpineInfo.getCurrentSpineIndex()+1;
+                if(nextSpineIndex<mSpineInfo.getSpineInfos().size() && mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).isHasMediaOverlay()){
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -1490,33 +1468,30 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
                 smilContentProvider.setSmilPath(mEpubFile.getSmilFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath()));
                 smilContentProvider.load(new SmilDocumentReader(mEpubFile.getSmilFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath())));
                 mediaOverlayController.setSmilSyncs(smilContentProvider.getSmilSyncsByFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath()));
-
                 return true;
-
             } else if(mLayoutMode == LayoutMode.FixedLayout){
 
-//                int nextSpineIndex = mSpineInfo.getCurrentSpineIndex()+1;
-//                LinkedHashMap<String, SmilSync> smilSyncs = new LinkedHashMap<String, SmilSync>();
-//
-//                SmilContentProvider smilContentProvider;
-//
-//                if( mSpineInfo.getCurrentSpineInfo().isHasMediaOverlay()){
-//                    smilContentProvider = new SmilContentProvider();
-//                    smilContentProvider.setSmilPath(mEpubFile.getSmilFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath()));
-//                    smilContentProvider.load(new SmilDocumentReader(mEpubFile.getSmilFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath())));
-//                    smilSyncs = smilContentProvider.getSmilSyncsByFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath());
-//                    mediaOverlayController.setSmilSyncs(smilSyncs);
-//                }
-//
-//                if(mFixedLayoutView.mPageMode == FixedLayoutScrollView.PageMode.TwoPage  && mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).isHasMediaOverlay()){
-//                    smilContentProvider = new SmilContentProvider();
-//                    smilContentProvider.setSmilPath(mEpubFile.getSmilFilePath(mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).getSpinePath()));
-//                    smilContentProvider.load(new SmilDocumentReader(mEpubFile.getSmilFilePath(mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).getSpinePath())));
-//                    smilSyncs.putAll(smilContentProvider.getSmilSyncsByFilePath(mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).getSpinePath()));
-//                    mediaOverlayController.setSmilSyncs(smilSyncs);
-//                    return true;
-//                } else
-//                    return true;
+                int nextSpineIndex = mSpineInfo.getCurrentSpineIndex()+1;
+                LinkedHashMap<String, SmilSync> smilSyncs = new LinkedHashMap<>();
+                SmilContentProvider smilContentProvider;
+
+                if( mSpineInfo.getCurrentSpineInfo().isHasMediaOverlay()){
+                    smilContentProvider = new SmilContentProvider();
+                    smilContentProvider.setSmilPath(mEpubFile.getSmilFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath()));
+                    smilContentProvider.load(new SmilDocumentReader(mEpubFile.getSmilFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath())));
+                    smilSyncs = smilContentProvider.getSmilSyncsByFilePath(mSpineInfo.getCurrentSpineInfo().getSpinePath());
+                    mediaOverlayController.setSmilSyncs(smilSyncs);
+                }
+
+                if(mFixedLayoutView.mPageMode == FixedLayoutScrollView.PageMode.TwoPage  && mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).isHasMediaOverlay()){
+                    smilContentProvider = new SmilContentProvider();
+                    smilContentProvider.setSmilPath(mEpubFile.getSmilFilePath(mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).getSpinePath()));
+                    smilContentProvider.load(new SmilDocumentReader(mEpubFile.getSmilFilePath(mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).getSpinePath())));
+                    smilSyncs.putAll(smilContentProvider.getSmilSyncsByFilePath(mSpineInfo.getSpineInfoBySpineIndex(nextSpineIndex).getSpinePath()));
+                    mediaOverlayController.setSmilSyncs(smilSyncs);
+                    return true;
+                } else
+                    return true;
             }
         }
         return false;
@@ -1561,7 +1536,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             if(mLayoutMode == LayoutMode.Reflowable){
                 ttsHighlighter.addMediaOverlayHighlight(mEPubViewer, id,  mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
             } else if(mLayoutMode == LayoutMode.FixedLayout){
-//                ttsHighlighter.addMediaOverlayHighlight(mFixedLayoutView.getCurrentWebView(currentFilePath), id, mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
+                ttsHighlighter.addMediaOverlayHighlight(mFixedLayoutView.getCurrentWebView(currentFilePath), id, mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
             }
         }
     }
@@ -1571,9 +1546,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             if(mLayoutMode == LayoutMode.Reflowable){
                 ttsHighlighter.removeMediaOverlayHighlight(mEPubViewer, mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
             } else if(mLayoutMode == LayoutMode.FixedLayout){
-//                ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getLeftWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
-//                if(mFixedLayoutView.getRightWebView()!=null)
-//                    ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getRightWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
+                ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getLeftWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
+                if(mFixedLayoutView.getRightWebView()!=null)
+                    ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getRightWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
             }
         }
     }
@@ -1597,8 +1572,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setPreventMediaControl(boolean isPrevent){
         if(mLayoutMode == LayoutMode.Reflowable)
             mEPubViewer.setPreventMediaControl(isPrevent);
-//        else if(mLayoutMode == LayoutMode.FixedLayout)
-//            mFixedLayoutView.setPreventMediaControl(isPrevent);
+        else if(mLayoutMode == LayoutMode.FixedLayout)
+            mFixedLayoutView.setPreventMediaControl(isPrevent);
     }
 
     public void playAudioContent(AudioContent audioContent){
@@ -1705,10 +1680,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void unpluggedHeadSet(boolean isUnplugged){
         if(mLayoutMode == LayoutMode.Reflowable && mEPubViewer!=null){
             mEPubViewer.unpluggedHeadSet(isUnplugged);
+        } else if (mLayoutMode == LayoutMode.FixedLayout && mFixedLayoutView!=null){
+            mFixedLayoutView.unpluggedHeadSet(isUnplugged);
         }
-//        else if (mLayoutMode == LayoutMode.FixedLayout && mFixedLayoutView!=null){
-//            mFixedLayoutView.unpluggedHeadSet(isUnplugged);
-//        }
     }
 
     public boolean hasMediaOverlayOnContents(){
@@ -1735,38 +1709,34 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setOnNoterefListener(OnNoterefListener listener) {
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.setOnNoterefListener(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.setOnNoterefListener(listener);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setOnNoterefListener(listener);
-//        }
     }
 
     public boolean isNoterefEnabled(){
         if( mLayoutMode == LayoutMode.Reflowable ){
             return mEPubViewer.isNoterefEnabled();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            return mFixedLayoutView.isNoterefEnabled();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            return mFixedLayoutView.isNoterefEnabled();
-//        }
         return false;
     }
 
     public void hideNoteref(){
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.hideNoteref();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.hideNoteref();
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.hideNoteref();
-//        }
     }
 
     public void setPreventNoteref(boolean isPrevent){
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.setPreventNoteref(isPrevent);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+            mFixedLayoutView.setPreventNoteref(isPrevent);
         }
-//        else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setPreventNoteref(isPrevent);
-//        }
     }
 
     public void setMemoIconPath(String iconPath){
@@ -1791,13 +1761,13 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
 
     public void setPageEffect(int effect){
         BookHelper.animationType=effect;
-//        if( mLayoutMode == LayoutMode.FixedLayout && mFixedLayoutView!=null ){
-//            if(BookHelper.animationType==0){
-//                mFixedLayoutView.pagerAnimation = false;
-//            } else {
-//                mFixedLayoutView.pagerAnimation = true;
-//            }
-//        }
+        if( mLayoutMode == LayoutMode.FixedLayout && mFixedLayoutView!=null ){
+            if(BookHelper.animationType==0){
+                mFixedLayoutView.pagerAnimation = false;
+            } else {
+                mFixedLayoutView.pagerAnimation = true;
+            }
+        }
     }
 
     public boolean checkEpubCondition(String epubPath){     // TODO : 프론트에서 안쓰면 없애자
@@ -1862,19 +1832,17 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void moveByAudioNavigation(AudioNavigationInfo audioNavigationInfo){
         if(mLayoutMode == LayoutMode.Reflowable){
             mEPubViewer.goPageByLink(audioNavigationInfo.getReferenceFilePath(), audioNavigationInfo.getReferenceFragment());
+        } else if(mLayoutMode == LayoutMode.FixedLayout){
+            mFixedLayoutView.goPage(audioNavigationInfo.getReferenceFilePath());
         }
-//        else if(mLayoutMode == LayoutMode.FixedLayout){
-//            mFixedLayoutView.goPage(audioNavigationInfo.getReferenceFilePath());
-//        }
     }
 
     public String getCurrentUserAgent(){
         if(mLayoutMode == LayoutMode.Reflowable){
             return mEPubViewer.getCurrentUserAgent();
+        } else if(mLayoutMode == LayoutMode.FixedLayout){
+            return mFixedLayoutView.getCurrentUserAgent();
         }
-//        else if(mLayoutMode == LayoutMode.FixedLayout){
-//            return mFixedLayoutView.getCurrentUserAgent();
-//        }
         return "";
     }
 
@@ -1896,7 +1864,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.addAnnotation();
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.addAnnotation();
+            mFixedLayoutView.addAnnotation();
         }
     }
 
@@ -1905,7 +1873,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.addAnnotationWithMemo(memoContent, isMemoMerged);
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.addAnnotationWithMemo(memoContent, isMemoMerged);
+            mFixedLayoutView.addAnnotationWithMemo(memoContent, isMemoMerged);
         }
     }
 
@@ -1914,7 +1882,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.modifyAnnotationColorAndRange(colorIndex);
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.modifyAnnotationColorAndRange(colorIndex);
+            mFixedLayoutView.modifyAnnotationColorAndRange(colorIndex);
         }
     }
 
@@ -1923,7 +1891,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.changeMemoText(currentMemoId, memoContent);
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.changeMemoText(currentMemoId, memoContent);
+            mFixedLayoutView.changeMemoText(currentMemoId, memoContent);
         }
     }
 
@@ -1932,7 +1900,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.requestAllMemoText();
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.requestAllMemoText();
+            mFixedLayoutView.requestAllMemoText();
         }
     }
 
@@ -1941,7 +1909,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if(mLayoutMode == LayoutMode.Reflowable) {
             mEPubViewer.deleteAnnotation();
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.deleteAnnotation();
+            mFixedLayoutView.deleteAnnotation();
         }
     }
 
@@ -1957,7 +1925,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.finishTextSelectionMode();
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.finishTextSelectionMode();
+            mFixedLayoutView.finishTextSelectionMode();
         }
     }
     /***************************** e: new custom selection */

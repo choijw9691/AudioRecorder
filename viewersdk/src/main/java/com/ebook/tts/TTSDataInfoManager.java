@@ -6,6 +6,7 @@ import android.os.Message;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.ebook.epub.fixedlayoutviewer.data.FixedLayoutPageData;
 import com.ebook.epub.parser.common.AttributeName;
 import com.ebook.epub.viewer.BookHelper;
 import com.ebook.epub.viewer.DebugSet;
@@ -99,76 +100,76 @@ public class TTSDataInfoManager {
     }
 
     /** fixed */
-//    public ArrayList<TTSDataInfo> readContents(WebView left, WebView right, FixedLayoutPageData pageData){
-//
-//        if( ttsDataInfoList.size() > 0 && onTTSDataInfoListener != null){
-//            return ttsDataInfoList;
-//        }
-//
-//        leftWebView = left;
-//        rightWebView = right;
-//
-//        if(rightWebView!=null)
-//            isTwoPageMode=true;
-//
-//        ttsDataJsonArr = new JSONArray();
-//        elementXPathJsonArr = new JSONArray();
-//
-//        for(int idx=0; idx<pageData.getContentsCount(); idx++){
-//
-//            ContentsData contentsData = pageData.getContentsDataList().get(idx);
-//
-//            Element rootElement = getContentText(contentsData.getContentsString());
-//
-//            if(rootElement!=null){
-//
-//                NodeList childNodes = rootElement.getChildNodes();
-//
-//                for (int i = 0; i < childNodes.getLength(); ++i) {
-//
-//                    if(childNodes.item(i).getNodeType() != Node.ELEMENT_NODE)
-//                        continue;
-//
-//                    getTextFromNode(childNodes.item(i), pageData.getContentsDataList().get(idx).getContentsFilePath());
-//                }
-//                setTTSDataList(pageData.getContentsDataList().get(idx).getContentsFilePath());
-//            }
-//        }
-//        return ttsDataInfoList;
-//    }
-//
-//    /** fixed in background */
-//    public ArrayList<TTSDataInfo> readContentsFromPageData(FixedLayoutPageData data){
-//
-//        ttsDataInfoList.clear();
-//        FixedLayoutPageData pageData = data;
-//
-//        ttsDataJsonArr = new JSONArray();
-//        elementXPathJsonArr = new JSONArray();
-//
-//        for(int idx=0; idx<pageData.getContentsCount(); idx++){
-//
-//            ContentsData contentsData = pageData.getContentsDataList().get(idx);
-//
-//            Element rootElement = getContentText(contentsData.getContentsString());
-//
-//            if(rootElement!=null){
-//
-//                NodeList childNodes = rootElement.getChildNodes();
-//
-//                for (int i = 0; i < childNodes.getLength(); ++i) {
-//
-//                    if(childNodes.item(i).getNodeType() != Node.ELEMENT_NODE)
-//                        continue;
-//
-//                    getTextFromNode(childNodes.item(i), pageData.getContentsDataList().get(idx).getContentsFilePath());
-//
-//                }
-//                setTTSDataList(pageData.getContentsDataList().get(idx).getContentsFilePath());
-//            }
-//        }
-//        return ttsDataInfoList;
-//    }
+    public ArrayList<TTSDataInfo> readContents(WebView left, WebView right, FixedLayoutPageData pageData){
+
+        if( ttsDataInfoList.size() > 0 && onTTSDataInfoListener != null){
+            return ttsDataInfoList;
+        }
+
+        leftWebView = left;
+        rightWebView = right;
+
+        if(rightWebView!=null)
+            isTwoPageMode=true;
+
+        ttsDataJsonArr = new JSONArray();
+        elementXPathJsonArr = new JSONArray();
+
+        for(int idx=0; idx<pageData.getContentsCount(); idx++){
+
+            FixedLayoutPageData.ContentsData contentsData = pageData.getContentsDataList().get(idx);
+
+            Element rootElement = getContentText(contentsData.getContentsString());
+
+            if(rootElement!=null){
+
+                NodeList childNodes = rootElement.getChildNodes();
+
+                for (int i = 0; i < childNodes.getLength(); ++i) {
+
+                    if(childNodes.item(i).getNodeType() != Node.ELEMENT_NODE)
+                        continue;
+
+                    getTextFromNode(childNodes.item(i), pageData.getContentsDataList().get(idx).getContentsFilePath());
+                }
+                setTTSDataList(pageData.getContentsDataList().get(idx).getContentsFilePath());
+            }
+        }
+        return ttsDataInfoList;
+    }
+
+    /** fixed in background */
+    public ArrayList<TTSDataInfo> readContentsFromPageData(FixedLayoutPageData data){
+
+        ttsDataInfoList.clear();
+        FixedLayoutPageData pageData = data;
+
+        ttsDataJsonArr = new JSONArray();
+        elementXPathJsonArr = new JSONArray();
+
+        for(int idx=0; idx<pageData.getContentsCount(); idx++){
+
+            FixedLayoutPageData.ContentsData contentsData = pageData.getContentsDataList().get(idx);
+
+            Element rootElement = getContentText(contentsData.getContentsString());
+
+            if(rootElement!=null){
+
+                NodeList childNodes = rootElement.getChildNodes();
+
+                for (int i = 0; i < childNodes.getLength(); ++i) {
+
+                    if(childNodes.item(i).getNodeType() != Node.ELEMENT_NODE)
+                        continue;
+
+                    getTextFromNode(childNodes.item(i), pageData.getContentsDataList().get(idx).getContentsFilePath());
+
+                }
+                setTTSDataList(pageData.getContentsDataList().get(idx).getContentsFilePath());
+            }
+        }
+        return ttsDataInfoList;
+    }
 
     private void getTextFromNode(Node node, String filePath){
 
@@ -441,7 +442,7 @@ public class TTSDataInfoManager {
                         DebugSet.d("TAG","Sentence: " + sentence);
                         DebugSet.d("TAG","Path: " + path);
 
-                        if(sentence.trim().length()>0)
+                        if(sentence.trim().length()>0)  // sentence.trim() 으로 데이터 넣지 않도록 수정함
                             ttsDataInfoList.add(new TTSDataInfo(sentence, path, index+prevIndex, iterator.current()+prevIndex,  currentFilePath));
                         index = iterator.current();
                     }

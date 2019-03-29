@@ -1408,6 +1408,10 @@ function findTagUnderPoint(x,y,singleTap) {
         // 재활성화 여부를 위해 flk 검사
         var isExceptionalTagOrAttr = findHighlight(x, y, element);
 
+        if( element.tagName.toUpperCase() == 'BUTTON') {
+            isExceptionalTagOrAttr = true;
+        }
+
         if(element.hasAttribute('onclick')){
             isExceptionalTagOrAttr = true;
         }
@@ -1426,10 +1430,6 @@ function findTagUnderPoint(x,y,singleTap) {
                     while(element.id != "feelingk_bookcontent"){	// img 태그 부모가 a tag 인 경우를 위해 부모 검사
                         element = element.parentNode;
                         if(element.tagName.toUpperCase()=='A'){
-                            var role = element.getAttribute('role');
-                            if(role!=null && role!=undefined && role.toLowerCase().indexOf("button") != -1){
-                                isExceptionalTagOrAttr = true;
-                            }
                             tagType = 2;
                             url = element.href;
                             break;
@@ -1459,8 +1459,17 @@ function findTagUnderPoint(x,y,singleTap) {
                             tagType = 3;
                         } else if(parent.tagName.toUpperCase() =='VIDEO'){
                             tagType = 4;
-                              url = element.src;
+                            url = element.src;
                         }
+                    }
+
+                    if(parent.hasAttribute('onclick')){
+                        isExceptionalTagOrAttr = true;
+                    }
+
+                    var role = parent.getAttribute('role');
+                    if(role!=null && role!=undefined && role.toLowerCase().indexOf("button") != -1){
+                        isExceptionalTagOrAttr = true;
                     }
                 }
             }
@@ -3516,8 +3525,6 @@ function setEndRange(x,y, colorIndex, selectionContinueCheck) {
         window.selection.finishTextSelectionMode();
         return;
     }
-
-	var endRange = document.caretRangeFromPoint(x, y);
 
     try {
         setSelectedText(totalRange.toString());

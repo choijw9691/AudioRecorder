@@ -69,7 +69,7 @@ public class Defines {
     public static final int FIXEDLAYOUT_CHECK_MERGE_ANNOTATION = 203;
     public static final int FIXEDLAYOUT_CONTEXT_MENU_SHOW = 204;
     public static final int FIXEDLAYOUT_CONTEXT_MENU_HIDE = 205;
-    public static final int FIXEDLAYOUT_SET_ANNOTATION_ID_LIST = 206;
+    public static final int FIXEDLAYOUT_MERGE_ALL_MEMO = 206;
     public static final int FIXEDLAYOUT_ADD_HIGHLIGHTED_DATA = 207;
     public static final int FIXEDLAYOUT_SCROLL_PAGE = 208;
     public static final int FIXEDLAYOUT_PLAY_SELECTED_MEDIAOVERLAY = 209;
@@ -81,8 +81,11 @@ public class Defines {
     public static final int FIXEDLAYOUT_REPORT_CURRENT_PAGE_INFO = 215;
     public static final int FIXEDLAYOUT_LINK_CLICK = 216;
     public static final int FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS = 217;
-    public static final int FIXEDLAYOUT_REPORT_ERROR = 218;
-    public static final int FIXEDLAYOUT_REPORT_VIDEO_INFO = 219;
+    public static final int FIXEDLAYOUT_OVERFLOW_MEMO_CONTENT = 218;
+
+    public static final int FIXEDLAYOUT_REPORT_VIDEO_INFO = 230;
+
+    public static final int FIXEDLAYOUT_REPORT_ERROR = 250;
     /********************************************************************** e : fixed */
 
     /********************************************************************** s: common */

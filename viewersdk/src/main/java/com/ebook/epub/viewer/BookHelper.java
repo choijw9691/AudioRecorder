@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.054";  // TODO :: 상용 배포 시 버전 정리하기
+    public static String VIEWER_VERSION = "3.100";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;

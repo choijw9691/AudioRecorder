@@ -7,7 +7,7 @@
 .KYBH
 {
 	background-color: transparent !important;
-	margin: 0 !important;	
+	margin: 0 !important;
 	padding: 0 !important;
 	line-height : inherit !important;
 	font-size : inherit !important;
@@ -87,6 +87,8 @@
 	margin: 0px !important;
 	position: absolute !important;
 	display : inline !important;
+    max-width: none !important;
+    max-height: none !important;
 }
 
 a {

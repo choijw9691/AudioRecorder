@@ -3327,6 +3327,7 @@ var contextMenuTargetPosition = "END";          // 컨텍스트 메뉴 기준 �
 
 var notifyOverflowedTextSelection=false;        // 셀렉션 글자 수 제한 notify 여부
 var notifyMergeOverflowedTextSelection=false;   // 셀렉션 병합 후 글자 수 제한 notify 여부
+var notifyOverflowedTextSelectionAfterPaging=false;
 
 var gMaxSelectionLength = 1000;                 // 셀렉션 글자 제한 기준 값
 
@@ -4280,10 +4281,13 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
         mergeCheckRange.setEnd(highlights[highlights.length-1].childNodes[0], highlights[highlights.length-1].childNodes[0].textContent.length);
     }
 
+    notifyOverflowedTextSelectionAfterPaging=false;
     if(mergeCheckRange.toString().length>gMaxSelectionLength){
+        notifyOverflowedTextSelectionAfterPaging = true;
         mergeCheckRange.setEnd(totalRange.endContainer, totalRange.endOffset);
         if(mergeCheckRange.toString().length>gMaxSelectionLength){
             targetPageIdx = gCurrentPage;
+            notifyOverflowedTextSelectionAfterPaging = false;
         } else {
             targetPageIdx = gCurrentPage;
             targetPageLeft = currentLeft;
@@ -4302,6 +4306,7 @@ function getSelectionLandingPage(isHighlight, highlightColorIndex){
     }
 
     if(targetPageIdx == gCurrentPage){
+        notifyOverflowedTextSelectionAfterPaging = false;
         totalRange = lastRangeInCurrentPage.cloneRange();
         contextMenuTargetPosition = "END";
         window.selection.overflowedTextSelection(2);
@@ -4362,6 +4367,11 @@ function selectionContinue(isHighlight, colorIndex){
         textSelectionMode=true;
 
         setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 100);
+    }
+
+    if(notifyOverflowedTextSelectionAfterPaging){
+        window.selection.overflowedTextSelection(1);
+        notifyOverflowedTextSelectionAfterPaging=false;
     }
 }
 
@@ -4667,6 +4677,7 @@ function finishTextSelection(){
     isConfirmedOverflowCallback=false;
     notifyOverflowedTextSelection=false;
     notifyMergeOverflowedTextSelection=false;
+    notifyOverflowedTextSelectionAfterPaging=false;
     contextMenuTargetPosition="END";
 }
 /********************************************************* e : selection common function test  */

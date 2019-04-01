@@ -3680,7 +3680,7 @@ public class EPubViewer extends ViewerBase {
             for(Rect rcSpan: modifiedSelectionRect) {
                 Rect r = rcSpan;
                 if(selectionHandler){
-                    mPaint.setColor(0x300087ff);
+                    mPaint.setColor(BookHelper.textSelectionColor);
                     canvas.drawRect(r, mPaint);
                     drawHandler(canvas);
                 } else{
@@ -5831,9 +5831,10 @@ public class EPubViewer extends ViewerBase {
             container.setClickable(false);
             container.setVisibility(View.GONE);
             mParent.addView(container, params);
-            scrollTopThreshold = Math.round(getHeight() / 10);
-            scrollBottomThreshold = getHeight() - Math.round(getHeight() / 10);
         }
+
+        scrollTopThreshold = Math.round(getHeight() / 10);
+        scrollBottomThreshold = getHeight() - Math.round(getHeight() / 10);
 
         // 쳅터가 바뀌면 search focus가 안되게 설정
         __canFocusSearchResult = false;

@@ -1013,6 +1013,7 @@ public class BookHelper {
                     "\n height : %feelingk_booktableheight_value%;" +
                     "\n margin-top : %feelingk_booktablemargintop_value%px;" +
                     "\n %feelingk_booktablecolumnwidth_value%"+
+                    "\n column-fill : auto !important;"+
                     "\n}" +
                     "\ndiv#feelingk_bookcontent { " +
                     "\n %feelingk_fontsize_value% " +

@@ -458,7 +458,7 @@ public class FixedLayoutWebview extends ViewerBase {
             for(Rect rcSpan: selectionRectList) {
                 Rect r = rcSpan;
                 if(selectionHandler){
-                    mPaint.setColor(0x7f00ffff);
+                    mPaint.setColor(BookHelper.textSelectionColor);
                     canvas.drawRect(r, mPaint);
                     drawHandler(canvas);
                 } else{

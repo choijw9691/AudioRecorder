@@ -4848,6 +4848,16 @@ public class EPubViewer extends ViewerBase {
     /******************************************************************** e : context menu */
 
     /******************************************************************** s : common */
+    public void handleBackKeyEvent(){
+        if(mTextSelectionMode){
+            if(!selectionHandler){
+                addAnnotation();
+            } else {
+                finishTextSelectionMode();
+            }
+        }
+    }
+
     public void finishTextSelectionMode(){
 
         ViewerActionListener.preventGestureEvent = true;

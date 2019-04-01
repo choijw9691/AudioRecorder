@@ -1920,6 +1920,14 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
     }
 
+    public void handleBackKeyEvent(){
+        if(mLayoutMode == LayoutMode.Reflowable) {
+            mEPubViewer.handleBackKeyEvent();
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.handleBackKeyEvent();
+        }
+    }
+
     public void finishTextSelectionMode(){
         // TODO : new
         if( mLayoutMode == LayoutMode.Reflowable ) {

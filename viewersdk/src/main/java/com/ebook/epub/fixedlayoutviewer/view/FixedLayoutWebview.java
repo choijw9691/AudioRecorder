@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -1121,7 +1120,7 @@ public class FixedLayoutWebview extends ViewerBase {
     }
 
     public void startTextSelection(int x, int y){
-        Log.d("SSIN","SSIN startTextSelection in mTextSelectionMode : "+mTextSelectionMode);
+        DebugSet.d(TAG,"startTextSelection in mTextSelectionMode : "+mTextSelectionMode);
 
         if(mTextSelectionMode){
             finishTextSelectionMode();
@@ -1138,7 +1137,7 @@ public class FixedLayoutWebview extends ViewerBase {
     }
 
     public void setMoveRange(int x, int y, boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted, float distX, float distY){
-        Log.d("SSIN","SSIN setMoveRange in mTextSelectionMode : "+mTextSelectionMode);
+        DebugSet.d(TAG,"setMoveRange in mTextSelectionMode : "+mTextSelectionMode);
 
         if(!mTextSelectionMode) {
             return;
@@ -1162,7 +1161,7 @@ public class FixedLayoutWebview extends ViewerBase {
     }
 
     public void setEndRange(int x, int y, boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
-        Log.d("SSIN","SSIN setEndRange in mTextSelectionMode : "+mTextSelectionMode);
+        DebugSet.d(TAG,"setEndRange in mTextSelectionMode : "+mTextSelectionMode);
 
         if(!mTextSelectionMode) {
             return;
@@ -1182,7 +1181,7 @@ public class FixedLayoutWebview extends ViewerBase {
     }
 
     public void findTagUnderPoint(int x, int y, int orgX, int orgY){
-        Log.d("SSIN","SSIN findTagUnderPoint in mTextSelectionMode : "+mTextSelectionMode);
+        DebugSet.d(TAG,"findTagUnderPoint in mTextSelectionMode : "+mTextSelectionMode);
 
         int wx = Scr2Web(x);
         int wy = Scr2Web(y);
@@ -1456,8 +1455,15 @@ public class FixedLayoutWebview extends ViewerBase {
         return null;
     }
 
+    public void handleBackKeyEvent(){
+        if(!selectionHandler){
+            addAnnotation();
+        } else {
+            finishTextSelectionMode();
+        }
+    }
+
     public void finishTextSelectionMode(){
-        Log.d("SSIN","SSIN finishTextSelectionMode in");
         hideAnnotationMenu();
         mTextSelectionMode=false;
         mWebviewCallbackListener.setTextSelectionMode(mTextSelectionMode);

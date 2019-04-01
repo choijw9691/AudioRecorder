@@ -528,6 +528,14 @@ public class FixedLayoutContainerView extends LinearLayout {
         return null;
     }
 
+    public void handleBackKeyEvent(){
+        for(FixedLayoutWebview webview : mWebviewList){
+            if(webview.getSelectionMode()) {
+                webview.handleBackKeyEvent();
+            }
+        }
+    }
+
     public void finishTextSelectionMode(){
         for(FixedLayoutWebview webview : mWebviewList){
             webview.finishTextSelectionMode();

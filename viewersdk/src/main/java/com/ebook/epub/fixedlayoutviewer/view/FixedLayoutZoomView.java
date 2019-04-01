@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -322,9 +321,7 @@ public class FixedLayoutZoomView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        Log.d("SSIN","SSIN FixedlayoutZoomView onTouchEvent in");
         try{
-
             if(!isTextSelectionMode) {
                 mScaleDetector.onTouchEvent(ev);
             }
@@ -332,13 +329,11 @@ public class FixedLayoutZoomView extends LinearLayout {
             switch (ev.getAction() & MotionEvent.ACTION_MASK) {
 
                 case MotionEvent.ACTION_DOWN:
-                    Log.d("SSIN","SSIN FixedlayoutZoomView onTouchEvent ACTION_DOWN in");
                     mLastTouchX = ev.getX();
                     mLastTouchY = ev.getY();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    Log.d("SSIN","SSIN FixedlayoutZoomView onTouchEvent ACTION_MOVE in isTextSelectionMode : "+isTextSelectionMode);
                     if(isTextSelectionMode) {
                         int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();    // TODO :: 텍스트 아주 작은 콘텐츠에서 slop 조정 필요
                         boolean userMoveConfirmed = Math.abs(mLastTouchX - ev.getX()) > slop || Math.abs(mLastTouchY -  ev.getY()) > slop;
@@ -384,7 +379,6 @@ public class FixedLayoutZoomView extends LinearLayout {
                     return true;
 
                 case MotionEvent.ACTION_UP:
-                    Log.d("SSIN","SSIN FixedlayoutZoomView onTouchEvent ACTION_UP in isTextSelectionMode : "+isTextSelectionMode);
                     if(isTextSelectionMode) {
                         setEndRange((int)ev.getX(), (int)ev.getY(), isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
                     }
@@ -654,6 +648,10 @@ public class FixedLayoutZoomView extends LinearLayout {
         return mFixedLayoutContainerView.getSelectionRectList();
     }
 
+    public void handleBackKeyEvent(){
+        mFixedLayoutContainerView.handleBackKeyEvent();
+    }
+
     public void finishTextSelectionMode(){
         isTextSelectionMode = false;
         isStartHandlerTouched = false;
@@ -662,7 +660,6 @@ public class FixedLayoutZoomView extends LinearLayout {
         mFixedLayoutContainerView.finishTextSelectionMode();
     }
     public void setTextSelectionMode(boolean isTextSelectionMode){
-        Log.d("SSIN","SSIN FixedlayoutZoomView isTextSelectionMode : "+isTextSelectionMode);
         this.isTextSelectionMode = isTextSelectionMode;
     }
 

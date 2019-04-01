@@ -9,7 +9,6 @@ import android.os.Message;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -460,7 +459,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            Log.d("SSIN","onPageScrolled in");
             if( !isViewerLoadingComplete )
                 return;
 
@@ -475,7 +473,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public void onPageScrollStateChanged(int state) {
-            Log.d("SSIN","onPageScrollStateChanged in");
             if( state == ViewPager.SCROLL_STATE_DRAGGING){
                 isPageScrolling = true;
             } else if (state == ViewPager.SCROLL_STATE_IDLE) {
@@ -680,7 +677,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.d("SSIN","SSIN FixedlayoutScrollView onInterceptTouchEvent in");
 
         if(mPagerAdapter==null || mPagerAdapter.getCurrentView()==null || asidePopupStatus || isPreventPageMove)
             return false;
@@ -695,7 +691,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public boolean onDown(MotionEvent e) {
-            Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onDown in");
 
             isStartHandlerTouched = false;
             isEndHandlerTouched = false;
@@ -729,9 +724,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                     targetY = selectionRectList.get(selectionRectList.size()-1).top + (selectionRectList.get(selectionRectList.size()-1).height()/2);
                 }
 
-                // TODO :: onDown 시 textSelectionMode 설정 필요 - 단 제스쳐와 같이 안일어 날 수 있도록
-                Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onDown isTextSelectionMode : "+isTextSelectionMode);
-
                 mPagerAdapter.getCurrentView().setCurrentTouchCondition(isLongPressStarted, isStartHandlerTouched, isEndHandlerTouched, isTextSelectionMode);
             }
             return super.onDown(e);
@@ -739,7 +731,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onDoubleTap in");
             if(isTextSelectionMode)
                 finishTextSelectionMode();
             mPagerAdapter.getCurrentView().onDoubleTab(e);
@@ -753,7 +744,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onSingleTapConfirmed in isTextSelectionMode : "+isTextSelectionMode);
+            DebugSet.d(TAG,"onSingleTapConfirmed in isTextSelectionMode : "+isTextSelectionMode);
             if(isTextSelectionMode && !isEndHandlerTouched && !isStartHandlerTouched){
                 finishTextSelectionMode();
             } else if(!isTextSelectionMode){
@@ -764,13 +755,12 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onScroll in");
             return super.onScroll(e1, e2, distanceX, distanceY);
         }
 
         @Override
         public void onLongPress(MotionEvent e) {
-            Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onLongPress in");
+            DebugSet.d(TAG,"onLongPress in isTextSelectionMode : "+isTextSelectionMode);
             super.onLongPress(e);
 
             if(asidePopupStatus){
@@ -811,8 +801,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            Log.d("SSIN","SSIN FixedlayoutScrollView SimpleGestureListener onFling in");
-
             if(asidePopupStatus){
                 mPagerAdapter.getCurrentView().hideNoteref();
                 return true;
@@ -880,8 +868,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     @Override
     public void onLeftTouched(float x, float y) {
-        Log.d("SSIN","SSIN FixedlayoutScrollView onLeftTouched in");
-
         if(asidePopupStatus){
             mPagerAdapter.getCurrentView().hideNoteref();
             return;
@@ -915,8 +901,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     @Override
     public void onRightTouched(float x, float y) {
-        Log.d("SSIN","SSIN FixedlayoutScrollView onRightTouched in");
-
         if(asidePopupStatus){
             mPagerAdapter.getCurrentView().hideNoteref();
             return;
@@ -950,8 +934,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     @Override
     public void onMiddleTouched(float x, float y) {
-        Log.d("SSIN","SSIN FixedlayoutScrollView onMiddleTouched in");
-
         if(asidePopupStatus){
             mPagerAdapter.getCurrentView().hideNoteref();
             return;
@@ -976,7 +958,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         @Override
         public void pageLoadFinished(FixedLayoutPageData.ContentsData data) {
 
-            Log.d("SSIN", "page LoadFinished in");
             if(mCurrentMode == CurrentMode.ViewerClose)
                 return;
 
@@ -1231,7 +1212,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         @Override
         public void setTextSelectionMode(boolean textSelectionMode) {
             isTextSelectionMode = textSelectionMode;
-            Log.d("SSIN","setTextSelectionMode isTextSelectionMode : "+isTextSelectionMode);
             if(isTextSelectionMode && mOnTextSelection!=null) {
                 mOnTextSelection.onStartTextSelection();
             } else {
@@ -1266,8 +1246,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             }
 
             isTextSelectionMode = true;
-
-            Log.d("SSIN","SSIN FixedlayoutScrollView showContextMenu isTextSelectionMode : "+isTextSelectionMode);
         }
 
         @Override
@@ -1571,6 +1549,12 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         if(mPagerAdapter!=null && mPagerAdapter.getCurrentView()!=null)
             return mPagerAdapter.getCurrentView().getCurrentUserAgent();
         return "";
+    }
+
+    public void handleBackKeyEvent(){
+        if(isTextSelectionMode){
+            mPagerAdapter.getCurrentView().handleBackKeyEvent();
+        }
     }
 
     public void finishTextSelectionMode(){
@@ -1896,10 +1880,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 }
             }
         }
-
-        Log.d("SSIN","after loadCurrentPage position : "+position);
-        Log.d("SSIN","after loadCurrentPage mCurrentPageIndex : "+mCurrentPageIndex);
-        Log.d("SSIN","after loadCurrentPage mCurrentPage : "+mCurrentPage);
 
         isPageScrolling = false;
 

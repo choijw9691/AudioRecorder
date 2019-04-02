@@ -322,7 +322,8 @@ public class FixedLayoutZoomView extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         try{
-            if(!isTextSelectionMode) {
+
+            if(ev.getPointerCount() >=2) {
                 mScaleDetector.onTouchEvent(ev);
             }
 
@@ -411,6 +412,8 @@ public class FixedLayoutZoomView extends LinearLayout {
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
+            isTextSelectionMode = false;
+            mFixedLayoutContainerView.finishTextSelectionMode();
             return super.onScaleBegin(detector);
         }
 

@@ -787,6 +787,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 return;
             }
 
+            if(mPagerAdapter.getCurrentView().getCurrentScale() > 1){
+                return;
+            }
+
             if(isTextSelectionMode){
                 int[] webviewPosition = mPagerAdapter.getCurrentView().getConvertWebviewPosition((int)e.getX(), (int)e.getY());
 

@@ -295,7 +295,7 @@ public class EPubViewer extends ViewerBase {
     OnMemoSelection mOnMemoSelection = null;
     OnTextSelection mOnTextSelection = null;
     OnViewerState mOnViewerState = null;
-//    OnTTSStateChangeListener mOnTTSStateChangeListener = null;
+    ViewerContainer.OnAnalyticsListener mOnAnalyticsListener = null;
 
     OnMoveToLinearNoChapterListener mMoveToLinearNoChapter = null;
     public void setMoveToLinearNoChapter(OnMoveToLinearNoChapterListener listener){
@@ -443,9 +443,9 @@ public class EPubViewer extends ViewerBase {
         mOnBookStartEnd = l;
     }
 
-//    public void setOnTTSStateChangeListener(OnTTSStateChangeListener l) {
-//        mOnTTSStateChangeListener = l;
-//    }
+    public void setOnAnalyticsListener(ViewerContainer.OnAnalyticsListener listener){
+        mOnAnalyticsListener = listener;
+    }
 
     //****************************************************************************
 
@@ -5989,6 +5989,13 @@ public class EPubViewer extends ViewerBase {
             if(BookHelper.useHistory) {
                 if( mMergedAnnotation ){
                     __hlHistory.mergeAdd(highlight.uniqueID);
+                    if(mOnAnalyticsListener!=null){
+                        if(selectionHandler){
+                            mOnAnalyticsListener.onAnnotationMergeSelection();
+                        } else {
+                            mOnAnalyticsListener.onAnnotationMergeQuick();
+                        }
+                    }
                     mMergedAnnotation = false;
                 } else{
                     __hlHistory.add(highlight.uniqueID);

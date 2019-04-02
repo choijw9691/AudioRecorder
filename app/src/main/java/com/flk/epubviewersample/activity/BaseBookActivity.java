@@ -62,7 +62,6 @@ import com.ebook.epub.viewer.ViewerContainer;
 import com.ebook.epub.viewer.ViewerContainer.OnTextSelection;
 import com.ebook.epub.viewer.data.AudioNavigationInfo;
 import com.ebook.epub.viewer.data.ChapterInfo;
-import com.ebook.epub.viewer.data.ReadingOrderInfo;
 import com.ebook.media.AudioContent;
 import com.ebook.tts.TTSDataInfo;
 import com.flk.epubviewersample.R;
@@ -320,6 +319,11 @@ public class BaseBookActivity extends Activity implements Runnable {
                 if(mVolumeUse)
                     mViewer.scrollNext();
                 return true;
+            }
+            else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                if (mContextMenu != null && mContextMenu.isShowing()) {
+                    mViewer.handleBackKeyEvent();
+                }
             }
         } else if ( event.getAction() == KeyEvent.ACTION_DOWN ){
         }
@@ -963,7 +967,7 @@ public class BaseBookActivity extends Activity implements Runnable {
         mViewer.setSlideResource(false, R.anim.reader_ani_push_right_in, R.anim.reader_ani_push_right_out);
 //        mViewer.setActionModeItemResourceWithDisableItem(R.menu.annotation, 5,false, 4,true);   //[ssin - actionmode] // TODO :: new custom selection - deleted
 
-        mViewer.setTextSelectionColor(0x4D0087ff);
+        mViewer.setTextSelectionColor(0x300087ff);
 
         mViewer.setOnMemoSelection(new ViewerContainer.OnMemoSelection() {
 
@@ -1006,6 +1010,19 @@ public class BaseBookActivity extends Activity implements Runnable {
                 intent.putExtra("SELECTED_ANNOTATION",mCurrentHighlight == null ? "" : mCurrentHighlight.highlightID);
                 intent.putExtra("MEMO_CONTENT",allMemoText);
                 startActivityForResult(intent, REQUEST_MEMO_ACTIVITY);
+            }
+        });
+
+        mViewer.setOnAnalyticsListener(new ViewerContainer.OnAnalyticsListener() {
+
+            @Override
+            public void onAnnotationMergeSelection() {
+                Log.d("SSIN","SELECTION MERGED IN");
+            }
+
+            @Override
+            public void onAnnotationMergeQuick() {
+                Log.d("SSIN","QUICK HIGHLIGHT MERGED IN");
             }
         });
 
@@ -1094,14 +1111,6 @@ public class BaseBookActivity extends Activity implements Runnable {
             public void onOverflowMemoContent() {
                 Toast.makeText(BaseBookActivity.this, "메모는 2,000자를 초과할 수 없습니다.", Toast.LENGTH_SHORT).show();
             }
-
-//            @Override
-//            public void onStart() {
-//                Log.d(TAG, "onTextSelection start ................. ");
-//                if(layoutVisible){
-//                    toggleLayoutVisible();
-//                }
-//            }
         });
 
         mViewer.setOnSelectionMenu(new ViewerContainer.OnContextMenu() {
@@ -1119,7 +1128,6 @@ public class BaseBookActivity extends Activity implements Runnable {
                 mContextMenu = createPopup(R.layout.context_popup, contextMenuType);
 
                 if(contextMenuType == BookHelper.ContextMenuType.TYPE_MODIFY || contextMenuType == BookHelper.ContextMenuType.TYPE_MODIFY_CONTINUE ){
-                    ReadingOrderInfo current = mViewer.getCurrentSpineInfo();
                     if(highlightID != null){
                         for( Highlight h: mViewer.getHighlights() ) {
                             if(highlightID.equals(h.highlightID)) { // h.chapterFile.toLowerCase().equals(fileName) &&
@@ -1195,7 +1203,7 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             @Override
             public void onChangeAfter(int pageCount) {
-                Log.d("DEBUG", "################## changeAfter ");
+                Log.d("SSIN", "################## changeAfter ");
 
                 mViewer.clearAllTTSDataInfo();
 

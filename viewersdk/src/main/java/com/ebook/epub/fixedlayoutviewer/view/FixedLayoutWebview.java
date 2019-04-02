@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -614,6 +613,11 @@ public class FixedLayoutWebview extends ViewerBase {
             if (BookHelper.useHistory) {
                 if (mMergedAnnotation) {
                     UserBookDataFileManager.__hlHistory.mergeAdd(highlight.uniqueID);
+                    if(selectionHandler){
+                        mWebviewCallbackListener.reportMergedAnnotationSelection();
+                    } else {
+                        mWebviewCallbackListener.reportMergedAnnotationQuick();
+                    }
                     mMergedAnnotation = false;
                 } else {
                     UserBookDataFileManager.__hlHistory.add(highlight.uniqueID);
@@ -1496,6 +1500,8 @@ public class FixedLayoutWebview extends ViewerBase {
         int requestStartSelectionPositionX();
         int requestStartSelectionPositionY();
         int[] requestContextMenuInfo();
+        void reportMergedAnnotationSelection();
+        void reportMergedAnnotationQuick();
     }
 
     @Override

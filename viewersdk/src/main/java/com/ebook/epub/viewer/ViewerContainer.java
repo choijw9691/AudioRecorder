@@ -155,8 +155,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
          * onHideContextMenu - 텍스트 셀렉션 종료 시 context 메뉴 비활성화 요청
          */
         void onHideContextMenu();                                                                               // TODO :: new custom selection - added
-//        void onShow(boolean isHighlight, String highlightId,int top, int bottom);                             // TODO :: new custom selection - deleted
-//        void onHide();                                                                                        // TODO :: new custom selection - deleted
     }
 
     public interface OnPageBookmark {
@@ -179,9 +177,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
          * @param allMemoText        : 셀렉션 영역 내 모든 메모 주석 내용
          */
         void onGetAllMemoText (String allMemoText);
-//        void onStart(EPubViewer sender, Highlight high);                          // TODO :: new custom selection - deleted
-//        void onEnd(EPubViewer sender);                                            // TODO :: new custom selection - deleted
-//        void onMark(EPubViewer sender, String id, Rect bound, boolean bShow);     // TODO :: new custom selection - deleted
     }
 
     public interface OnTouchEventListener {
@@ -299,11 +294,10 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         void onOverflowMemoContent();
     }
 
-//    public void setOnActionModeListener(OnActionModeListener listener) {      // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.setOnActionModeListener(listener);
-//        }
-//    }
+    public interface OnAnalyticsListener{
+        void onAnnotationMergeSelection();
+        void onAnnotationMergeQuick();
+    }
 
     public ViewerContainer(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -753,14 +747,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
     }
 
-//    public void setOnTTSStateChangeListener(OnTTSStateChangeListener l) {       // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable ) {
-//            mEPubViewer.setOnTTSStateChangeListener(l);
-//        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.setOnTTSStateChangeListener(l);
-//        }
-//    }
-
 //    public void forceChapterChanging() {        // TODO : 프론트에서 안쓰면 없애자 deleted
 //        if( mLayoutMode == LayoutMode.Reflowable )
 //            mEPubViewer.forceChapterChanging();
@@ -798,29 +784,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setTextSelectionColor(int color){   // TODO :: new custom selection - modified
         BookHelper.textSelectionColor = color;
     }
-
-//    public void removeSelection(){  // TODO : 프론트에서 안쓰면 없애자 -> finishTextSelectionMode() 추가함 이거로 사용하면됨
-//        if( mLayoutMode == LayoutMode.Reflowable ) {
-//            mEPubViewer.removeSelection();
-//        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.removeSelection();
-//        }
-//    }
-
-//    public void resetTextSelection() {      // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable ) {
-//            mEPubViewer.resetTextSelection();
-//        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
-//            mFixedLayoutView.resetTextSelection();
-//        }
-//    }
-
-//    public boolean getSelectionMode(){      // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            return mEPubViewer.getSelectionMode();
-//        else
-//            return false;
-//    }
 
     public void setSlideResource(boolean bLeft, int inId, int outId) {
         if( mLayoutMode == LayoutMode.Reflowable )
@@ -970,49 +933,13 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return new ArrayList<>();
     }
 
-//    public void doHighlight(){  // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.doHighlight();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.doHighlight();
-//    }
-
-//    public void deleteHighlight(String id){           // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.deleteHighlight(id);
-//    }
-
-    public void deleteHighlight(Highlight high){     // TODO : 프론트에서 안쓰면 없애자 - 커스텀셀렉션에서 안쓰일듯
+    public void deleteHighlight(Highlight high){
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.deleteHighlight(high);
         } else if( mLayoutMode == LayoutMode.FixedLayout ){
 //            mFixedLayoutView.deleteHighlight(high);
         }
     }
-
-//    public void doMemo(){                             // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.doMemo();
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.doMemo();
-//    }
-
-//    public void requestShowMemo(Highlight h, boolean isEdit){   // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.requestShowMemo(h, isEdit);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.requestShowMemo(h, isEdit);
-//    }
-
-//    public void hasMemo(){  // TODO :: new custom selection - deleted
-//        if( mLayoutMode ==LayoutMode.Reflowable )
-//            mEPubViewer.hasMemo();
-//    }
-
-//    public void showMemoTagAll(){   // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.showMemoTagAll();
-//    }
 
     public void hasBookmark() {
         if( mLayoutMode == LayoutMode.Reflowable )
@@ -1043,32 +970,9 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return new ArrayList<>();
     }
 
-//    public void clearBookmarkHistory() {    // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.clearBookmarkHistory();
-//    }
-
-//    public void clearHighlightHistory() {   // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.clearHighlightHistory();
-//    }
-
     public UnModifiableArrayList<String> getImageList()  {
         return mImageReader.getPublicationImageList();
     }
-
-//    public void getCurrentPageInfo(){   // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.getCurrentPageInfo();
-//    }
-
-//    public double getChapterStartPercent(int index){    // TODO : 프론트에서 안쓰면 없애자 deleted
-//        return mSpineInfo.getSpineInfos().get(index).getSpineStartPercentage();
-//    }
-
-//    public double getChapterHavePercent(int index){  // TODO : 프론트에서 안쓰면 없애자 deleted
-//        return mSpineInfo.getSpineInfos().get(index).getSpinePercentage();
-//    }
 
     public int getSpineIndexFromPercent(double percent){
         if( mLayoutMode == LayoutMode.Reflowable )
@@ -1099,12 +1003,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return mSpineInfo.getSpineIndex(filePath);
     }
 
-//    public void startChapterStringGet(){    // TODO : 프론트에서 안쓰면 없애자
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.startChapterStringGet();
-//    }
-
-    public void setPreviewMode(boolean onoff){      // TODO : 기능 확인하기
+    public void setPreviewMode(boolean onoff){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.setPreviewMode(onoff);
     }
@@ -1150,33 +1049,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             mEPubViewer.changeIndentDirect(value);
     }
 
-//    public void changeHighlightColorDirect(int clrIndex) {  // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.changeHighlightColorDirect(clrIndex);
-//        else if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.changeHighlightColorDirect(clrIndex);
-//    }
-
-//    public void changeFontStyle(String styleValue) {    // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.changeFontStyle(styleValue);
-//    }
-
-//    public void changeFontWeight(String weightValue) {  // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.changeFontWeight(weightValue);
-//    }
-
-//    public void changeListStyle(String styleValue) {    // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.changeListStyle(styleValue);
-//    }
-
-//    public void changeTextEmphasis(String styleValue, String colorValue) {  // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.changeTextEmphasis(styleValue, colorValue);
-//    }
-
     public void	setDefaultReadingStyle(ReadingStyle readingStyle){
         if(mLayoutMode==LayoutMode.Reflowable){
             mEPubViewer.setDefaultReadingStyle(readingStyle);
@@ -1194,18 +1066,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.saveAllStyle(stylePath, fontSize, fontName, faceName, fontPath, lineSpace, paraSpace, indent, marginLeft, marginTop, marginRight, marginBottom);
     }
-
-//    public void setHandMode(int handmode){  // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.setHandMode(handmode);
-//    }
-
-//    public void setUseVolumeKey(boolean bAble){    // TODO : 프론트에서 안쓰면 없애자 deleted
-//        if( mLayoutMode == LayoutMode.Reflowable )
-//            mEPubViewer.setUseVolumeKey(bAble);
-//        if( mLayoutMode == LayoutMode.FixedLayout )
-//            mFixedLayoutView.setUseVolumeKey(bAble);
-//    }
 
     public void saveAllViewerData() {
         if( mLayoutMode == LayoutMode.Reflowable )
@@ -1673,11 +1533,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return mEpubFile.isValidNavigation();
     }
 
-//    public void reloadPoster(){ // TODO :: deleted - 이슈 현상 수정됨
-//        if(mLayoutMode == LayoutMode.FixedLayout)
-//            mFixedLayoutView.reloadPoster();
-//    }
-
     public void unpluggedHeadSet(boolean isUnplugged){
         if(mLayoutMode == LayoutMode.Reflowable && mEPubViewer!=null){
             mEPubViewer.unpluggedHeadSet(isUnplugged);
@@ -1715,7 +1570,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
     }
 
-    public boolean isNoterefEnabled(){
+    public boolean isNoterefEnabled(){   // TODO : 프론트에서 안쓰면 없애자
         if( mLayoutMode == LayoutMode.Reflowable ){
             return mEPubViewer.isNoterefEnabled();
         } else if( mLayoutMode == LayoutMode.FixedLayout ){
@@ -1724,7 +1579,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return false;
     }
 
-    public void hideNoteref(){
+    public void hideNoteref(){  // TODO : 프론트에서 안쓰면 없애자
         if( mLayoutMode == LayoutMode.Reflowable ){
             mEPubViewer.hideNoteref();
         } else if( mLayoutMode == LayoutMode.FixedLayout ){
@@ -1743,14 +1598,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setMemoIconPath(String iconPath){
         BookHelper.memoIconPath = iconPath;
     }
-
-//    public void changeIntoMemo(Highlight highlight, String memo){       // TODO :: new custom selection - deleted
-//        if( mLayoutMode == LayoutMode.Reflowable ){
-//            mEPubViewer.changeIntoMemo(highlight, memo);
-//        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.changeIntoMemo(highlight, memo);
-//        }
-//    }
 
     public ReadpositionData getReadpositionData(String filePath){   // TODO : 프론트에서 안쓰면 없애자
         return BookHelper.getReadpositionData(filePath);
@@ -1804,16 +1651,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             return false;
     }
 
-//    public void loadLastPosition(){	// temp 수정건 동기화 관련 // TODO : 프론트에서 안쓰면 없애자
-//        if( mLayoutMode == LayoutMode.Reflowable ){
-//            mEPubViewer.restoreLastPosition();
-//            mEPubViewer.showBook();
-//        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.loadLastReadPosition();
-//            mFixedLayoutView.goPage(mSpineInfo.getCurrentSpineIndex());
-//        }
-//    }
-
     public void setPreload(boolean isPreload){
         BookHelper.isPreload = isPreload;
     }
@@ -1846,18 +1683,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
         return "";
     }
-
-//    public void setActionModeItemResource(int id) { // TODO :: new custom selection - deleted
-//        BookHelper.actionModeItemResource = id;
-//    }
-
-//    public void setActionModeItemResourceWithDisableItem(int id, int indexOfTTS, boolean isDiableTTS, int indexOfShare, boolean isDisableShare) {   // TODO :: new custom selection - deleted
-//        BookHelper.actionModeItemResource = id;
-//        BookHelper.indexOfTTS = indexOfTTS;
-//        BookHelper.isDisableTTS = isDiableTTS;
-//        BookHelper.indexOfShare = indexOfShare;
-//        BookHelper.isDisableShare = isDisableShare;
-//    }
 
     /***************************** s: new custom selection */
     public void addAnnotation(){
@@ -1938,4 +1763,12 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
     }
     /***************************** e: new custom selection */
+
+    public void setOnAnalyticsListener(ViewerContainer.OnAnalyticsListener listener){
+        if( mLayoutMode == LayoutMode.Reflowable ) {
+            mEPubViewer.setOnAnalyticsListener(listener);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setOnAnalyticsListener(listener);
+        }
+    }
 }

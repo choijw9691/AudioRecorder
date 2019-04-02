@@ -1557,15 +1557,20 @@ function findTagUnderPoint(x, y, orgX, orgY){
                 return;
             }
         } else if(tagName == 'IMG'){
-            while(element.id != "feelingk_bookcontent"){	// img 태그 부모가 a tag 인 경우를 위해 부모 검사
-                element = element.parentNode;
-                if(element.tagName.toUpperCase()=='A'){
-                    var href = element.href;
+            var parentElement = element.parentNode;
+            while(parentElement.id != "feelingk_bookcontent"){	// img 태그 부모가 a tag 인 경우를 위해 부모 검사
+                if(parentElement.tagName.toUpperCase()=='A'){
+                    var href = parentElement.href;
                     if( href.length > 0 ){
                         window.fixedlayout.reportLinkClick(href);
                         return;
                     }
                 }
+                parentElement = parentElement.parentNode;
+            }
+            var role = element.getAttribute('role');
+            if(role!=null && role!=undefined && role.toLowerCase().indexOf("button") != -1){
+                return;
             }
         }
     } else {
@@ -1594,7 +1599,6 @@ function findTagUnderPoint(x, y, orgX, orgY){
         if(role!=null && role!=undefined && role.toLowerCase().indexOf("button") != -1){
             return;
         }
-
     }
 
     if(!isExceptionalTagOrAttr)
@@ -1718,7 +1722,7 @@ function setStartSelectionRange(x,y) {
         drawSelectionRect(rectList, currentSelectionInfo.isExistHandler);
     } catch(error){
         console.log("setStartSelectionRange error : "+error);
-        window.selection.finishTextSelectionMode();
+        window.fixedlayout.finishTextSelectionMode();
     }
 }
 

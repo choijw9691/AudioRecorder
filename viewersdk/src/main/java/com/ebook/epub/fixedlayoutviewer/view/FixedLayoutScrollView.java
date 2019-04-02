@@ -159,6 +159,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     private ViewerContainer.OnReportError mOnReportError = null;
     private ViewerContainer.OnMediaControlListener mOnMediaControlListener = null;
     private ViewerContainer.OnMediaOverlayStateListener mOnMediaOverlayStateListener;
+    private ViewerContainer.OnAnalyticsListener mOnAnalyticsListener;
 
     public void setOnDecodeContent(ViewerContainer.OnDecodeContent l){
         mOnDecodeContent = l;
@@ -239,6 +240,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     public void setOnMediaOverlayStateListener(ViewerContainer.OnMediaOverlayStateListener listener) {
         mOnMediaOverlayStateListener = listener;
         mediaOverlayController.setOnMediaOverlayStateListener(mOnMediaOverlayStateListener);
+    }
+
+    public void setOnAnalyticsListener(ViewerContainer.OnAnalyticsListener listener){
+        mOnAnalyticsListener = listener;
     }
     /********************************************************************** e : event listener variable and setter */
 
@@ -1298,6 +1303,20 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             contextMenuInfo[1] = mContextMenuTopMargin;
             contextMenuInfo[2] = mContextMenuBottomMargin;
             return contextMenuInfo;
+        }
+
+        @Override
+        public void reportMergedAnnotationSelection() {
+            if(mOnAnalyticsListener!=null){
+                mOnAnalyticsListener.onAnnotationMergeSelection();
+            }
+        }
+
+        @Override
+        public void reportMergedAnnotationQuick() {
+            if(mOnAnalyticsListener!=null){
+                mOnAnalyticsListener.onAnnotationMergeQuick();
+            }
         }
     };
     /********************************************************************** e : webview callback */

@@ -1228,9 +1228,11 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             isTextSelectionMode = textSelectionMode;
             if(isTextSelectionMode && mOnTextSelection!=null) {
                 mOnTextSelection.onStartTextSelection();
-            } else {
+            } else if(!isTextSelectionMode) {
                 currentSelectedText = "";
-                mPagerAdapter.getCurrentView().setTextSelectionMode(isTextSelectionMode);
+                if(mOnTextSelection!=null){
+                    mOnTextSelection.onEndTextSelection();
+                }
             }
         }
 

@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -1160,7 +1161,7 @@ public class FixedLayoutWebview extends ViewerBase {
         }
     }
 
-    public void setEndRange(int x, int y, boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
+    public void setEndRange(boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
         DebugSet.d(TAG,"setEndRange in mTextSelectionMode : "+mTextSelectionMode);
 
         if(!mTextSelectionMode) {
@@ -1174,10 +1175,6 @@ public class FixedLayoutWebview extends ViewerBase {
         } else if(!isLongPressStarted && isStartHandlerTouched || isEndHandlerTouched ){
             loadUrl("javascript:setEndRangeWithHandler(" + BookHelper.lastHighlightColor + ")");
         }
-    }
-
-    public void showLastContextMenu(){
-
     }
 
     public void findTagUnderPoint(int x, int y, int orgX, int orgY){

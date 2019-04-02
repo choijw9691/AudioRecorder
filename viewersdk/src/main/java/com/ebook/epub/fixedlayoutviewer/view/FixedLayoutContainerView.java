@@ -377,27 +377,14 @@ public class FixedLayoutContainerView extends LinearLayout {
         }
     }
 
-    public void setEndRange(int x, int y, boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
+    public void setEndRange(boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
         for(FixedLayoutWebview webview : mWebviewList){
 
             if(webview.getCurrentPageData().getContentsString()==null)
                 continue;
 
-            if(webview.getSelectionMode()) { //isTouchInView(webview,x,y)
-                int[] touchedPosition = convertWebviewPosition(x,y,(FixedLayoutZoomView)getParent(), webview);
-                webview.setEndRange(touchedPosition[0],touchedPosition[1], isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
-            }
-        }
-    }
-
-    public void showLastContextMenu(){
-        for(FixedLayoutWebview webview : mWebviewList){
-
-            if(webview.getCurrentPageData().getContentsString()==null)
-                continue;
-
-            if(webview.getSelectionMode()){
-                webview.showLastContextMenu();
+            if(webview.getSelectionMode()) {
+                webview.setEndRange(isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
             }
         }
     }
@@ -538,7 +525,9 @@ public class FixedLayoutContainerView extends LinearLayout {
 
     public void finishTextSelectionMode(){
         for(FixedLayoutWebview webview : mWebviewList){
-            webview.finishTextSelectionMode();
+            if(webview.getSelectionMode()){
+                webview.finishTextSelectionMode();
+            }
         }
     }
 

@@ -218,8 +218,8 @@ public class FixedLayoutZoomView extends LinearLayout {
             height = mDisplayHeight;
         } else {
             String[] viewPortValue = viewPort.split(",");
-            width = Integer.parseInt(viewPortValue[0].split("=")[1]);
-            height = Integer.parseInt(viewPortValue[1].split("=")[1]);
+            width = Integer.parseInt(viewPortValue[0].split("=")[1].trim());
+            height = Integer.parseInt(viewPortValue[1].split("=")[1].trim());
         }
 
         return width+","+height;
@@ -340,7 +340,6 @@ public class FixedLayoutZoomView extends LinearLayout {
                         if(userMoveConfirmed){
                             float moveDistx = ev.getX() - mLastTouchX;
                             float moveDisty = ev.getY() - mLastTouchY;
-//                            setMoveRange((int) ev.getX(), (int) ev.getY(), isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
                             setMoveRange((int) ev.getX(), (int) ev.getY(), isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted, moveDistx, moveDisty);
                         }
                     } else {
@@ -380,7 +379,8 @@ public class FixedLayoutZoomView extends LinearLayout {
 
                 case MotionEvent.ACTION_UP:
                     if(isTextSelectionMode) {
-                        setEndRange((int)ev.getX(), (int)ev.getY(), isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
+                        isTextSelectionMode = false;
+                        setEndRange(isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
                     }
                     return true;
 
@@ -586,13 +586,8 @@ public class FixedLayoutZoomView extends LinearLayout {
         }
     }
 
-    public void setEndRange(int x, int y, boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
-//        if(isTouchInView(mFixedLayoutContainerView,x,y)) {
-            mFixedLayoutContainerView.setEndRange(x, y, isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
-//        }
-//        else {
-//            mFixedLayoutContainerView.showLastContextMenu();
-//        }
+    public void setEndRange(boolean isStartHandlerTouched, boolean isEndHandlerTouched, boolean isLongPressStarted){
+        mFixedLayoutContainerView.setEndRange(isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
     }
 
     public void findTagUnderPoint(float x, float y){
@@ -658,9 +653,6 @@ public class FixedLayoutZoomView extends LinearLayout {
         isEndHandlerTouched = false;
         isLongPressStarted=false;
         mFixedLayoutContainerView.finishTextSelectionMode();
-    }
-    public void setTextSelectionMode(boolean isTextSelectionMode){
-        this.isTextSelectionMode = isTextSelectionMode;
     }
 
     public int getTouchedWebviewPosition(){

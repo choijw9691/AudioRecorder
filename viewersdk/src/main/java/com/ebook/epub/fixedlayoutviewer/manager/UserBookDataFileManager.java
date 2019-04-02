@@ -180,30 +180,27 @@ public class UserBookDataFileManager {
 
         try {
             if( object == null ) {
-                throw new Exception();
-            }
-
-            String file = "";
-            if( !object.isNull(AnnotationConst.FLK_READPOSITION_FILE) ) {
-                file = object.getString(AnnotationConst.FLK_READPOSITION_FILE);
-            }
-
-            if( file.trim().length() <= 0 ) {
+                // first load시
                 mReadingSpine.setCurrentSpineIndex(0);
             } else {
-                file = getFullPath(file);
-                if( file.indexOf('\\') != -1 ) {
-                    file = file.replace('\\', '/');
+                String file = "";
+                if( !object.isNull(AnnotationConst.FLK_READPOSITION_FILE) ) {
+                    file = object.getString(AnnotationConst.FLK_READPOSITION_FILE);
                 }
-                mReadingSpine.setCurrentSpineIndex(file);
+
+                if( file.trim().length() <= 0 ) {
+                    mReadingSpine.setCurrentSpineIndex(0);
+                } else {
+                    file = getFullPath(file);
+                    if( file.indexOf('\\') != -1 ) {
+                        file = file.replace('\\', '/');
+                    }
+                    mReadingSpine.setCurrentSpineIndex(file);
+                }
             }
         } catch(Exception e) {
             e.printStackTrace();
-
-            // first load시 exception 강제 발생
-            mReadingSpine.setCurrentSpineIndex(0);
         }
-
     }
 
     /**

@@ -1546,7 +1546,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             if(mLayoutMode == LayoutMode.Reflowable){
                 ttsHighlighter.removeMediaOverlayHighlight(mEPubViewer, mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
             } else if(mLayoutMode == LayoutMode.FixedLayout){
-                ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getLeftWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
+                if(mFixedLayoutView.getLeftWebView()!=null)
+                    ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getLeftWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
                 if(mFixedLayoutView.getRightWebView()!=null)
                     ttsHighlighter.removeMediaOverlayHighlight(mFixedLayoutView.getRightWebView(), mEpubFile.getActiveClass(), mEpubFile.getPlaybackActiveClass());
             }

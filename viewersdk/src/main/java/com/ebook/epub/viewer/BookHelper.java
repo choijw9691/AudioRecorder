@@ -55,7 +55,7 @@ public class BookHelper {
 //    public static int lastMemoHighlightColor = 4;
     public static int focusTextColor = 0x809e9e9e;          // light gray
     public static int ttsHighlightColor = 0x4D0087ff;       // TTS 하이라이트 색상
-    public static int textSelectionColor = 0x4D0087ff;      // default 0x4D0087ff ( front 설정값 )
+    public static int textSelectionColor = 0x300087ff;      // default 0x4D0087ff ( front 설정값 )
 
     public static int maxSelectionLength = 1000;            // 셀렉션 글자 수 제한값 (default 1000)
 

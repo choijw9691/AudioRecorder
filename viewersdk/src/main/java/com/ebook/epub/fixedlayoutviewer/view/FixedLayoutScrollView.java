@@ -392,7 +392,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
             boolean isLoadBookDataFinished = loadUserBookData();
             if(isLoadBookDataFinished){
-                finishLoadBookData();
+                mViewerHandler.sendMessage(mViewerHandler.obtainMessage(Defines.FIXEDLAYOUT_FINISH_LOAD_DATA,null));
             }
             return isLoadBookDataFinished;
         } catch(Exception e) {
@@ -418,10 +418,22 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     }
 
     public void finishLoadBookData(){
-        mPagerAdapter = new PagerAdapterClass(mContext, mPageDataList);
-        setAdapter(mPagerAdapter);
+        try{
+            isViewerLoadingComplete = true;
 
-        isViewerLoadingComplete = true;
+            if(BookHelper.isPreload) {
+                setOffscreenPageLimit(2);
+            } else {
+                setOffscreenPageLimit(1);
+            }
+
+            mPagerAdapter = new PagerAdapterClass(mContext, mPageDataList);
+            setAdapter(mPagerAdapter);
+
+            mViewerHandler.sendMessage(mViewerHandler.obtainMessage(Defines.FIXEDLAYOUT_LOAD_BOOK,null));
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void showBook(){
@@ -449,8 +461,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         }
 
         finishLoadBookData();
-
-        mViewerHandler.sendMessage(mViewerHandler.obtainMessage(Defines.FIXEDLAYOUT_LOAD_BOOK,null));
     }
     /********************************************************************** e : start loading */
 
@@ -585,6 +595,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             case Defines.FIXEDLAYOUT_LOAD_BOOK:
                 showBook();
                 FixedLayoutScrollView.this.setVisibility(View.VISIBLE);
+                break;
+
+            case Defines.FIXEDLAYOUT_FINISH_LOAD_DATA:
+                finishLoadBookData();
                 break;
 
             case Defines.FIXEDLAYOUT_SCROLL_PAGE:

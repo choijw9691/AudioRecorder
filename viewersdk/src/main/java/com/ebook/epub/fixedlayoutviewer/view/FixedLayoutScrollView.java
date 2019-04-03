@@ -899,6 +899,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         if(isPreventPageMove)
             return;
 
+        if(mPagerAdapter.getCurrentView().getCurrentScale() != 1f) {
+            return;
+        }
+
         if(mPageDirection == ViewerContainer.PageDirection.LTR){
             int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
             if( numChapter < 0 ) {
@@ -913,7 +917,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             }
         }
 
-        isFromRight = mPagerAdapter.getCurrentView().getIsFromRight();  // TODO :: 쓰이는 용도는?
+        isFromRight = mPagerAdapter.getCurrentView().getIsFromRight();
 
         setCurrentItem(mCurrentPageIndex-1, pagerAnimation);
 
@@ -931,6 +935,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         if(isPreventPageMove)
             return;
+
+        if(mPagerAdapter.getCurrentView().getCurrentScale() != 1f) {
+            return;
+        }
 
         if(mPageDirection == ViewerContainer.PageDirection.LTR){
             int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
@@ -1019,6 +1027,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                     } else if(position==1){
                         isRightWebviewLoadFinished = true;
                     }
+
                     if(isLeftWebviewLoadFinished && isRightWebviewLoadFinished){
                         mOnChapterChange.onChangeAfter(mPagerAdapter.getCount());
                         if( mOnPageScroll != null ){
@@ -1027,12 +1036,19 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                                 currentPage = 1;
                             mOnPageScroll.onScrollAfter(currentPage, 0, mReadingSpine.getSpineInfos().size(), (double) currentPage / (double)mReadingSpine.getSpineInfos().size() * 100.0);
                         }
+
+                        if(mPageMode == PageMode.TwoPage && isMoveByFling) {
+                            mPagerAdapter.getCurrentView().setIsFromLeft(isFromLeft);
+                            mPagerAdapter.getCurrentView().setIsFromRight(isFromRight);
+                            isFromLeft = false;
+                            isFromRight = false;
+                            mPagerAdapter.getCurrentView().onDoubleTab(null);
+                        }
+
                         isLeftWebviewLoadFinished=false;
                         isRightWebviewLoadFinished=false;
                     }
                 }
-
-                // TODO :: 2page 시 더블탭 후 이동 정책 확인 - scale 유지?
 
                 mPagerAdapter.getLoadedViewMap().get(mCurrentPageIndex).applyCurrentChapterHighlight(position);
 

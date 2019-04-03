@@ -65,6 +65,7 @@ public class FixedLayoutZoomView extends LinearLayout {
 
     private boolean isFromLeft = false;
     private boolean isFromRight = false;
+
     private boolean isLeftEnd = false;
     private boolean isRightEnd = false;
 

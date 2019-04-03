@@ -1322,6 +1322,13 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 mOnAnalyticsListener.onAnnotationMergeQuick();
             }
         }
+
+        @Override
+        public void reportAnnotationQuick() {
+            if(mOnAnalyticsListener!=null){
+                mOnAnalyticsListener.onAnnotationQuick();
+            }
+        }
     };
     /********************************************************************** e : webview callback */
 

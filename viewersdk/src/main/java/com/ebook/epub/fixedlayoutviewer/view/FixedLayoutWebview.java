@@ -621,6 +621,9 @@ public class FixedLayoutWebview extends ViewerBase {
                     mMergedAnnotation = false;
                 } else {
                     UserBookDataFileManager.__hlHistory.add(highlight.uniqueID);
+                    if(!selectionHandler){
+                        mWebviewCallbackListener.reportAnnotationQuick();
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -1502,6 +1505,7 @@ public class FixedLayoutWebview extends ViewerBase {
         int[] requestContextMenuInfo();
         void reportMergedAnnotationSelection();
         void reportMergedAnnotationQuick();
+        void reportAnnotationQuick();
     }
 
     @Override

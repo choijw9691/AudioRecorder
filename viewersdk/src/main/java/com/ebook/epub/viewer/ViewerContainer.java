@@ -295,6 +295,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     }
 
     public interface OnAnalyticsListener{
+        void onAnnotationQuick();
         void onAnnotationMergeSelection();
         void onAnnotationMergeQuick();
     }

@@ -1016,6 +1016,11 @@ public class BaseBookActivity extends Activity implements Runnable {
         mViewer.setOnAnalyticsListener(new ViewerContainer.OnAnalyticsListener() {
 
             @Override
+            public void onAnnotationQuick() {
+                Log.d("SSIN","QUICK IN");
+            }
+
+            @Override
             public void onAnnotationMergeSelection() {
                 Log.d("SSIN","SELECTION MERGED IN");
             }

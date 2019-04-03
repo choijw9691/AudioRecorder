@@ -5997,8 +5997,13 @@ public class EPubViewer extends ViewerBase {
                         }
                     }
                     mMergedAnnotation = false;
-                } else{
+                } else {
                     __hlHistory.add(highlight.uniqueID);
+                    if(mOnAnalyticsListener!=null){
+                        if(!selectionHandler){
+                            mOnAnalyticsListener.onAnnotationQuick();
+                        }
+                    }
                 }
             }
         } catch (JSONException e) {

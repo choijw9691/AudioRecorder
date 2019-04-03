@@ -5987,6 +5987,11 @@ public class EPubViewer extends ViewerBase {
             mHighlights.add(highlight);
 
             if(BookHelper.useHistory) {
+                if(mOnAnalyticsListener!=null){
+                    if(!selectionHandler){
+                        mOnAnalyticsListener.onAnnotationQuick();
+                    }
+                }
                 if( mMergedAnnotation ){
                     __hlHistory.mergeAdd(highlight.uniqueID);
                     if(mOnAnalyticsListener!=null){
@@ -5999,11 +6004,6 @@ public class EPubViewer extends ViewerBase {
                     mMergedAnnotation = false;
                 } else {
                     __hlHistory.add(highlight.uniqueID);
-                    if(mOnAnalyticsListener!=null){
-                        if(!selectionHandler){
-                            mOnAnalyticsListener.onAnnotationQuick();
-                        }
-                    }
                 }
             }
         } catch (JSONException e) {

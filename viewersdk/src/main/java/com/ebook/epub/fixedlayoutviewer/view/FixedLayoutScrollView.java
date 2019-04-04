@@ -1036,15 +1036,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                                 currentPage = 1;
                             mOnPageScroll.onScrollAfter(currentPage, 0, mReadingSpine.getSpineInfos().size(), (double) currentPage / (double)mReadingSpine.getSpineInfos().size() * 100.0);
                         }
-
-                        if(mPageMode == PageMode.TwoPage && isMoveByFling) {
-                            mPagerAdapter.getCurrentView().setIsFromLeft(isFromLeft);
-                            mPagerAdapter.getCurrentView().setIsFromRight(isFromRight);
-                            isFromLeft = false;
-                            isFromRight = false;
-                            mPagerAdapter.getCurrentView().onDoubleTab(null);
-                        }
-
                         isLeftWebviewLoadFinished=false;
                         isRightWebviewLoadFinished=false;
                     }

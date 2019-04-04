@@ -426,12 +426,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         try{
             isViewerLoadingComplete = true;
 
-            if(BookHelper.isPreload) {
-                setOffscreenPageLimit(2);
-            } else {
-                setOffscreenPageLimit(1);
-            }
-
             mPagerAdapter = new PagerAdapterClass(mContext, mPageDataList);
             setAdapter(mPagerAdapter);
 

@@ -368,7 +368,7 @@ public class FixedLayoutWebview extends ViewerBase {
             // #1. context menu draw 가능 여부 체크
             // #2. 위치 보정 및 전달
 
-            if(!mTextSelectionMode)
+            if(!mTextSelectionMode || selectionRectList.isEmpty())
                 return;
 
             endRight = Web2Scr(endRight);

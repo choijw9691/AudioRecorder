@@ -1695,7 +1695,7 @@ function setStartSelectionRange(x,y) {
         while (startOffset > 0) {
             startOffset -= 1;
             totalRange.setStart(startContainer, startOffset);
-            if (/^\s|^\(/.test(totalRange.toString())) {
+            if (/^\s|^\(|^\)/.test(totalRange.toString())) {
               startOffset += 1
               totalRange.setStart(startContainer, startOffset);
               startRange.setStart(startContainer, startOffset);
@@ -1706,7 +1706,7 @@ function setStartSelectionRange(x,y) {
         var nodeLength = startContainer.textContent.length;
         while (endOffset <= nodeLength) {
             totalRange.setEnd(startContainer, endOffset);
-            if (/\s$|\)$/.test(totalRange.toString())) {
+            if (/\s$|\)$|\($/.test(totalRange.toString())) {
                 totalRange.setEnd(startContainer, endOffset - 1);
                 break;
             }

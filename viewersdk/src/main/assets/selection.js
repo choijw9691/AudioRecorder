@@ -81,7 +81,13 @@ $(document).ready(function(){
         }
     });
 
-    doInReady();
+    var epubtype = $.epubtype();
+    var epubswitch = $.epubswitch();
+    var epubtrigger = $.epubtrigger();
+    epubtype.init();
+    epubswitch.init();
+    epubtrigger.init();
+    gNoteRefArray = epubtype.data();
 
 	document.body.addEventListener('touchstart', function(event) {
 
@@ -219,18 +225,6 @@ $(document).ready(function(){
     });
 });
 /********************************************************************************************* e:ready */
-
-/************************************************************************************** s: do in ready */
-function doInReady(){   // TODO ::
-    var epubtype = $.epubtype();
-    var epubswitch = $.epubswitch();
-    var epubtrigger = $.epubtrigger();
-    epubtype.init();
-    epubswitch.init();
-    epubtrigger.init();
-    gNoteRefArray = epubtype.data();
-}
-/************************************************************************************** e: do in ready */
 
 /******************************************************************************************** s:jQuery */
 jQuery.fn.getPath=function() {

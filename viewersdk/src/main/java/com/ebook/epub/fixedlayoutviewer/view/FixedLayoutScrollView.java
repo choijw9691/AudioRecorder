@@ -1142,6 +1142,11 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                     } else if(clickArea== BookHelper.ClickArea.Middle){
                         mOnTouchEventListener.onUp(clickArea);
                     }
+                } else {
+                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y);
+                    if(clickArea == BookHelper.ClickArea.Middle){
+                        mOnTouchEventListener.onUp(clickArea);
+                    }
                 }
             }
         }

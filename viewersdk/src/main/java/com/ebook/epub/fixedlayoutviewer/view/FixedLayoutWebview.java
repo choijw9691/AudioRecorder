@@ -1189,7 +1189,9 @@ public class FixedLayoutWebview extends ViewerBase {
 
         int wx = Scr2Web(x);
         int wy = Scr2Web(y);
-        loadUrl("javascript:findTagUnderPoint(" + wx + "," + wy + ","+ orgX +","+ orgY +")");
+
+        boolean isTextSelectionDisabled = mWebviewCallbackListener.requestIsSelectionDisabled();
+        loadUrl("javascript:findTagUnderPoint(" + wx + "," + wy + ","+ orgX +","+ orgY +"," +isTextSelectionDisabled+")");
     }
 
     private Handler mWebviewInnerHandler;
@@ -1500,6 +1502,7 @@ public class FixedLayoutWebview extends ViewerBase {
         void hideContextMenu();
         Drawable requestStartHandlerImage();
         Drawable requestEndHandlerImage();
+        boolean requestIsSelectionDisabled();
         int requestStartSelectionPositionX();
         int requestStartSelectionPositionY();
         int[] requestContextMenuInfo();

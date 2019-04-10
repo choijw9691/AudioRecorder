@@ -1345,7 +1345,7 @@ function getNodeFromElementPath(containerElementPath,containerChildIndex) {
     return null;
 }
 
-function findTagUnderPoint(x,y,singleTap) {
+function findTagUnderPoint(x,y,singleTap,isTextSelectionDisabled) {
 
  	var url=null;
     var tagType=-1;
@@ -1400,7 +1400,10 @@ function findTagUnderPoint(x,y,singleTap) {
      	}
 
         // 재활성화 여부를 위해 flk 검사
-        var isExceptionalTagOrAttr = findHighlight(x, y, element);
+        var isExceptionalTagOrAttr = false;
+        if(!isTextSelectionDisabled){
+            isExceptionalTagOrAttr = findHighlight(x, y, element);
+        }
 
         if( element.tagName.toUpperCase() == 'BUTTON') {
             isExceptionalTagOrAttr = true;

@@ -5017,7 +5017,7 @@ public class EPubViewer extends ViewerBase {
         int wy = Scr2Web(y);
 
         if( !__forceChapterChanging ) {
-            loadUrl("javascript:findTagUnderPoint(" + wx + "," + wy + "," + true + ")");
+            loadUrl("javascript:findTagUnderPoint(" + wx + "," + wy + "," + true + ","+isTextSelectionDisabled+")");
         }
     }
 
@@ -5093,6 +5093,9 @@ public class EPubViewer extends ViewerBase {
             hideNoteref();
             return;
         }
+
+        if(isTextSelectionDisabled)
+            return;
 
         if(mTextSelectionMode){
             if(isStartHandlerTouched || isEndHandlerTouched)
@@ -5210,7 +5213,7 @@ public class EPubViewer extends ViewerBase {
         if( !__forceChapterChanging ) {
             int wx = Scr2Web(x);
             int wy = Scr2Web(y);
-            loadUrl("javascript:findTagUnderPoint(" + wx + "," + wy + "," + false + ")");
+            loadUrl("javascript:findTagUnderPoint(" + wx + "," + wy + "," + false + ","+isTextSelectionDisabled+")");
         }
     }
 
@@ -6209,5 +6212,10 @@ public class EPubViewer extends ViewerBase {
                 }, 500);
             }
         }
+    }
+
+    private boolean isTextSelectionDisabled = false;
+    public void setSelectionDisabled(boolean isTextSelectionDisabled){
+        this.isTextSelectionDisabled = isTextSelectionDisabled;
     }
 }

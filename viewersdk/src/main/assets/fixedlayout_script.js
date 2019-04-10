@@ -1518,7 +1518,7 @@ function setMemoIcon() {
     }
 }
 
-function findTagUnderPoint(x, y, orgX, orgY){
+function findTagUnderPoint(x, y, orgX, orgY, isSelectionDisabled){
 
     console.log("SSIN findTagUnderPoint in");
 
@@ -1539,7 +1539,10 @@ function findTagUnderPoint(x, y, orgX, orgY){
         return;
     }
 
-    var isExceptionalTagOrAttr = findHighlight(x, y, element);
+    var isExceptionalTagOrAttr = false;
+    if(!isSelectionDisabled){
+        isExceptionalTagOrAttr = findHighlight(x, y, element);
+    }
 
     if(element.hasAttribute('onclick')){
         return;

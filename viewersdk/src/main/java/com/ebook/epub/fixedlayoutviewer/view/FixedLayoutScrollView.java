@@ -521,10 +521,12 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 fixedLayoutZoomView.setWebviewCallbackListener(listener);
                 fixedLayoutZoomView.setTouchAreaCheckInterface(FixedLayoutScrollView.this);
                 fixedLayoutZoomView.setJSInterface(ttsDataInfoManager, ttsHighlighter, mediaOverlayController);
+                fixedLayoutZoomView.setSelectionDisabled(isTextSelectionDisabled);
             } else{
                 fixedLayoutZoomView = new FixedLayoutZoomView(mContext, mPageDataArrayList.get(position), mPageMode, mPageDirection, true);
                 fixedLayoutZoomView.setWebviewCallbackListener(listener);
                 fixedLayoutZoomView.setTouchAreaCheckInterface(FixedLayoutScrollView.this);
+                fixedLayoutZoomView.setSelectionDisabled(isTextSelectionDisabled);
             }
             container.addView(fixedLayoutZoomView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             mLoadedViewMap.put(position,fixedLayoutZoomView);
@@ -713,31 +715,33 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 mOnTouchEventListener.onDown((int)e.getX(), (int)e.getY());
             }
 
-            int[] webviewPosition = mPagerAdapter.getCurrentView().getConvertWebviewPosition((int)e.getX(), (int)e.getY());
+            if(!isTextSelectionDisabled){
+                int[] webviewPosition = mPagerAdapter.getCurrentView().getConvertWebviewPosition((int)e.getX(), (int)e.getY());
 
-            if(webviewPosition==null)
-                return super.onDown(e);
+                if(webviewPosition==null)
+                    return super.onDown(e);
 
-            Rect handlerStartRegion = mStartHandle.getBounds();
-            Rect handlerEndRegion = mEndHandle.getBounds();
-            ArrayList<Rect> selectionRectList = mPagerAdapter.getCurrentView().getSelectionRectList();
-            if(selectionRectList!=null && isTextSelectionMode ){
+                Rect handlerStartRegion = mStartHandle.getBounds();
+                Rect handlerEndRegion = mEndHandle.getBounds();
+                ArrayList<Rect> selectionRectList = mPagerAdapter.getCurrentView().getSelectionRectList();
+                if(selectionRectList!=null && isTextSelectionMode ){
 
-                if( mStartHandle.isVisible() && handlerStartRegion.contains(webviewPosition[0],webviewPosition[1])){
-                    isStartHandlerTouched=true;
-                    isTextSelectionMode = true;
-                    targetX = selectionRectList.get(0).left;
-                    targetY = selectionRectList.get(0).top+ (selectionRectList.get(0).height()/2);
+                    if( mStartHandle.isVisible() && handlerStartRegion.contains(webviewPosition[0],webviewPosition[1])){
+                        isStartHandlerTouched=true;
+                        isTextSelectionMode = true;
+                        targetX = selectionRectList.get(0).left;
+                        targetY = selectionRectList.get(0).top+ (selectionRectList.get(0).height()/2);
+                    }
+
+                    if( mEndHandle.isVisible() && handlerEndRegion.contains(webviewPosition[0],webviewPosition[1])){
+                        isEndHandlerTouched=true;
+                        isTextSelectionMode = true;
+                        targetX = selectionRectList.get(selectionRectList.size()-1).right;
+                        targetY = selectionRectList.get(selectionRectList.size()-1).top + (selectionRectList.get(selectionRectList.size()-1).height()/2);
+                    }
+
+                    mPagerAdapter.getCurrentView().setCurrentTouchCondition(isLongPressStarted, isStartHandlerTouched, isEndHandlerTouched, isTextSelectionMode);
                 }
-
-                if( mEndHandle.isVisible() && handlerEndRegion.contains(webviewPosition[0],webviewPosition[1])){
-                    isEndHandlerTouched=true;
-                    isTextSelectionMode = true;
-                    targetX = selectionRectList.get(selectionRectList.size()-1).right;
-                    targetY = selectionRectList.get(selectionRectList.size()-1).top + (selectionRectList.get(selectionRectList.size()-1).height()/2);
-                }
-
-                mPagerAdapter.getCurrentView().setCurrentTouchCondition(isLongPressStarted, isStartHandlerTouched, isEndHandlerTouched, isTextSelectionMode);
             }
             return super.onDown(e);
         }
@@ -781,7 +785,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 return;
             }
 
-            if(mPagerAdapter.getCurrentView().getCurrentScale() > 1){
+            if(isTextSelectionDisabled || mPagerAdapter.getCurrentView().getCurrentScale() > 1){
                 return;
             }
 
@@ -1294,6 +1298,11 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         @Override
         public Drawable requestEndHandlerImage() {
             return mEndHandle;
+        }
+
+        @Override
+        public boolean requestIsSelectionDisabled() {
+            return isTextSelectionDisabled;
         }
 
         @Override
@@ -1968,4 +1977,9 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         mPagerAdapter.getCurrentView().changeMemoText(memoId, currentMemo);
     }
     /******************************************************************** e : modify annotation */
+
+    private boolean isTextSelectionDisabled = false;
+    public void setSelectionDisabled(boolean isTextSelectionDisabled){
+        this.isTextSelectionDisabled = isTextSelectionDisabled;
+    }
 }

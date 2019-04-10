@@ -336,7 +336,7 @@ public class FixedLayoutZoomView extends LinearLayout {
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    if(isTextSelectionMode) {
+                    if(!isTextSelectionDisabled && isTextSelectionMode) {
                         int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();    // TODO :: 텍스트 아주 작은 콘텐츠에서 slop 조정 필요
                         boolean userMoveConfirmed = Math.abs(mLastTouchX - ev.getX()) > slop || Math.abs(mLastTouchY -  ev.getY()) > slop;
                         if(userMoveConfirmed){
@@ -380,7 +380,7 @@ public class FixedLayoutZoomView extends LinearLayout {
                     return true;
 
                 case MotionEvent.ACTION_UP:
-                    if(isTextSelectionMode) {
+                    if(!isTextSelectionDisabled && isTextSelectionMode) {
                         isTextSelectionMode = false;
                         setEndRange(isStartHandlerTouched, isEndHandlerTouched, isLongPressStarted);
                     }
@@ -665,5 +665,10 @@ public class FixedLayoutZoomView extends LinearLayout {
 
     public int[] getContextMenuTargetViewPosition(int currentContentsPosition){
         return mFixedLayoutContainerView.getContextMenuTargetViewPosition(currentContentsPosition);
+    }
+
+    private boolean isTextSelectionDisabled = false;
+    public void setSelectionDisabled(boolean isTextSelectionDisabled){
+        this.isTextSelectionDisabled = isTextSelectionDisabled;
     }
 }

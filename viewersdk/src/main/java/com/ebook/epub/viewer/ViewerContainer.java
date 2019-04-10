@@ -1772,4 +1772,24 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             mFixedLayoutView.setOnAnalyticsListener(listener);
         }
     }
+
+    public boolean isTwoPageMode() {
+        if(mLayoutMode == LayoutMode.FixedLayout){
+            String pageMode = mEpubFile.getRenditionSpread();
+            if(pageMode == null || pageMode.equals("none") || pageMode == "") {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setSelectionDisabled(boolean isTextSelectionDisable){
+        if (mLayoutMode == LayoutMode.Reflowable) {
+            mEPubViewer.setSelectionDisabled(isTextSelectionDisable);
+        } else if (mLayoutMode == LayoutMode.FixedLayout) {
+            mFixedLayoutView.setSelectionDisabled(isTextSelectionDisable);
+        }
+    }
 }

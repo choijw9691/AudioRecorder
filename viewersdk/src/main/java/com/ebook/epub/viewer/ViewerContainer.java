@@ -1785,11 +1785,11 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return false;
     }
 
-    public void setSelectionDisabled(boolean isTextSelectionDisable){
+    public void setSelectionDisabled(boolean isTextSelectionDisabled){
         if (mLayoutMode == LayoutMode.Reflowable) {
-            mEPubViewer.setSelectionDisabled(isTextSelectionDisable);
+            mEPubViewer.setSelectionDisabled(isTextSelectionDisabled);
         } else if (mLayoutMode == LayoutMode.FixedLayout) {
-            mFixedLayoutView.setSelectionDisabled(isTextSelectionDisable);
+            mFixedLayoutView.setSelectionDisabled(isTextSelectionDisabled);
         }
     }
 }

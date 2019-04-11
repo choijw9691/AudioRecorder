@@ -5121,8 +5121,13 @@ public class EPubViewer extends ViewerBase {
         DebugSet.d(TAG, "onTouchMoveAfterLongPress in x : "+x +" / y : "+y);
         DebugSet.d(TAG, "onTouchMoveAfterLongPress in moveDistX : "+moveDistX +" / moveDistY : "+moveDistY);
 
-        if(!mTextSelectionMode)
+        if(!mTextSelectionMode) {
+            if(autoScrollTimer!=null) {
+                autoScrollTimer.cancel();
+                autoScrollTimer = null;
+            }
             return;
+        }
 
         int wx = Scr2Web(x);
         int wy = Scr2Web(y);

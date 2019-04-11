@@ -73,16 +73,17 @@ public class Defines {
     public static final int FIXEDLAYOUT_CONTEXT_MENU_HIDE = 207;
     public static final int FIXEDLAYOUT_MERGE_ALL_MEMO = 208;
     public static final int FIXEDLAYOUT_ADD_HIGHLIGHTED_DATA = 209;
-    public static final int FIXEDLAYOUT_PLAY_SELECTED_MEDIAOVERLAY = 210;
-    public static final int FIXEDLAYOUT_MEDIAOVERLAY_PAUSE = 211;
-    public static final int FIXEDLAYOUT_PREVENT_MEDIA_CONTROL = 212;
-    public static final int FIXEDLAYOUT_SEARCH_RESULT = 213;
-    public static final int FIXEDLAYOUT_SEARCH_END = 214;
-    public static final int FIXEDLAYOUT_REPORT_CURRENT_PAGE_INFO = 215;
-    public static final int FIXEDLAYOUT_LINK_CLICK = 216;
-    public static final int FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS = 217;
-    public static final int FIXEDLAYOUT_OVERFLOW_MEMO_CONTENT = 218;
-    public static final int FIXEDLAYOUT_SET_BGM_STATE = 219;
+    public static final int FIXEDLAYOUT_FINISH_TEXT_SELECTION = 210;
+    public static final int FIXEDLAYOUT_PLAY_SELECTED_MEDIAOVERLAY = 211;
+    public static final int FIXEDLAYOUT_MEDIAOVERLAY_PAUSE = 212;
+    public static final int FIXEDLAYOUT_PREVENT_MEDIA_CONTROL = 213;
+    public static final int FIXEDLAYOUT_SEARCH_RESULT = 214;
+    public static final int FIXEDLAYOUT_SEARCH_END = 215;
+    public static final int FIXEDLAYOUT_REPORT_CURRENT_PAGE_INFO = 216;
+    public static final int FIXEDLAYOUT_LINK_CLICK = 217;
+    public static final int FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS = 218;
+    public static final int FIXEDLAYOUT_OVERFLOW_MEMO_CONTENT = 219;
+    public static final int FIXEDLAYOUT_SET_BGM_STATE = 220;
 
     public static final int FIXEDLAYOUT_REPORT_VIDEO_INFO = 230;
 

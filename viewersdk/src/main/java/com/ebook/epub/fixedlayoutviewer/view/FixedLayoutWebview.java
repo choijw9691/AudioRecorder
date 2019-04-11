@@ -201,7 +201,7 @@ public class FixedLayoutWebview extends ViewerBase {
 
         @JavascriptInterface
         public void finishTextSelectionMode(){
-            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_CONTEXT_MENU_HIDE,null));
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_FINISH_TEXT_SELECTION,null));
         }
 
         @JavascriptInterface
@@ -1336,6 +1336,11 @@ public class FixedLayoutWebview extends ViewerBase {
 
             case Defines.FIXEDLAYOUT_CONTEXT_MENU_HIDE : {
                 hideAnnotationMenu();
+                break;
+            }
+
+            case Defines.FIXEDLAYOUT_FINISH_TEXT_SELECTION : {
+                finishTextSelectionMode();
                 break;
             }
 

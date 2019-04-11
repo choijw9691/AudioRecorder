@@ -81,9 +81,6 @@ public class FixedLayoutWebview extends ViewerBase {
 
     private FixedLayoutWebview.OnWebviewCallbackInterface  mWebviewCallbackListener;
 
-    private Rect startRect;
-    private Rect endRect;
-
     public interface OnPageLoad {
         /**
          * webview page load finish
@@ -368,7 +365,7 @@ public class FixedLayoutWebview extends ViewerBase {
             // #1. context menu draw 가능 여부 체크
             // #2. 위치 보정 및 전달
 
-            if(!mTextSelectionMode || selectionRectList.isEmpty())
+            if(!mTextSelectionMode )
                 return;
 
             endRight = Web2Scr(endRight);
@@ -386,16 +383,16 @@ public class FixedLayoutWebview extends ViewerBase {
 
             PopupData contextMenuData;
             if(contextMenuPosition.equalsIgnoreCase("START")) {
-                if(startRect.top  - contextMenuTopMargin - contextMenuHeight < 0) { // 시작 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
-                    contextMenuData = new PopupData(highlightID, startRect.left , startRect.bottom  + handlerHeight + contextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
+                if(startTop  - contextMenuTopMargin - contextMenuHeight < 0) { // 시작 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
+                    contextMenuData = new PopupData(highlightID, startLeft , startBottom  + handlerHeight + contextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
                 } else {
-                    contextMenuData = new PopupData(highlightID, startRect.left , startRect.top  - contextMenuTopMargin - contextMenuHeight, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
+                    contextMenuData = new PopupData(highlightID, startLeft , startTop  - contextMenuTopMargin - contextMenuHeight, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
                 }
             } else if (contextMenuPosition.equalsIgnoreCase("END")){
-                if(endRect.top  - contextMenuTopMargin - contextMenuHeight < 0) { // 종료 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
-                    contextMenuData = new PopupData(highlightID, endRect.right , endRect.bottom  + handlerHeight + contextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
+                if(endTop  - contextMenuTopMargin - contextMenuHeight < 0) { // 종료 핸들러 위 메뉴 그렸는데 화면 벗어나는 경우 - 핸들러 아래로 메뉴 그려야 함
+                    contextMenuData = new PopupData(highlightID, endRight , endBottom  + handlerHeight + contextMenuBottomMargin, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
                 } else {
-                    contextMenuData = new PopupData(highlightID, endRect.right ,endRect.top  - contextMenuTopMargin - contextMenuHeight, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
+                    contextMenuData = new PopupData(highlightID, endRight ,endTop  - contextMenuTopMargin - contextMenuHeight, BookHelper.ContextMenuType.values()[menuTypeIndex], currentPageData.getContentsPosition());
                 }
             } else {
                 contextMenuData = new PopupData(highlightID, getWidth()/2, getHeight()/2 - contextMenuHeight/2, BookHelper.ContextMenuType.values()[menuTypeIndex], -1);
@@ -453,8 +450,6 @@ public class FixedLayoutWebview extends ViewerBase {
         canvas.save();
 
         if(selectionRectList.size()>0){
-            startRect = selectionRectList.get(0);
-            endRect = selectionRectList.get(selectionRectList.size()-1);
             for(Rect rcSpan: selectionRectList) {
                 Rect r = rcSpan;
                 if(selectionHandler){

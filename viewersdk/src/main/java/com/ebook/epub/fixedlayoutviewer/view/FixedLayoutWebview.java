@@ -1069,7 +1069,7 @@ public class FixedLayoutWebview extends ViewerBase {
             newHighlight.endChild = endChildIndex;
             newHighlight.endChar = endCharOffset;
             newHighlight.colorIndex = colorIndex;
-            newHighlight.memo = Uri.encode(memoText);
+            newHighlight.memo = memoText;
             newHighlight.deviceModel = DeviceInfoUtil.getDeviceModel();
             newHighlight.osVersion = DeviceInfoUtil.getOSVersion();
 
@@ -1106,7 +1106,7 @@ public class FixedLayoutWebview extends ViewerBase {
                 .append("'"+highlight.highlightID+"'").append(",")
                 .append(colorIndex).append(",")
                 .append(array.toString()).append(",'")
-                .append(Uri.encode(highlight.memo)).append("'")
+                .append(highlight.memo).append("'")
                 .append(")").toString();
 
         DebugSet.d(TAG, "script >>>>>>>>>>>>> " + script);

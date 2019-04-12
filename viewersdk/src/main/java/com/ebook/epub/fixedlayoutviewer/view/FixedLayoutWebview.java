@@ -1059,7 +1059,10 @@ public class FixedLayoutWebview extends ViewerBase {
 
             isMergedMemo = false;
 
-            if( isMemo && memoText.length() > 0 ) memoText +="\n";
+            if( isMemo && memoText.length() > 0 ) {
+                memoText=memoText.replace("'","\\'");
+                memoText += "\n";
+            }
 
             newHighlight.highlightID = hID;
             newHighlight.startPath = startPath;

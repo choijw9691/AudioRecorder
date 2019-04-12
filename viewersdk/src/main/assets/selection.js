@@ -3880,7 +3880,13 @@ function notifyOverflowToFront(){
 }
 
 function showCurrentContextMenu(highlightID, menuTypeIndex, contextMenuPosition){
-    var currentSelectedRect = totalRange.getClientRects();
+    var tempSelectedRect = totalRange.getClientRects();
+    var currentSelectedRect = [];
+    for( var index = 0 ; index < tempSelectedRect.length; index++ ) {
+        if(tempSelectedRect[index].width != 0){
+            currentSelectedRect.push(tempSelectedRect[index]);
+        }
+    }
     var startRect = currentSelectedRect[0];
     var endRect = currentSelectedRect[currentSelectedRect.length-1];
     window.selection.showContextMenu( highlightID, menuTypeIndex, contextMenuPosition, endRect.right, endRect.top, endRect.bottom, startRect.left, startRect.top, startRect.bottom);

@@ -110,14 +110,12 @@ public class ViewerActionListener implements View.OnTouchListener, View.OnKeyLis
                 } else if(touchCount == 1 && mViewer.mTextSelectionMode) {
                     int slop = ViewConfiguration.get(mViewer.getContext()).getScaledTouchSlop();
                     final boolean userMoveConfirmed = Math.abs(pressDownX - motionEvent.getX()) > slop || Math.abs(pressDownY - motionEvent.getY()) > slop;
-                    if(userMoveConfirmed){
-                        float moveDistx = motionEvent.getX() - pressDownX;
-                        float moveDisty = motionEvent.getY() - pressDownY;
-                        if (isLongPressed){
-                            mViewer.onTouchMoveAfterLongPress((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
-                        } else {
-                            mViewer.onTouchMove((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
-                        }
+                    float moveDistx = motionEvent.getX() - pressDownX;
+                    float moveDisty = motionEvent.getY() - pressDownY;
+                    if (isLongPressed){
+                        mViewer.onTouchMoveAfterLongPress((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
+                    } else {
+                        mViewer.onTouchMove((int) motionEvent.getX(), (int) motionEvent.getY(), moveDistx, moveDisty);
                     }
                     return true;
                 }

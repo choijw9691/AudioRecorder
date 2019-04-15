@@ -29,8 +29,8 @@ public class AnnotationManager {
     	AnnotationHistory hlghHistory = new AnnotationHistory();
     	hlghHistory.read(historyPath);
     	
-    	ArrayList<Highlight> highArr = new ArrayList<Highlight>();
-    	ArrayList<Highlight> resultArr = new ArrayList<Highlight>();
+    	ArrayList<Highlight> highArr = new ArrayList<>();
+    	ArrayList<Highlight> resultArr = new ArrayList<>();
     	
     	for(Highlight mh : mergeArr){
     		boolean isMatch = false;
@@ -66,7 +66,7 @@ public class AnnotationManager {
     private CheckHighlightResult checkHighlight(Highlight highlight, ArrayList<Highlight> highlightArr, AnnotationHistory hlghHistory, int index) {
     	
     	CheckHighlightResult result = new CheckHighlightResult();
-    	ArrayList<Highlight> resultArr = new ArrayList<Highlight>();
+    	ArrayList<Highlight> resultArr = new ArrayList<>();
     	
     	String hID = highlight.highlightID;
 		String startPath = highlight.startPath;
@@ -84,6 +84,7 @@ public class AnnotationManager {
 		String extra1 = highlight.extra1;
 		String extra2 = highlight.extra2;
 		String extra3 = highlight.extra3;
+        int page = highlight.page;
 
 		String current = highlight.chapterFile.toLowerCase();
 		
@@ -333,14 +334,12 @@ public class AnnotationManager {
 					endCharOffset = h.endChar;
 				}
 			}
-//                Log.d(TAG, "____________________________________________________" );
 		}
 		
 		if(resultArr.size() > 0){
 			Highlight prevHighlight=null;
-			text = "";
-			ArrayList<String> memoList = new ArrayList<String>();
-			ArrayList<String> deviceList = new ArrayList<String>();
+			ArrayList<String> memoList = new ArrayList<>();
+			ArrayList<String> deviceList = new ArrayList<>();
 			
 			Highlight newHighlight = new Highlight();
 			newHighlight.uniqueID = newHighlight.uniqueID + index;
@@ -401,11 +400,6 @@ public class AnnotationManager {
 			highlight.endChar = endCharOffset;
 			highlight.colorIndex = colorIndex;
 			highlight.memo = memoText;
-			//2014.02.10
-			//병합 후 주석메 메모일 경우 메모 색상으로 변경.
-			if( highlight.memo.length() > 0 ) {
-				highlight.colorIndex = 5;
-            }
 			highlight.chapterFile = current;
 			highlight.chapterName = chapterName;
 			highlight.percent = percent;
@@ -416,7 +410,8 @@ public class AnnotationManager {
 			highlight.extra3 = extra3;
 			highlight.deviceModel = DeviceInfoUtil.getDeviceModel();
 			highlight.osVersion = DeviceInfoUtil.getOSVersion();
-			
+			highlight.page = page;
+
 			hlghHistory.mergeAdd(highlight.uniqueID);
 		}
 		
@@ -617,7 +612,6 @@ public class AnnotationManager {
     
     private void highlightsToFile(String fileName, ArrayList<Highlight> highlights){
 
-
     	try {
     		if( fileName.length() <= 0 ) return;
 
@@ -656,7 +650,7 @@ public class AnnotationManager {
     }
     
     private ArrayList<Highlight> highlightsFromFile(String fileName){
-    	ArrayList<Highlight> resultArr = new ArrayList<Highlight>();
+    	ArrayList<Highlight> resultArr = new ArrayList<>();
 
     	JSONObject object = getJSONObjectFromFile(fileName);
 
@@ -706,6 +700,11 @@ public class AnnotationManager {
     				colorIndex = jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR);
     			}
 
+                int page = -1;
+    			if(!jobj.isNull(AnnotationConst.FLK_ANNOTATION_PAGE)){
+                    page = jobj.getInt(AnnotationConst.FLK_ANNOTATION_PAGE);
+                }
+
     			Highlight highlight = new Highlight();
     			highlight.highlightID = generateUniqueID();
     			highlight.startPath = startPath;
@@ -721,7 +720,7 @@ public class AnnotationManager {
     			highlight.memo = memo;
     			highlight.uniqueID = uniqueID;
     			highlight.colorIndex = colorIndex;
-    			highlight.page = -1;
+    			highlight.page = page;
     			highlight.percent = percent;
     			highlight.creationTime = creationTime;
     			highlight.chapterName = chapterName;

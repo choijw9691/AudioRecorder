@@ -689,7 +689,7 @@ public class FixedLayoutWebview extends ViewerBase {
 
         for(Highlight h : mHighlights) {
             if( UserBookDataFileManager.getChapter().getCurrentChapter() != null ) {
-                if(currentPageData.getContentsFilePath().equals(h.chapterFile)) {
+                if(currentPageData.getContentsFilePath().equalsIgnoreCase(h.chapterFile)) {
                     array.put(h.get2());
                 }
             }

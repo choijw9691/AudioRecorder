@@ -838,28 +838,25 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 } else {
                     if(velocityX<0){
                         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-                            if( numChapter == mReadingSpine.getSpineInfos().size() ) {
+                            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
                                 mOnBookStartEnd.onEnd();
                                 return false;
                             }
-                        } else{
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
-                            if( numChapter < 0 ) {
+                        } else {
+                            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
                                 mOnBookStartEnd.onStart();
                                 return false;
                             }
                         }
                     } else if(velocityX>0){
+
                         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
-                            if( numChapter < 0 ) {
+                            if ( getCurrentItem()-1 < 0) {
                                 mOnBookStartEnd.onStart();
                                 return false;
                             }
-                        } else{
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-                            if( numChapter == mReadingSpine.getSpineInfos().size() ) {
+                        } else {
+                            if ( getCurrentItem()-1 < 0) {
                                 mOnBookStartEnd.onEnd();
                                 return false;
                             }
@@ -1115,29 +1112,26 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
                     if(clickArea== BookHelper.ClickArea.Left){
                         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
-                            if( numChapter < 0 ) {
+                            if ( getCurrentItem()-1 < 0) {
                                 mOnBookStartEnd.onStart();
                                 return;
                             }
-                        } else{
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-                            if( numChapter == mReadingSpine.getSpineInfos().size() ) {
+                        } else {
+                            if ( getCurrentItem()-1 < 0) {
                                 mOnBookStartEnd.onEnd();
                                 return;
                             }
                         }
                         setCurrentItem(mCurrentPageIndex-1, pagerAnimation);
                     } else if(clickArea== BookHelper.ClickArea.Right){
+
                         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-                            if( numChapter == mReadingSpine.getSpineInfos().size() ) {
+                            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
                                 mOnBookStartEnd.onEnd();
                                 return;
                             }
-                        } else{
-                            int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
-                            if( numChapter < 0 ) {
+                        } else {
+                            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
                                 mOnBookStartEnd.onStart();
                                 return;
                             }

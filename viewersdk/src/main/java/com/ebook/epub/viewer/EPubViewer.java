@@ -2317,7 +2317,7 @@ public class EPubViewer extends ViewerBase {
         if( mHtmlDirectionType == 1 )
             l = (mTotalPageInChapter * this.getWidth()) - l - this.getWidth();
 
-        int currentPage = (int) Math.round((double)l / (double)this.getWidth());
+        int currentPage = Math.round(l / this.getWidth());
 
         if( __requestPageMove ){
             __requestPageMove = false;

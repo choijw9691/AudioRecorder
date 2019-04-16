@@ -4779,6 +4779,9 @@ public class EPubViewer extends ViewerBase {
 
         int colorIndex = highlight.colorIndex;
 
+        JSONArray memoArr = new JSONArray();
+        memoArr.put(highlight.memo);
+
         String script = (new StringBuilder())
                 .append("javascript:highlightText(")
                 .append("'"+highlight.uniqueID+"'").append(",")
@@ -4788,9 +4791,9 @@ public class EPubViewer extends ViewerBase {
                 .append(highlight.endChar).append(",")
                 .append("'"+highlight.highlightID+"'").append(",")
                 .append(colorIndex).append(",")
-                .append(array.toString()).append(",'")
+                .append(array.toString()).append(",")
 //                .append(Uri.encode(highlight.memo)).append("'")
-                .append(highlight.memo).append("'")
+                .append(memoArr.toString())
                 .append(")").toString();
 
         DebugSet.d(TAG, "script >>>>>>>>>>>>> " + script);

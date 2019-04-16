@@ -2363,10 +2363,10 @@ function highlightText(uniqueId, startElementPath, endElementPath, startCharOffs
             highlightToSave.chapterId = lastId;
             highlightToSave.colorIndex = clrIndex;
             highlightToSave.text = selectedText;
-            highlightToSave.memo = memoText;
+            var memo = memoText[0];
+            highlightToSave.memo = memo;
             saved=saveHighlight(highlightToSave);
-
-            if(memoText.length>0){
+            if(memo.length>0){
                 $("[title=\""+highlightID+"\"]").addClass(MEMO_CLASS);
                 setMemoIcon();
             }

@@ -39,7 +39,7 @@ public class FixedLayoutPageData {
         public void setContentsPosition(int contentsPosition) {
             this.mContentsPosition = contentsPosition;
         }
-        public void setContentsInitalScale(float scale) {
+        public void setContentsInitialScale(float scale) {
             this.mContentsInitialScale = scale;
         }
 

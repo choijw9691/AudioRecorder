@@ -1594,7 +1594,7 @@ public class EPubViewer extends ViewerBase {
         boolean chapterChanged=false;
         if( pageNumber < 0 ) {
             chapterChanged = loadPriorChapter();
-        } else if( pageNumber >= mTotalPageInChapter ) {
+        } else if( pageNumber > mTotalPageInChapter -1 ) {
             chapterChanged = loadNextChapter();
         }
 
@@ -1611,14 +1611,14 @@ public class EPubViewer extends ViewerBase {
 
         if( pageNumber < 0 ) {
             pageNumber = 0;
-        } else if( pageNumber > mTotalPageInChapter ) {
+        } else if( pageNumber > mTotalPageInChapter -1 ) {
             pageNumber = mTotalPageInChapter;
         }
 
-        __requestPageMove = true;
-
+//        __requestPageMove = true;
+        boolean updatePageInfo = true;
         String script = (new StringBuilder())
-                .append("javascript:goPage(")
+                .append("javascript:scrollPage(")
                 .append(pageNumber).append(",")
                 .append(BookHelper.twoPageMode).append(")").toString();
 
@@ -3829,7 +3829,7 @@ public class EPubViewer extends ViewerBase {
                 }
                 return false;
             }
-        } else if( pageNumber >= mTotalPageInChapter ) {
+        } else if( pageNumber > mTotalPageInChapter -1 ) {
             int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
             int size = mReadingSpine.getSpineInfos().size();
             if( numChapter < size ) {

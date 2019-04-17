@@ -142,12 +142,12 @@ public class FixedLayoutZoomView extends LinearLayout {
                     int webViewHeight = (int) Math.ceil((double)(mDisplayWidth) * contentHeight / contentWidth);
                     mPageData.getContentsDataList().get(i).setContentsWidth(mDisplayWidth);
                     mPageData.getContentsDataList().get(i).setContentsHeight(webViewHeight);
-                    mPageData.getContentsDataList().get(i).setContentsInitalScale(widthScale);
+                    mPageData.getContentsDataList().get(i).setContentsInitialScale(widthScale);
                 } else {
                     int webViewWidth = (int) Math.ceil((double)(mDisplayHeight) * contentWidth / contentHeight);
                     mPageData.getContentsDataList().get(i).setContentsWidth(webViewWidth);
                     mPageData.getContentsDataList().get(i).setContentsHeight(mDisplayHeight);
-                    mPageData.getContentsDataList().get(i).setContentsInitalScale(heightScale);
+                    mPageData.getContentsDataList().get(i).setContentsInitialScale(heightScale);
                 }
             }
 

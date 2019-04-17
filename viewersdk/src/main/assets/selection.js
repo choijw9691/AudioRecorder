@@ -1765,11 +1765,15 @@ function gotoPATH(path, isReload, twoPageViewMode) {
 	}
 }
 
-function goPage(pageNumber, twoPageViewMode) {
-    return goPageScrollWithCallback(pageNumber, twoPageViewMode, null);
+function scrollPage(pageNumber, twoPageViewMode) {
+    return goPageScrollWithCallback(pageNumber, twoPageViewMode, true);
 }
 
-function goPageScrollWithCallback(pageNumber, twoPageViewMode, callback) {
+function goPage(pageNumber, twoPageViewMode) {
+    return goPageScrollWithCallback(pageNumber, twoPageViewMode, false);
+}
+
+function goPageScrollWithCallback(pageNumber, twoPageViewMode, updatePageInfo) {
 
     if (pageNumber < 0 ) {
     	pageNumber = 0;
@@ -1786,8 +1790,6 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, callback) {
     if( gDirectionType == 1 )
     	gPosition = -gPosition;
 
-    var currentOffset = window.pageXOffset;
-
     if(gCurrentViewMode!=3){
         window.scrollTo(gPosition, 0);
     } else{
@@ -1800,11 +1802,10 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, callback) {
         window.selection.setAsidePopupStatus(false);
     }
 
-    if( pageNumber == 0 || isPageMoveRequest){
+    if( updatePageInfo || pageNumber == 0 || isPageMoveRequest){
         isPageMoveRequest = false;
         window.selection.updatePosition(gCurrentPage, gPosition);
     }
-
     return gPosition;
 }
 /**************************************************** e:move page*/

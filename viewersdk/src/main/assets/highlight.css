@@ -99,4 +99,5 @@ a {
     padding: 0.6em;
     margin: -0.6em;
     text-indent : 0em !important;
+    background-color : transparent !important;
 }

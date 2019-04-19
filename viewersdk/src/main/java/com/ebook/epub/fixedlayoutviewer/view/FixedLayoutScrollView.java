@@ -605,7 +605,8 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             case Defines.FIXEDLAYOUT_SCROLL_PAGE:
                 int scrollDirection = (Integer) msg.obj;
                 ttsHighlighter.remove();
-                setCurrentItem(mCurrentPageIndex+scrollDirection, pagerAnimation);
+                checkPageStatus(scrollDirection);
+//                setCurrentItem(mCurrentPageIndex+scrollDirection, pagerAnimation);
                 break;
 
 
@@ -899,14 +900,14 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         }
 
         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-            int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
+            int numChapter = getCurrentItem() - 1;
             if( numChapter < 0 ) {
                 mOnBookStartEnd.onStart();
                 return;
             }
         } else {
-            int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-            if( numChapter == mReadingSpine.getSpineInfos().size() ) {
+            int numChapter = getCurrentItem() + 1;
+            if( numChapter == mPagerAdapter.getCount() ) {
                 mOnBookStartEnd.onEnd();
                 return;
             }
@@ -936,13 +937,13 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         }
 
         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-            int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-            if( numChapter == mReadingSpine.getSpineInfos().size() ) {
+            int numChapter = getCurrentItem() + 1;
+            if( numChapter == mPagerAdapter.getCount() ) {
                 mOnBookStartEnd.onEnd();
                 return;
             }
         } else{
-            int numChapter = mReadingSpine.getCurrentSpineIndex() - 1;
+            int numChapter = getCurrentItem() - 1;
             if( numChapter < 0 ) {
                 mOnBookStartEnd.onStart();
                 return;
@@ -1975,5 +1976,46 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     private boolean isTextSelectionDisabled = false;
     public void setSelectionDisabled(boolean isTextSelectionDisabled){
         this.isTextSelectionDisabled = isTextSelectionDisabled;
+    }
+
+    private void checkPageStatus(int scrollDirection){
+
+        if(asidePopupStatus){
+            mPagerAdapter.getCurrentView().hideNoteref();
+            return;
+        }
+
+        if(mPagerAdapter.getCurrentView().getCurrentScale() != 1f)
+            return;
+
+        if(isTextSelectionMode)
+            finishTextSelectionMode();
+
+        if(scrollDirection==1){
+            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                    mOnBookStartEnd.onEnd();
+                    return;
+                }
+            } else {
+                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                    mOnBookStartEnd.onStart();
+                    return;
+                }
+            }
+        } else if(scrollDirection==-1){
+            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                if ( getCurrentItem()-1 < 0) {
+                    mOnBookStartEnd.onStart();
+                    return;
+                }
+            } else {
+                if ( getCurrentItem()-1 < 0) {
+                    mOnBookStartEnd.onEnd();
+                    return;
+                }
+            }
+        }
+        setCurrentItem(mCurrentPageIndex+scrollDirection, pagerAnimation);
     }
 }

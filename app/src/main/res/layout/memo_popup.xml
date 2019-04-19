@@ -1,38 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#FFFFFF"
-    android:orientation="vertical" >
+              android:layout_width="match_parent"
+              android:layout_height="196dp"
+              android:layout_gravity="center_horizontal"
+              android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical" >
 
-        <LinearLayout
+        <View
             android:layout_width="match_parent"
             android:layout_height="8dp"
             android:background="@drawable/popup_shadow" />
 
-        <ScrollView
-            android:id="@+id/sv_memo"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:background="#f9f7ea" >
+            android:layout_height="138.67dp"
+            android:background="@drawable/viewer_memo_bg" >
 
-            <TextView
-                android:id="@+id/tv_memo"
+            <ScrollView
+                android:id="@+id/sv_memo"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_margin="20dp"
-                android:focusable="false"
-                android:gravity="top"
-                android:scrollbars="vertical"
-                android:text="TEST1234"
-                android:textColor="#1a1a1a"
-                android:textSize="12sp" />
-        </ScrollView>
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:background="@android:color/white">
+
+                <TextView
+                    android:id="@+id/tv_memo"
+                    android:layout_width="match_parent"
+                    android:layout_height="108dp"
+                    android:textSize="12sp"
+                    android:maxLength="2000"
+                    android:scrollbars="vertical"
+                    android:text="123"
+                    android:focusable="false"
+                    android:paddingTop="16dp"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:background="@android:color/transparent"/>
+            </ScrollView>
+
+        </RelativeLayout>
 
         <TextView
             android:layout_width="match_parent"
@@ -41,9 +51,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_height="38dp"
+            android:layout_marginLeft="14dp"
+            android:layout_marginRight="14dp"
             android:gravity="center_vertical" >
 
             <Button

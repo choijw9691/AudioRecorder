@@ -4456,7 +4456,7 @@ public class EPubViewer extends ViewerBase {
             boolean isMemo = object.getBoolean("isMemo");
             String memoText = "";
             if(isMemo)
-                memoText = object.getString("memo");
+                memoText = object.getString("memo").replace("'","\\'").trim();
 
             String currentChapterFilePath = mReadingSpine.getCurrentSpineInfo().getSpinePath().toLowerCase();
 
@@ -4682,9 +4682,8 @@ public class EPubViewer extends ViewerBase {
             for(int i = 0; i < erases.size(); i++) {
                 if( erases.get(i) != prevHighlight ) {
                     if( !isMergedMemo && erases.get(i).isMemo() ) {     // TODO :: 수정되는 메모는 이미 머지된 상태라
+                        memoText += "\n";
                         memoText += erases.get(i).memo;
-                        if( i < erases.size()-1 )
-                            memoText += "\n";
                     }
                     prevHighlight = erases.get(i);
                 }
@@ -4699,11 +4698,6 @@ public class EPubViewer extends ViewerBase {
             }
 
             isMergedMemo = false;
-
-            if( isMemo && memoText.length() > 0 ) {
-                memoText=memoText.replace("'","\\'");
-                memoText += "\n";
-            }
 
             newHighlight.highlightID = hID;
             newHighlight.startPath = startPath;
@@ -4826,7 +4820,7 @@ public class EPubViewer extends ViewerBase {
         for(int idx=0; idx<mHighlights.size(); idx++){
             Highlight targetHighlight = mHighlights.get(idx);
             if(targetHighlight.highlightID.equalsIgnoreCase(memoId)){
-                targetHighlight.memo = currentMemo;
+                targetHighlight.memo = currentMemo.trim();
                 if( BookHelper.useHistory ){ //메모 변경도 히스토리에 변경항목으로 추가(동기화를 위함)
                     long newID = System.currentTimeMillis() / 1000L;
                     __hlHistory.modifyRemove(targetHighlight.uniqueID, newID);

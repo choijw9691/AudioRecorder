@@ -32,7 +32,6 @@ var fontfaceLoadingDone=true;
 var chromeAgent;
 var currentChromeVersion;
 var currentAndroidVersion;
-var isPageMoveRequest = false;
 var imageDataInfo= new Array();
 /********************************************************************************************* s:ready */
 $(document).ready(function(){
@@ -429,10 +428,10 @@ function setupChapter(	highlights,
         first.css('marginTop', '0em', '!important');
         first.css('paddingTop', firstMarginTop, '!important');
 
+        resizingImage();
+
         setNightMode(isNightMode,true, backgroundColor);
         applyHighlights(highlights);
-
-        resizingImage();
 
     } catch(err) {
         log('setupChapter: ' + err);
@@ -485,6 +484,7 @@ function resizingImage() {
         		window.selection.imgResizingDone();
     } catch(error){
         console.log("resizingImage error : "+error);
+        window.selection.imgResizingDone();
     }
 }
 
@@ -1682,8 +1682,6 @@ function getTextFromSearchWord(node, pat, pos, maxLen) {
 /**************************************************** s:move page*/
 function gotoID(inputid, twoPageViewMode) {
 
-	isPageMoveRequest = true;
-
 	resetBodyStatus();
 
 	if(gCurrentViewMode!=3){
@@ -1774,7 +1772,7 @@ function gotoPATH(path, isReload, twoPageViewMode) {
 	}
 }
 
-function scrollPage(pageNumber, twoPageViewMode) {
+function scrollPage(pageNumber, twoPageViewMode) {  // 강제 페이지 정보 업데이트 필요한 경우
     return goPageScrollWithCallback(pageNumber, twoPageViewMode, true);
 }
 
@@ -1811,8 +1809,7 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, updatePageInfo) {
         window.selection.setAsidePopupStatus(false);
     }
 
-    if( updatePageInfo || pageNumber == 0 || isPageMoveRequest){
-        isPageMoveRequest = false;
+    if( updatePageInfo || pageNumber == 0 ){
         window.selection.updatePosition(gCurrentPage, gPosition);
     }
     return gPosition;
@@ -2788,7 +2785,6 @@ function setTTSHighlight(ttsData) {
                 twoPageViewMode = 1;
 
             if(clientRects[0].left < 0){
-                isPageMoveRequest = true;
                 var left = $(ttsData.path).offset().left;
 
                 if( gDirectionType == 1 )
@@ -2796,7 +2792,7 @@ function setTTSHighlight(ttsData) {
 
                 var retval = Math.abs(left);
                 pageNum = Math.floor((retval / getWindowWidth(gTwoPageViewMode)));
-                goPage(pageNum, gTwoPageViewMode);
+                goPage(pageNum, gTwoPageViewMode, true);
             } else if( clientRects[0].left > getWindowWidth(twoPageViewMode)){
                 nextPage = true;
             }

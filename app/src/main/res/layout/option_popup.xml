@@ -388,7 +388,7 @@
                             android:id="@+id/iv_white"
                             android:layout_width="28dp"
                             android:layout_height="28dp"
-                            android:background="@drawable/btn_setting_bg_w_pre"
+                            android:background="@drawable/btn_setting_bg_w_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
 
@@ -397,7 +397,7 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_marginLeft="5dp"
-                            android:background="@drawable/btn_setting_bg_bk_pre"
+                            android:background="@drawable/btn_setting_bg_bk_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
 
@@ -406,16 +406,16 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_marginLeft="5dp"
-                            android:background="@drawable/btn_setting_bg_g_pre"
+                            android:background="@drawable/btn_setting_bg_gl_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
 
                         <ImageView
-                            android:id="@+id/iv_blue"
+                            android:id="@+id/iv_pink"
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_marginLeft="5dp"
-                            android:background="@drawable/btn_setting_bg_b_pre"
+                            android:background="@drawable/btn_setting_bg_p_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
                     </LinearLayout>
@@ -427,10 +427,19 @@
                         android:gravity="right" >
 
                         <ImageView
-                            android:id="@+id/iv_violet"
+                            android:id="@+id/iv_blue"
                             android:layout_width="28dp"
                             android:layout_height="28dp"
-                            android:background="@drawable/btn_setting_bg_p_pre"
+                            android:background="@drawable/btn_setting_bg_bl_nor"
+                            android:gravity="center"
+                            android:src="@drawable/colorbox_selector" />
+
+                        <ImageView
+                            android:id="@+id/iv_green"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_marginLeft="5dp"
+                            android:background="@drawable/btn_setting_bg_g_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
 
@@ -439,7 +448,7 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_marginLeft="5dp"
-                            android:background="@drawable/btn_setting_bg_bei_pre"
+                            android:background="@drawable/btn_setting_bg_bei_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
 
@@ -448,16 +457,7 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_marginLeft="5dp"
-                            android:background="@drawable/btn_setting_bg_br_pre"
-                            android:gravity="center"
-                            android:src="@drawable/colorbox_selector" />
-
-                        <ImageView
-                            android:id="@+id/iv_navy"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:layout_marginLeft="5dp"
-                            android:background="@drawable/btn_setting_bg_n_pre"
+                            android:background="@drawable/btn_setting_bg_b_nor"
                             android:gravity="center"
                             android:src="@drawable/colorbox_selector" />
                     </LinearLayout>

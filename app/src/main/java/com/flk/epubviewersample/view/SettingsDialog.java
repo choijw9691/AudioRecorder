@@ -179,17 +179,17 @@ public class SettingsDialog {
         colors[2].setTag(new Integer(0xd1d1d1));
         colors[3] = (ImageView)mRootView.findViewById(R.id.iv_blue);
         colors[3].setOnClickListener(new OptionItemClick());
-        colors[3].setTag(new Integer(0xf4e6e9));
-        colors[4] = (ImageView)mRootView.findViewById(R.id.iv_violet);
+        colors[3].setTag(new Integer(0xe4e6f2));
+        colors[4] = (ImageView)mRootView.findViewById(R.id.iv_pink);
         colors[4].setOnClickListener(new OptionItemClick());
-        colors[4].setTag(new Integer(0xe4e6f2));
-        colors[5] = (ImageView)mRootView.findViewById(R.id.iv_beige);
+        colors[4].setTag(new Integer(0xf4e6e9));
+        colors[5] = (ImageView)mRootView.findViewById(R.id.iv_green);
         colors[5].setOnClickListener(new OptionItemClick());
         colors[5].setTag(new Integer(0xddead6));
-        colors[6] = (ImageView)mRootView.findViewById(R.id.iv_brown);
+        colors[6] = (ImageView)mRootView.findViewById(R.id.iv_beige);
         colors[6].setOnClickListener(new OptionItemClick());
         colors[6].setTag(new Integer(0xeee6ca));
-        colors[7] = (ImageView)mRootView.findViewById(R.id.iv_navy);
+        colors[7] = (ImageView)mRootView.findViewById(R.id.iv_brown);
         colors[7].setOnClickListener(new OptionItemClick());
         colors[7].setTag(new Integer(0x584a3d));
         
@@ -506,14 +506,14 @@ public class SettingsDialog {
                 case R.id.iv_black: 
                 case R.id.iv_grey: 
                 case R.id.iv_blue: 
-                case R.id.iv_violet: 
+                case R.id.iv_pink:
                 case R.id.iv_beige: 
                 case R.id.iv_brown: 
-                case R.id.iv_navy: {
+                case R.id.iv_green: {
                     toggleSelected(colors, v);
                     
                     int color = (Integer)v.getTag();
-                    boolean nightMode = v.getId()==R.id.iv_black || v.getId()==R.id.iv_navy ? true : false;
+                    boolean nightMode = v.getId()==R.id.iv_black || v.getId()==R.id.iv_brown ? true : false;
                     
                     __color = color;
                     if(nightMode) 

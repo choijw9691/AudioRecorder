@@ -7,6 +7,7 @@ const SEARCH_HIGHLIGHT='KYBSearchHighlight';
 const TTS_HIGHLIGHT_CLASS = "FLKTTSHighlight";
 const ANNOTATION_LASTSPAN_CLASS='KYBAnnotatedLastSpan';
 const MEMO_CLASS='KYBMemo';
+const ATAG_CLASS='KYBAtag';
 
 var gPosition = 0;
 var gCurrentPage = 0;
@@ -223,6 +224,12 @@ $(document).ready(function(){
         imageDataInfo.push(result);
         image.style.display = 'block';
     });
+
+    $('a').each(function () {
+        if(this.hasAttribute('href')) {
+            $(this).addClass(ATAG_CLASS);
+        }
+    });
 });
 /********************************************************************************************* e:ready */
 
@@ -422,10 +429,10 @@ function setupChapter(	highlights,
         first.css('marginTop', '0em', '!important');
         first.css('paddingTop', firstMarginTop, '!important');
 
-        resizingImage();
-
-        applyHighlights(highlights);
         setNightMode(isNightMode,true, backgroundColor);
+        applyHighlights(highlights);
+
+        resizingImage();
 
     } catch(err) {
         log('setupChapter: ' + err);
@@ -532,7 +539,7 @@ function applyHighlights(highlights) {
             	highlightSpans.addClass(MEMO_CLASS);
             }
         }
-            setMemoIcon();
+        setMemoIcon();
     } catch(err) {
         log(err);
     }
@@ -617,7 +624,9 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     	$(outerSpan).addClass(highlightID);
     	$(outerSpan).addClass(HIGHLIGHT_CLASS);
         $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
-//        $(outerSpan).addClass('FLKAnnotationFontColor');	    // 주석 폰트 색상은 무조건 검정으로 -> TODO :: 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지
+        if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
+            $(outerSpan).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
+        }
     }
 
     if (spans.length > 0) {
@@ -751,8 +760,8 @@ function setNightMode(isNightMode, doCallback, backgroundColor) {
 
     if(isNightMode==true || isNightMode==1) {
         textColor="#bebebe";
-        $('body').find('*').not('a').not($('#flk_note')).not($('#flk_note').find('*')).css('backgroundColor', backgroundColor, 'important');
-        $('body').find('*').not('a').not($('#flk_note')).not($('#flk_note').find('*')).css('color', textColor, 'important');
+        $('body').find('*').not('flk').not('a').not($('#flk_note')).not($('#flk_note').find('*')).css('backgroundColor', backgroundColor, 'important');
+        $('body').find('*').not('flk').not('a').not($('#flk_note')).not($('#flk_note').find('*')).css('color', textColor, 'important');
         $('body').find('a').css('color','#6887f7', 'important');
         $('body').css('backgroundColor', backgroundColor, 'important');
         $('body').css('color', textColor, 'important');
@@ -2215,6 +2224,34 @@ function removeSearchHighlight(){
 	$('#feelingk_bookcontent').removeHighlight();
 }
 
+function getCurrentInnerChapterId(Ids, bookMarks, twoPageView){
+
+    var viewportWidth = getWindowWidth(twoPageView);
+    var viewportHeight = gWindowInnerHeight;
+
+    var scrLeft = $(document).scrollLeft();
+    var scrRight = scrLeft + viewportWidth;
+    var scrTop = $(document).scrollTop();
+    var scrBottom = scrTop + viewportHeight;
+
+	var currentChapterId = "";
+
+    for(var idx=0; idx<Ids.length; idx++){
+        var chapterElement = $("[id=\""+Ids[idx]+"\"]");
+        if(gCurrentViewMode == 3){
+            if(chapterElement[0].offsetTop < scrBottom ){
+                currentChapterId = Ids[idx];
+            }
+        } else {
+            if(chapterElement[0].offsetLeft < scrRight){
+                currentChapterId = Ids[idx];
+            }
+        }
+    }
+    window.selection.setCurrentInnerChapter(currentChapterId);
+    getBookmarkPath(Ids, bookMarks, twoPageView);
+}
+
 function getBookmarkPath(Ids, bookMarks, twoPageView) {
 
 	for(var i=0 ;i<bookMarks.length; i++) {
@@ -2399,8 +2436,8 @@ function changeBackgroundColorDirect(color,nightMode) {
 
 	if(nightMode) {
 		$('body').find('a').css('color','#6887f7', 'important');			// 야간모드 a tag 색상 변경
-		$('body').find('*').not('a').css('color', '#bebebe', 'important');	// 야간모드 폰트 색상 변경
-		$('body').find('*').css('backgroundColor', color, 'important');		// 야간모드 배경 색상 변경
+		$('body').find('*').not('flk').not('a').css('color', '#bebebe', 'important');	// 야간모드 폰트 색상 변경
+		$('body').find('*').not('flk').css('backgroundColor', color, 'important');		// 야간모드 배경 색상 변경
 		$('body').css('color', '#bebebe', 'important');
 		$('body').css('backgroundColor', color, 'important');
 	} else {
@@ -2454,6 +2491,9 @@ function changeHighlightColorDirect(highlightID, clrIndex, callBack) {  // TODO 
             $(span).removeClass('FLKAnnotationColor0 FLKAnnotationColor1 FLKAnnotationColor2 FLKAnnotationColor3 FLKAnnotationColor4 FLKAnnotationColor5');
             $(span).addClass(HIGHLIGHT_CLASS);
             $(span).addClass('FLKAnnotationColor'+clrIndex);
+            if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
+                $(span).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
+            }
 
             if(i==0){	// 색상 변경 시 기존 데이터 percent update
                 percent = getPercentOfElement($(span));

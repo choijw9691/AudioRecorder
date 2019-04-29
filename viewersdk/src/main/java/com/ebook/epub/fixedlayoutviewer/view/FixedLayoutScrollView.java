@@ -1432,7 +1432,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             if( mReadingSpine.getSpineInfos().get( index ).getSpinePath().toLowerCase().equals( cp.getChapterFilePath().toLowerCase() ) )
                 return cp;
         }
-        return new ChapterInfo(mReadingSpine.getSpineInfos().get(index).getSpinePath(),"", 0);
+        return new ChapterInfo(mReadingSpine.getSpineInfos().get(index).getSpinePath(),"", 0, "");
     }
 
     public int getSpineIndexFromPercent(double percent){

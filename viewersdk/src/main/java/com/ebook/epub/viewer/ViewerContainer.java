@@ -565,7 +565,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         if( mChapterInfo != null )
             return mChapterInfo.getCurrentChapter();
 
-        return new ChapterInfo("", "", 0);
+        return new ChapterInfo("", "", 0, "");
     }
 
     public String getBookTitle() {

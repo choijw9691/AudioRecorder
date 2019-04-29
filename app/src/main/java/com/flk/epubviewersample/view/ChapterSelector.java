@@ -71,18 +71,15 @@ public class ChapterSelector extends AlertDialog implements OnItemClickListener 
         this.setView(mRootView);
     }
 
-    public static interface OnSelectChapter {
-        public abstract void onSelect(ChapterSelector sender, int position, ChapterInfo chapter);
+    public interface OnSelectChapter {
+        void onSelect(ChapterSelector sender, int position, ChapterInfo chapter);
     }
     public void setOnSelectChapter(OnSelectChapter l) {
         mOnSelectChapter = l;
     }
     
-    /**
-     */
     OnSelectChapter mOnSelectChapter = null;
 
-    
     public class ChapterAdapter extends BaseAdapter implements ListAdapter {
         LayoutInflater inflator;
         
@@ -135,29 +132,13 @@ public class ChapterSelector extends AlertDialog implements OnItemClickListener 
                 
                 label += item.getChapterName();
                 chapterTitle.setText(label);
-                if( item.getChapterFilePath().equals(currentChapterInfo.getChapterFilePath()) )
-                	chapterTitle.setTextColor(Color.RED);
-                else
-                	chapterTitle.setTextColor(Color.BLACK);
+                if( item.getChapterFilePath().equals(currentChapterInfo.getChapterFilePath()) && item.getChapterId().equals(currentChapterInfo.getChapterId())){
+                    chapterTitle.setTextColor(Color.RED);
+                } else {
+                    chapterTitle.setTextColor(Color.BLACK);
+                }
                 DebugSet.d("TAG", "depth : " + item.getChapterDepth());
-
-//                int nPage=0;
-//                for(Spine sp: BookHelper.mBook.getSpines() ) {
-//                    String chFile = item.mFilename.toLowerCase();
-//                    String spFile = sp.fileName.toLowerCase();
-//                    
-//                    if( spFile.equals(chFile) ) {
-//                        break;
-//                    }
-//                    nPage += sp.nPage;
-//                }
-                
                 page.setText("");
-//                if( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE )
-//                    page.setText("p." + (nPage + item.mLandPageOffset + 1) );
-//                else
-//                    page.setText( "p." + (nPage + item.mPortPageOffset + 1) );
-
             }
             
             return v;

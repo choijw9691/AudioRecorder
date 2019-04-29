@@ -462,6 +462,15 @@ public class EPubViewer extends ViewerBase {
     class MyJavaScriptObject {
 
         @JavascriptInterface
+        public void setCurrentInnerChapter(String chapterId){
+            if(chapterId.isEmpty()){
+                mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath());
+            } else {
+                mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath()+'#'+chapterId);
+            }
+        }
+
+        @JavascriptInterface
         public void overflowedMemoContent(){
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_OVERFLOW_MEMO_CONTENT));
         }
@@ -2013,16 +2022,17 @@ public class EPubViewer extends ViewerBase {
         float scale = EPubViewer.this.getScale();
         int windowInnerWidth= Math.round(EPubViewer.this.getWidth()/scale);
         int windowInnerHeight= Math.round(EPubViewer.this.getHeight()/scale);
+//        int windowInnerWidth= (int)Math.ceil(EPubViewer.this.getWidth()/scale);
+//        int windowInnerHeight= (int)Math.ceil(EPubViewer.this.getHeight()/scale);
         int windowNumColumns=1;
         if(BookHelper.twoPageMode==1){
             windowNumColumns=2;
         }
 
-        bodyTopBottomMargin = convertDpToPixels(20);
-
         try {
             String baseStyle = BookHelper.getBaseStyle();
             if(BookHelper.animationType==3){
+                bodyTopBottomMargin = convertDpToPixels(20);
                 baseStyle=baseStyle.replaceAll("%feelingk_booktableheight_value%", "auto");
                 baseStyle=baseStyle.replaceAll("%feelingk_booktablecolumnwidth_value%", "");
                 baseStyle=baseStyle.replaceAll("%feelingk_body_width_value%", windowInnerWidth+"px !important");
@@ -2607,7 +2617,7 @@ public class EPubViewer extends ViewerBase {
      */
     public void getCurrentPageInfo(boolean isClose) {
         String currentFile = mReadingSpine.getCurrentSpineInfo().getSpinePath();
-        String currentChapterPath = mReadingChapter.getCurrentChapter().getChapterFilePath().toLowerCase();
+//        String currentChapterPath = mReadingChapter.getCurrentChapter().getChapterFilePath().toLowerCase();
         ArrayList<String> array = new ArrayList<String>();
         for (int i = 0; i < mReadingChapter.getChapters().size(); i++) {
             ChapterInfo ch = mReadingChapter.getChapters().get(i);
@@ -2617,7 +2627,7 @@ public class EPubViewer extends ViewerBase {
             if (src.lastIndexOf("#") != -1) {
                 chapterId = src.substring(src.lastIndexOf("#") + 1);
             }
-            if (chapterId != null && currentChapterPath.equals(src)) {
+            if (!chapterId.isEmpty() && src.contains(currentFile)) {
                 array.add(chapterId);
             }
         }
@@ -2636,7 +2646,8 @@ public class EPubViewer extends ViewerBase {
         }
         JSONArray barr = new JSONArray(array);
 
-        loadUrl("javascript:getBookmarkPath(" + carr.toString() + "," + barr.toString() + "," + BookHelper.twoPageMode + ")" );
+//        loadUrl("javascript:getBookmarkPath(" + carr.toString() + "," + barr.toString() + "," + BookHelper.twoPageMode + ")" );
+        loadUrl("javascript:getCurrentInnerChapterId("+ carr.toString() + "," + barr.toString() + "," + BookHelper.twoPageMode + ")" );
     }
 
     ChapterInfo getChapterById(String file, String id) {
@@ -2901,6 +2912,12 @@ public class EPubViewer extends ViewerBase {
                 // new version data
                 if( file.indexOf('\\') != -1 ) {
                     file = file.replace('\\', '/');
+                }
+
+                mReadingChapter.setCurrentChapter(file);
+
+                if(file.indexOf("#")!=-1){
+                    file = file.substring(0,file.indexOf("#"));
                 }
                 mReadingSpine.setCurrentSpineIndex(getFullPath(file));
 
@@ -4022,7 +4039,7 @@ public class EPubViewer extends ViewerBase {
                 return cp;
             }
         }
-        return new ChapterInfo(mReadingSpine.getSpineInfos().get(index).getSpinePath(), "", 0);
+        return new ChapterInfo(mReadingSpine.getSpineInfos().get(index).getSpinePath(), "", 0, "");
     }
 
     public void startChapterStringGet(){
@@ -5849,7 +5866,7 @@ public class EPubViewer extends ViewerBase {
 
         showBookByPosition(mReadingSpine.getCurrentSpineIndex());
 
-        mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath());
+//        mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath());
     }
 
     private void notifyForceChapterChanging(){

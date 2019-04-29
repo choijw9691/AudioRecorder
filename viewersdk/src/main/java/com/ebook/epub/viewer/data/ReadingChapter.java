@@ -1,11 +1,7 @@
 package com.ebook.epub.viewer.data;
-import java.util.ArrayList;
-
 import com.ebook.epub.parser.common.ExceptionParameter;
 import com.ebook.epub.parser.common.FileInfo;
-import com.ebook.epub.parser.common.PackageVersion;
 import com.ebook.epub.parser.common.UnModifiableArrayList;
-import com.ebook.epub.parser.ocf.EpubContainer;
 import com.ebook.epub.parser.ocf.EpubFile;
 import com.ebook.epub.parser.ocf.EpubFileSystemException;
 import com.ebook.epub.parser.ocf.XmlContainerException;
@@ -15,6 +11,8 @@ import com.ebook.epub.parser.ops.XmlNavigationException;
 import com.ebook.epub.viewer.DebugSet;
 import com.ebook.epub.viewer.EpubFileUtil;
 import com.ebook.epub.viewer.ViewerErrorInfo;
+
+import java.util.ArrayList;
 
 /**
  * 목차 정보 및 현재 챕터를 관리하는 클래스
@@ -30,8 +28,7 @@ public class ReadingChapter {
 	
 	/**
 	 * 생성자에 현재 챕터 인덱스를 받던, 현재 챕터 set 메소드가 있던지 해야함.
-	 * @param chapterInfos
-	 * @throws XmlNavigationException 
+	 * @throws XmlNavigationException
 	 * @throws XmlContainerException 
 	 * @throws EpubFileSystemException 
 	 * @throws XmlPackageException 
@@ -76,7 +73,19 @@ public class ReadingChapter {
 			
 			String fullPath = info.filePath;
 			
-			ChapterInfo newChapter = new ChapterInfo(fullPath, chapter.getValue(), depth);
+//			ChapterInfo newChapter = new ChapterInfo(fullPath, chapter.getValue(), depth);
+            ChapterInfo newChapter;
+            if(depth == 0){
+                newChapter = new ChapterInfo(fullPath, chapter.getValue(), depth, "");
+            } else {
+                if( chapter.gethRef().lastIndexOf("#") != -1 ){
+                    String chapterId = chapter.gethRef().substring(chapter.gethRef().lastIndexOf("#")+1);
+                    newChapter = new ChapterInfo(fullPath, chapter.getValue(), depth, chapterId);
+                } else {
+                    newChapter = new ChapterInfo(fullPath, chapter.getValue(), depth, "");
+                }
+            }
+
 			modifyChapters.add(newChapter);
 			if( chapter.getChapterList().size() > 0 ) {
 //				newChapter.setChapterInfo(modifyChapterHRef(chapter.getChapterList(), depth + 1));
@@ -105,7 +114,7 @@ public class ReadingChapter {
 				return info;
 			}
 		}
-		return new ChapterInfo(filePath, "", 0);
+		return new ChapterInfo(filePath, "", 0, "");
 	}
 
 	public void setCurrentChapter(ChapterInfo currentChapter) {
@@ -132,9 +141,9 @@ public class ReadingChapter {
 		}
 		
 		if( !changed ) {
-			this.currentChapter = new ChapterInfo("", "", 0);
+			this.currentChapter = new ChapterInfo("", "", 0, "");
 		}
-			
+
 	}
 	
 	public int getCurrentChapterIndex() {

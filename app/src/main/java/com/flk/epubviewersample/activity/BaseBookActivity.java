@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -961,6 +962,8 @@ public class BaseBookActivity extends Activity implements Runnable {
 
         mViewer.setSelectionMaxLength(1000);        // TODO :: new custom selection added
 
+        mViewer.setSelectionDisabled(false);
+
         mViewer.setMemoIconPath("file:///android_asset/btn_body_memo_nor.png");
 
         mViewer.setSlideResource(true, R.anim.reader_ani_push_left_in, R.anim.reader_ani_push_left_out);
@@ -1465,10 +1468,10 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             @Override
             public void onClick(View v) {
-//				layoutVisible = true;
-//				toggleLayoutVisible();
-//				Bitmap bitmap = viewerScreenShot(viewerContainer);
-//				saveBitmapToFile(addWaterMark(bitmap), Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+System.currentTimeMillis()+".png");
+				layoutVisible = true;
+				toggleLayoutVisible();
+				Bitmap bitmap = viewerScreenShot();
+				saveBitmapToFile(addWaterMark(bitmap), Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+System.currentTimeMillis()+".png");
 //                if(BookHelper.animationType==0){
 //                    mViewer.setPageEffect(1);
 //                    Log.d("DEBUG"," setPageEffect 1");
@@ -1945,29 +1948,28 @@ public class BaseBookActivity extends Activity implements Runnable {
         }
     }
 
-    Bitmap viewerScreenShot(View view) {
+    Bitmap viewerScreenShot() {
 
         try {
-
-            int width = view.getWidth();
-            int height = view.getHeight();
-
-            Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            Canvas c = new Canvas(b);
-            view.layout(0, 0, width, height);
-            view.draw(c);
+            mViewer.getChildAt(0).invalidate();
+            Bitmap b = Bitmap.createBitmap(mViewer.getChildAt(0).getDrawingCache());
+//            int width = view.getWidth();
+//            int height = view.getHeight();
+//
+//            Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+//            Canvas c = new Canvas(b);
+//            view.layout(0, 0, width, height);
+//            view.draw(c);
 
             return b;
         }
         catch (Exception e) {
+            e.printStackTrace();
         }
         catch( OutOfMemoryError e ) {
+            e.printStackTrace();
         }
-
-        System.gc();
-
-        Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565);
-        return b;
+        return null;
     }
 
     private void printMemory(String tag) {

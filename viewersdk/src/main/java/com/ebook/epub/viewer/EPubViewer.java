@@ -703,11 +703,11 @@ public class EPubViewer extends ViewerBase {
          * @param windowWidth   : inner-width
          */
         @JavascriptInterface
-        public void pageReady(int pageCount, int windowWidth) {
+        public void pageReady(float pageCount, int windowWidth) {
             DebugSet.d(TAG, "pageReady >>>>>>>>>>>>>> " + pageCount );
             __reloadFlag = PAGE_READY;
 
-            mTotalPageInChapter = pageCount;
+            mTotalPageInChapter = (int)Math.ceil(pageCount);
             mWindowWidth = windowWidth;
 
             if(BookHelper.animationType==3)
@@ -1867,43 +1867,43 @@ public class EPubViewer extends ViewerBase {
      */
     public void goPage(ChapterInfo chapter) {
 
-        String filePath = chapter.getChapterFilePath();
+        String targetFilePath = chapter.getChapterFilePath();
         String id = "";
 
-        if(mEpubFile.hasLinearNo(filePath.replace(mEpubFile.getPublicationPath(), ""))){
-            mMoveToLinearNoChapter.moveToLinearNoChapter(filePath);
+        if(mEpubFile.hasLinearNo(targetFilePath.replace(mEpubFile.getPublicationPath(), ""))){
+            mMoveToLinearNoChapter.moveToLinearNoChapter(targetFilePath);
             return;
         }
 
-        ChapterInfo currentChapter = mReadingChapter.getCurrentChapter();
-
-        if( filePath.lastIndexOf("#") != -1 ){
-            id = filePath.substring(filePath.lastIndexOf("#")+1);
-            filePath = filePath.substring(0, filePath.lastIndexOf("#"));
-
+        if( targetFilePath.lastIndexOf("#") != -1 ){
+            id = targetFilePath.substring(targetFilePath.lastIndexOf("#")+1);
+            targetFilePath = targetFilePath.substring(0, targetFilePath.lastIndexOf("#"));
             __scrollByID=true;
             __scrollID=id;
         }
 
-
-        String current = currentChapter.getChapterFilePath().toLowerCase();
-        String chapterFile = chapter.getChapterFilePath().toLowerCase();
+        String current = mReadingChapter.getCurrentChapter().getChapterFilePath().toLowerCase();
+//        String chapterFile = chapter.getChapterFilePath().toLowerCase();
+        if(current.lastIndexOf("#")!=-1){
+            current = current.substring(0,current.lastIndexOf("#"));
+        }
 
         //챕터 파일 네임이 없는 경우 이동처리 안함.
-        if( chapterFile.length() <= 0 )
+        if( targetFilePath.length() <= 0 )
             return;
 
-        if( !chapterFile.equals( current ) ) {
-
+        if(!targetFilePath.equalsIgnoreCase(current)){
             mReadingChapter.setCurrentChapter(chapter.getChapterFilePath());
-            mReadingSpine.setCurrentSpineIndex(filePath);
-
+            mReadingSpine.setCurrentSpineIndex(targetFilePath);
             if( mReadingSpine.getCurrentSpineIndex() >= 0 ){
                 goPageByChapter();
             }
-        }
-        else {
-            goPageByID(id);
+        } else {
+            if(id.isEmpty()) {  // 같은 챕터에 id 없는 경우 이동 시
+                goPageByChapter();
+            } else {
+                goPageByID(id);
+            }
         }
     }
 
@@ -3698,6 +3698,7 @@ public class EPubViewer extends ViewerBase {
                 Rect r = rcSpan;
                 if(selectionHandler){
                     mPaint.setColor(BookHelper.textSelectionColor);
+                    mPaint.setAlpha(70);
                     canvas.drawRect(r, mPaint);
                     drawHandler(canvas);
                 } else{

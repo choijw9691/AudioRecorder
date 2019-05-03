@@ -724,16 +724,21 @@ function getPageCount(twoPageViewMode){
         }
 
         gRealHeight = gWindowInnerHeight - (gMarginTop + gMarginBottom);
-        gColumnWidth = gWindowInnerWidth / getNumColumns(twoPageViewMode) - getColumnGap(twoPageViewMode);
-        gPageCount = Math.ceil(document.body.scrollWidth / getWindowWidth(twoPageViewMode));
-        if ( gPageCount == 0 ) {
-            gPageCount = 1;
+        gColumnWidth = gWindowInnerWidth / getNumColumns(twoPageViewMode);
+        var bookContentHeight = parseInt($('#feelingk_bookcontent').css('height'));
+        var bookTableHeight = parseInt($('#feelingk_booktable').css('height'));
+        if(twoPageViewMode == 1 && document.body.scrollWidth % getWindowWidth(twoPageViewMode) != 0 ){
+            var tempAdditionalHeight = bookTableHeight - bookContentHeight%bookTableHeight;
+            $('#feelingk_bookcontent').css('height', (bookContentHeight+tempAdditionalHeight)+'px');
+        }
+        gPageCount = bookContentHeight/bookTableHeight;
+
+        if(twoPageViewMode==1){
+            gPageCount /= 2;
         }
 
-        if(twoPageViewMode == 1 && document.body.scrollWidth % getWindowWidth(twoPageViewMode) != 0 ){
-            log('setup twoPageViewMode == 1 >> ' + document.body.scrollWidth / getWindowWidth(twoPageViewMode) + ', gCount : ' + gPageCount);
-            modifyBookContents();
-            gPageCount = Math.ceil(document.body.scrollWidth / getWindowWidth(twoPageViewMode));
+        if ( gPageCount <1 ) {
+            gPageCount = 1;
         }
 
         console.log('setup >> ' + document.body.scrollWidth + ', ' + getWindowWidth(twoPageViewMode) + ', '+gPageCount);
@@ -772,14 +777,6 @@ function setNightMode(isNightMode, doCallback, backgroundColor) {
 
     if(doCallback) {
         window.selection.turnOnNightModeDone(isNightMode==1 ? true : false);
-    }
-}
-
-function getColumnGap(twoPageViewMode) {
-    if (twoPageViewMode == 1) {
-        return 0;
-    } else {
-        return 0;
     }
 }
 
@@ -1684,32 +1681,41 @@ function gotoID(inputid, twoPageViewMode) {
 
 	resetBodyStatus();
 
-	if(gCurrentViewMode!=3){
-		 var pageNum=0;
-		    try {
-		    	var checkid = '#'+inputid;
+    try {
+        if(gCurrentViewMode!=3){
+            var pageNum=0;
+            var checkid = '#'+inputid;
+            var left=0;
+            if($(checkid).css('display') == 'none'){
+                $(checkid).show();
+                left = $(checkid)[0].offsetLeft;
+                $(checkid).hide();
+            } else {
+                left = $(checkid)[0].offsetLeft;
+            }
 
-		    	var left = $(checkid)[0].offsetLeft;
+            if( gDirectionType == 1 )
+                left = left - getWindowWidth(twoPageViewMode);
 
-		    	if( gDirectionType == 1 )
-		    		left = left - getWindowWidth(twoPageViewMode);
-
-		    	var retval = Math.abs(left);
-		        pageNum = Math.floor((retval / getWindowWidth(twoPageViewMode)));
-		    } catch(err) {
-		        pageNum = 0;
-		    }
-		    goPage(pageNum, twoPageViewMode);
-	} else if(gCurrentViewMode==3){
-
-		var checkid = '#'+inputid;
-		var top = $(checkid)[0].offsetTop;
-
-		window.scrollTo(0, top);
-
-		if($(document).height()<=window.innerHeight)
-			goPage(0, twoPageViewMode);
-	}
+            var retval = Math.abs(left);
+            pageNum = Math.floor((retval / getWindowWidth(twoPageViewMode)));
+            goPage(pageNum, twoPageViewMode);
+        } else if(gCurrentViewMode==3){
+            var checkid = '#'+inputid;
+            var top;
+            if($(checkid).css('display') == 'none'){
+                $(checkid).show();
+                top = $(checkid)[0].offsetTop;
+                $(checkid).hide();
+                window.scrollTo(0, top);
+            } else {
+                top = $(checkid)[0].offsetTop;
+            }
+            window.scrollTo(0, top);
+        }
+    } catch(error){
+        log("gotoID error : "+error);
+    }
 }
 
 function gotoHighlight(inputid, twoPageViewMode) {
@@ -2225,7 +2231,6 @@ function getCurrentInnerChapterId(Ids, bookMarks, twoPageView){
 
     var viewportWidth = getWindowWidth(twoPageView);
     var viewportHeight = gWindowInnerHeight;
-
     var scrLeft = $(document).scrollLeft();
     var scrRight = scrLeft + viewportWidth;
     var scrTop = $(document).scrollTop();
@@ -2234,17 +2239,34 @@ function getCurrentInnerChapterId(Ids, bookMarks, twoPageView){
 	var currentChapterId = "";
 
     for(var idx=0; idx<Ids.length; idx++){
+
         var chapterElement = $("[id=\""+Ids[idx]+"\"]");
-        if(gCurrentViewMode == 3){
-            if(chapterElement[0].offsetTop < scrBottom ){
-                currentChapterId = Ids[idx];
+
+        if(chapterElement.css('display')=="none"){
+            chapterElement.show();
+            if(gCurrentViewMode == 3){
+                if(chapterElement[0].offsetTop < scrBottom ){
+                    currentChapterId = Ids[idx];
+                }
+            } else {
+                if(chapterElement[0].offsetLeft < scrRight){
+                    currentChapterId = Ids[idx];
+                }
             }
+            chapterElement.hide();
         } else {
-            if(chapterElement[0].offsetLeft < scrRight){
-                currentChapterId = Ids[idx];
+            if(gCurrentViewMode == 3){
+                if(chapterElement[0].offsetTop < scrBottom ){
+                    currentChapterId = Ids[idx];
+                }
+            } else {
+                if(chapterElement[0].offsetLeft < scrRight){
+                    currentChapterId = Ids[idx];
+                }
             }
         }
     }
+
     window.selection.setCurrentInnerChapter(currentChapterId);
     getBookmarkPath(Ids, bookMarks, twoPageView);
 }

@@ -10,13 +10,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.ebook.epub.parser.common.UnModifiableArrayList;
-import com.ebook.epub.viewer.DebugSet;
 import com.ebook.epub.viewer.data.ChapterInfo;
 import com.flk.epubviewersample.R;
 
@@ -24,26 +22,15 @@ import com.flk.epubviewersample.R;
  * @author  syw
  */
 public class ChapterSelector extends AlertDialog implements OnItemClickListener {
-    /**
-     */
-    static ChapterSelector mThis = null;
-    
+    ChapterSelector mThis = null;
     Context mContext;
-
     View mRootView;
     ListView mChapterList;
-
-    UnModifiableArrayList<ChapterInfo> mChapters = new UnModifiableArrayList<ChapterInfo>();
+    UnModifiableArrayList<ChapterInfo> mChapters = new UnModifiableArrayList<>();
     ChapterInfo currentChapterInfo;
-
-    public ChapterSelector(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context, cancelable, cancelListener);
-        init(context);
-    }
-
-    public ChapterSelector(Context context, int theme) {
-        super(context, theme);
-        init(context);
+    OnSelectChapter mOnSelectChapter = null;
+    public interface OnSelectChapter {
+        void onSelect(ChapterSelector sender, int position, ChapterInfo chapter);
     }
 
     public ChapterSelector(Context context) {
@@ -53,36 +40,35 @@ public class ChapterSelector extends AlertDialog implements OnItemClickListener 
     
     public ChapterSelector(Context context, UnModifiableArrayList<ChapterInfo> chapters, ChapterInfo current) {
         super(context);
-        init(context);
-
-//        for(ChapterInfo ch: chapters) {
-//            if( ch.isVisible())
-//                mChapters.add(ch);
-//        }
-        
         mChapters = chapters;
         currentChapterInfo = current;
+        init(context);
     }
     
     void init(Context context) {
         mContext = context;
-        
         mRootView = LayoutInflater.from(mContext).inflate(R.layout.select_dialog, null);
         this.setView(mRootView);
     }
 
-    public interface OnSelectChapter {
-        void onSelect(ChapterSelector sender, int position, ChapterInfo chapter);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mThis = this;
+        mChapterList = mRootView.findViewById(android.R.id.list);
+        mChapterList.setOnItemClickListener(this);
+        ChapterAdapter adapter = new ChapterAdapter();
+        mChapterList.setAdapter(adapter);
     }
+
     public void setOnSelectChapter(OnSelectChapter l) {
         mOnSelectChapter = l;
     }
-    
-    OnSelectChapter mOnSelectChapter = null;
 
     public class ChapterAdapter extends BaseAdapter implements ListAdapter {
+
         LayoutInflater inflator;
-        
+
         ChapterAdapter() {
             inflator = LayoutInflater.from(mContext);
         }
@@ -104,8 +90,8 @@ public class ChapterSelector extends AlertDialog implements OnItemClickListener 
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+
             View v;
-            
             if( convertView == null ) {
                 v = inflator.inflate(R.layout.item_list, null);
             } else {
@@ -114,63 +100,34 @@ public class ChapterSelector extends AlertDialog implements OnItemClickListener 
 
             ChapterInfo item = mChapters.get(position);
             if( item != null ) {
-                
-                ImageView iv = (ImageView)v.findViewById(R.id.ivImage);
-                TextView chapterTitle = (TextView)v.findViewById(R.id.tvChapter);
-                TextView dateTime = (TextView)v.findViewById(R.id.tvDate);
-                TextView snippet = (TextView)v.findViewById(R.id.tvSnippet);
-                TextView page = (TextView)v.findViewById(R.id.tvPage);
-                
-                iv.setVisibility(View.GONE);
-                dateTime.setVisibility(View.GONE);
-                snippet.setVisibility(View.GONE);
-                
+                TextView chapterTitle = v.findViewById(R.id.tvChapter);
                 String label = "";
                 for( int i = 0 ; i < item.getChapterDepth() ; i++ ){
                 	label = "  " + label;
                 }
-                
                 label += item.getChapterName();
                 chapterTitle.setText(label);
-                if( item.getChapterFilePath().equals(currentChapterInfo.getChapterFilePath()) && item.getChapterId().equals(currentChapterInfo.getChapterId())){
-                    chapterTitle.setTextColor(Color.RED);
-                } else {
-                    chapterTitle.setTextColor(Color.BLACK);
+                chapterTitle.setTextColor(Color.BLACK);
+                if( item.getChapterFilePath().equals(currentChapterInfo.getChapterFilePath())) {
+                    if( currentChapterInfo.getChapterId().isEmpty()){
+                        chapterTitle.setTextColor(Color.RED);
+                    } else if ( !currentChapterInfo.getChapterId().isEmpty() && item.getChapterId().equals(currentChapterInfo.getChapterId())) {
+                        chapterTitle.setTextColor(Color.RED);
+                    }
                 }
-                DebugSet.d("TAG", "depth : " + item.getChapterDepth());
-                page.setText("");
             }
-            
             return v;
         }
-        
     }
     
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        mThis = this;
-        
-        mChapterList = (ListView)mRootView.findViewById(android.R.id.list);
-        mChapterList.setOnItemClickListener(this);
-        
-        ChapterAdapter adapter = new ChapterAdapter();
-        mChapterList.setAdapter(adapter);
-    }
-
-    @Override
     public void onItemClick(AdapterView<?> adapter, View view, int pos, long id) {
-        
         if( mOnSelectChapter != null ) {
         	ChapterInfo chapter = mChapters.get(pos);
-            
             if( chapter.getChapterFilePath().length() > 0 ){
             	mOnSelectChapter.onSelect(this, pos, chapter);
             	dismiss();
             }
         }
-        
     }
-
 }

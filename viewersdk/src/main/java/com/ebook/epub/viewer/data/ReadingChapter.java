@@ -132,8 +132,8 @@ public class ReadingChapter {
 		for (int i = 0; i < chapterInfos.size(); i++) {
 			
 			ChapterInfo info = chapterInfos.get(i);
-			if(info.getChapterFilePath().toLowerCase().contains(filePath.toLowerCase())) {
-				this.currentChapter = info;
+            if(info.getChapterFilePath().toLowerCase().equals(filePath.toLowerCase())) {
+                this.currentChapter = info;
 				currentChapterIndex = i;
 				changed = true;
 				break;

@@ -414,7 +414,7 @@ public class FixedLayoutWebview extends ViewerBase {
         public void onPageFinished(WebView view, String url) {
             if( mOnPageLoad != null )
                 mOnPageLoad.onPageLoadFinished(view);
-            mWebviewCallbackListener.pageLoadFinished((FixedLayoutPageData.ContentsData) view.getTag());
+            mWebviewCallbackListener.reportPageLoadFinished((FixedLayoutPageData.ContentsData) view.getTag());
         }
 
         @Override
@@ -1182,6 +1182,14 @@ public class FixedLayoutWebview extends ViewerBase {
     public void findTagUnderPoint(int x, int y, int orgX, int orgY){
         DebugSet.d(TAG,"findTagUnderPoint in mTextSelectionMode : "+mTextSelectionMode);
 
+        if(currentPageData.getContentsString()==null) {
+            int[] touchedPosition = new int[2];
+            touchedPosition[0] = orgX;
+            touchedPosition[1] = orgY;
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_REPORT_TOUCH_POSITION, touchedPosition));
+            return;
+        }
+
         int wx = Scr2Web(x);
         int wy = Scr2Web(y);
 
@@ -1483,7 +1491,7 @@ public class FixedLayoutWebview extends ViewerBase {
     }
 
     public interface OnWebviewCallbackInterface {
-        void pageLoadFinished(FixedLayoutPageData.ContentsData data);
+        void reportPageLoadFinished(FixedLayoutPageData.ContentsData data);
         void reportVideoInfo(String videoSrc);
         void reportAsidePopupStatus(boolean isAsidePopopShow);
         void reportLinkClick(String href);

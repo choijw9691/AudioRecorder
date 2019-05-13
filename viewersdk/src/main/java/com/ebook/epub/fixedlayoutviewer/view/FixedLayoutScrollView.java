@@ -125,8 +125,8 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     private BookHelper.ClickArea touchedPositionDuringPlaying;
 
-    private int mCurrentPageIndex=-1;                   // viewPager index
-    private int mCurrentPage = 0;                       // content page
+    private int mCurrentPagerIndex=0;                   // viewPager index
+    private int mCurrentPage = 1;                       // content page
 
     private int targetX;
     private int targetY;
@@ -436,10 +436,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     }
 
     public void showBook(){
-        int lastReadPage=mReadingSpine.getCurrentSpineIndex();
-        goPage(lastReadPage);
+        int lastReadPageIndex=mReadingSpine.getCurrentSpineIndex();
+        goPage(lastReadPageIndex);
 
-        if(lastReadPage==0){
+        if(lastReadPageIndex==0 && mPageDirection == ViewerContainer.PageDirection.LTR){
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -515,6 +515,8 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
             checkPageData(mPageDataArrayList.get(position));
 
+            mCurrentPagerIndex = getPageIndexFromFilePath(mReadingSpine.getSpineInfos().get(mReadingSpine.getCurrentSpineIndex()).getSpinePath());
+
             FixedLayoutZoomView fixedLayoutZoomView = null;
             if(BookHelper.isPreload){
                 fixedLayoutZoomView = new FixedLayoutZoomView(mContext, mPageDataArrayList.get(position), mPageMode, mPageDirection, false);
@@ -528,7 +530,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 fixedLayoutZoomView.setTouchAreaCheckInterface(FixedLayoutScrollView.this);
                 fixedLayoutZoomView.setSelectionDisabled(isTextSelectionDisabled);
             }
-            container.addView(fixedLayoutZoomView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            container.addView(fixedLayoutZoomView, 0);
             mLoadedViewMap.put(position,fixedLayoutZoomView);
             return fixedLayoutZoomView;
         }
@@ -606,7 +608,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 int scrollDirection = (Integer) msg.obj;
                 ttsHighlighter.remove();
                 checkPageStatus(scrollDirection);
-//                setCurrentItem(mCurrentPageIndex+scrollDirection, pagerAnimation);
+//                setCurrentItem(mCurrentPagerIndex+scrollDirection, pagerAnimation);
                 break;
 
 
@@ -915,7 +917,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         isFromRight = mPagerAdapter.getCurrentView().getIsFromRight();
 
-        setCurrentItem(mCurrentPageIndex-1, pagerAnimation);
+        setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
 
         if( mOnTouchEventListener != null  && !isMoveByFling){
             mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y));
@@ -952,7 +954,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         isFromLeft = mPagerAdapter.getCurrentView().getIsFromLeft();
 
-        setCurrentItem(mCurrentPageIndex+1, pagerAnimation);
+        setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
 
         if( mOnTouchEventListener != null  && !isMoveByFling){
             mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y));    // TODO :: 프론트가 필요한 콜백인가?
@@ -980,74 +982,80 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     /********************************************************************** e : user action callback */
 
     /********************************************************************** s : webview callback */
+    private void pageLoadFinished(FixedLayoutPageData.ContentsData data){
+
+        if(mCurrentMode == CurrentMode.ViewerClose)
+            return;
+
+        int scroll = data.getContentsScrollIndex();     // 실제 컨텐츠 기준 스크롤 인덱스 ( page -1 )
+        int page = data.getContentsPage();              // 실제 컨텐츠 기준 페이지
+        int position = data.getContentsPosition();      // 두면보기 좌/우 여부
+
+        DebugSet.d(TAG,"SSIN FIXEDLAYOUT_PAGE_FINISHED page : "+page);
+
+        if( mCurrentMode == CurrentMode.ViewerOpen && mCurrentPage == page){
+            mDecodeThread = new Thread(FixedLayoutScrollView.this);
+            mDecodeThread.start();
+            mCurrentMode = null;
+        }
+
+        if( mCurrentMode == CurrentMode.SearchFocus && mCurrentPage == page && mSearchPageIndex == page ){
+            focusText(mSearchResult);
+            mCurrentMode = null;
+        }
+
+        if( mPageDirection == ViewerContainer.PageDirection.LTR && mCurrentPagerIndex == scroll
+                || mPageDirection == ViewerContainer.PageDirection.RTL && mCurrentPagerIndex == mPagerAdapter.getCount() - scroll -1 ){     // preload로 수정
+
+            if( mOnChapterChange != null ){
+                mOnChapterChange.onPageReady(mPagerAdapter.getCount());     // TODO :: 프론트가 해당 콜백 받고 하는 기능 있는지 확인하기
+            }
+
+            if(mPageMode == PageMode.OnePage){
+                mOnChapterChange.onChangeAfter(mPagerAdapter.getCount());
+
+                if( mOnPageScroll != null ){
+                    mOnPageScroll.onScrollAfter(data.getContentsPage(), 0, mReadingSpine.getSpineInfos().size(), (double) data.getContentsPage() / (double)mReadingSpine.getSpineInfos().size() * 100.0);
+                }
+            } else if(mPageMode == PageMode.TwoPage) {
+                if(position==0){
+                    isLeftWebviewLoadFinished = true;
+                } else if(position==1){
+                    isRightWebviewLoadFinished = true;
+                }
+
+                if(isLeftWebviewLoadFinished && isRightWebviewLoadFinished){
+                    mOnChapterChange.onChangeAfter(mPagerAdapter.getCount());
+                    if( mOnPageScroll != null ){
+                        int currentPage = mPageDataList.get(mCurrentPagerIndex).getContentsDataList().get(0).getContentsPage();
+                        if(currentPage==-1)
+                            currentPage = 1;
+                        mOnPageScroll.onScrollAfter(currentPage, 0, mReadingSpine.getSpineInfos().size(), (double) currentPage / (double)mReadingSpine.getSpineInfos().size() * 100.0);
+                    }
+
+                    isLeftWebviewLoadFinished=false;
+                    isRightWebviewLoadFinished=false;
+
+                }
+            }
+            mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex).applyCurrentChapterHighlight(position);
+
+            if(!selectedAnnotationId.isEmpty()){
+                mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex).scrollToAnnotationId(selectedAnnotationId);
+                selectedAnnotationId="";
+            }
+
+            mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex).removeCommentNode(position);
+
+            saveLastPosition();
+        }
+    }
+
     FixedLayoutWebview.OnWebviewCallbackInterface listener = new FixedLayoutWebview.OnWebviewCallbackInterface() {
 
         @Override
-        public void pageLoadFinished(FixedLayoutPageData.ContentsData data) {
-
-            if(mCurrentMode == CurrentMode.ViewerClose)
-                return;
-
-            int scroll = data.getContentsScrollIndex();     // 실제 컨텐츠 기준 스크롤 인덱스 ( page -1 )
-            int page = data.getContentsPage();              // 실제 컨텐츠 기준 페이지
-            int position = data.getContentsPosition();      // 두면보기 좌/우 여부
-
-            DebugSet.d(TAG,"SSIN FIXEDLAYOUT_PAGE_FINISHED page : "+page);
-
-            if( mCurrentMode == CurrentMode.ViewerOpen && mCurrentPage == page){
-                mDecodeThread = new Thread(FixedLayoutScrollView.this);
-                mDecodeThread.start();
-                mCurrentMode = null;
-            }
-
-            if( mCurrentMode == CurrentMode.SearchFocus && mCurrentPage == page && mSearchPageIndex == page ){
-                focusText(mSearchResult);
-                mCurrentMode = null;
-            }
-
-            if( mCurrentPageIndex == scroll ){     // RTL,LTR 체크 필요 없음 무조건 콘텐츠 스크롤인덱스 기준임
-
-                if( mOnChapterChange != null ){
-                    mOnChapterChange.onPageReady(mPagerAdapter.getCount());     // TODO :: 프론트가 해당 콜백 받고 하는 기능 있는지 확인하기
-                }
-
-                if(mPageMode == PageMode.OnePage){
-                    mOnChapterChange.onChangeAfter(mPagerAdapter.getCount());
-
-                    if( mOnPageScroll != null ){
-                        mOnPageScroll.onScrollAfter(data.getContentsPage(), 0, mReadingSpine.getSpineInfos().size(), (double) data.getContentsPage() / (double)mReadingSpine.getSpineInfos().size() * 100.0);
-                    }
-                } else if(mPageMode == PageMode.TwoPage) {
-                    if(position==0){
-                        isLeftWebviewLoadFinished = true;
-                    } else if(position==1){
-                        isRightWebviewLoadFinished = true;
-                    }
-
-                    if(isLeftWebviewLoadFinished && isRightWebviewLoadFinished){
-                        mOnChapterChange.onChangeAfter(mPagerAdapter.getCount());
-                        if( mOnPageScroll != null ){
-                            int currentPage = mPageDataList.get(mCurrentPageIndex).getContentsDataList().get(0).getContentsPage();
-                            if(currentPage==-1)
-                                currentPage = 1;
-                            mOnPageScroll.onScrollAfter(currentPage, 0, mReadingSpine.getSpineInfos().size(), (double) currentPage / (double)mReadingSpine.getSpineInfos().size() * 100.0);
-                        }
-                        isLeftWebviewLoadFinished=false;
-                        isRightWebviewLoadFinished=false;
-                    }
-                }
-
-                mPagerAdapter.getLoadedViewMap().get(mCurrentPageIndex).applyCurrentChapterHighlight(position);
-
-                if(!selectedAnnotationId.isEmpty()){
-                    mPagerAdapter.getLoadedViewMap().get(mCurrentPageIndex).scrollToAnnotationId(selectedAnnotationId);
-                    selectedAnnotationId="";
-                }
-
-                mPagerAdapter.getLoadedViewMap().get(mCurrentPageIndex).removeCommentNode(position);
-
-                saveLastPosition();
-            }
+        public void reportPageLoadFinished(FixedLayoutPageData.ContentsData data) {
+            pageLoadFinished(data);
         }
 
         @Override
@@ -1123,7 +1131,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                                 return;
                             }
                         }
-                        setCurrentItem(mCurrentPageIndex-1, pagerAnimation);
+                        setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
                     } else if(clickArea== BookHelper.ClickArea.Right){
 
                         if(mPageDirection == ViewerContainer.PageDirection.LTR){
@@ -1137,7 +1145,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                                 return;
                             }
                         }
-                        setCurrentItem(mCurrentPageIndex+1, pagerAnimation);
+                        setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
                     } else if(clickArea== BookHelper.ClickArea.Middle){
                         mOnTouchEventListener.onUp(clickArea);
                     }
@@ -1595,10 +1603,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 mOnBookStartEnd.onEnd();
                 return null;
             } else {
-                mCurrentPageIndex = numChapter;
+                mCurrentPagerIndex = numChapter;
             }
         }
-        return mPageDataList.get(mCurrentPageIndex);
+        return mPageDataList.get(mCurrentPagerIndex);
     }
 
     public String getCurrentUserAgent() {
@@ -1794,7 +1802,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             }
         }
 
-        if( mCurrentPageIndex == pagerIndex ) {
+        if( mCurrentPagerIndex == pagerIndex ) {
             setCurrentItem(pagerIndex, pagerAnimation);
             mPagerAdapter.getLoadedViewMap().get(pagerIndex).focusSearchText(sr.keyword, sr.pageOffset, pagePosition);
         }
@@ -1808,7 +1816,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     }
 
     public void removeSearchHighlight(){
-        FixedLayoutZoomView zoomView = mPagerAdapter.getLoadedViewMap().get(mCurrentPageIndex);
+        FixedLayoutZoomView zoomView = mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex);
         if( zoomView != null ){
             zoomView.removeSearchHighlight();
         }
@@ -1898,34 +1906,35 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     private void loadCurrentPage(int position) {
 
-        mCurrentPageIndex = position;
-        if(mPageDirection == ViewerContainer.PageDirection.LTR){
-            mCurrentPage = mCurrentPageIndex+1;
-        } else if(mPageDirection == ViewerContainer.PageDirection.RTL){
-            mCurrentPage = mPagerAdapter.getCount()-mCurrentPageIndex;
-        }
-
+        mCurrentPagerIndex = position;
+//        if(mPageDirection == ViewerContainer.PageDirection.LTR){
+//            mCurrentPage = mCurrentPagerIndex+1;
+//        } else if(mPageDirection == ViewerContainer.PageDirection.RTL){
+//            mCurrentPage = mPagerAdapter.getCount()-mCurrentPagerIndex;
+//        }
         FixedLayoutPageData.ContentsData contents;
         if( mPageDirection == ViewerContainer.PageDirection.LTR ){
-            contents = mPageDataList.get(mCurrentPageIndex).getContentsDataList().get(0);
+            contents = mPageDataList.get(mCurrentPagerIndex).getContentsDataList().get(0);
             if( contents.getContentsFilePath().equals("about:blank") )
-                contents = mPageDataList.get(mCurrentPageIndex).getContentsDataList().get(1);
+                contents = mPageDataList.get(mCurrentPagerIndex).getContentsDataList().get(1);
         } else {
             if( mPageMode == PageMode.OnePage )
-                contents = mPageDataList.get(mCurrentPageIndex).getContentsDataList().get(0);
+                contents = mPageDataList.get(mCurrentPagerIndex).getContentsDataList().get(0);
             else
-                contents = mPageDataList.get(mCurrentPageIndex).getContentsDataList().get(1);
+                contents = mPageDataList.get(mCurrentPagerIndex).getContentsDataList().get(1);
 
             if( contents.getContentsFilePath().equals("about:blank") )
-                contents = mPageDataList.get(mCurrentPageIndex).getContentsDataList().get(0);
+                contents = mPageDataList.get(mCurrentPagerIndex).getContentsDataList().get(0);
         }
+
+        mCurrentPage = contents.getContentsPage();
 
         String currentFile =  contents.getContentsFilePath();
         mReadingChapter.setCurrentChapter(currentFile);
         mReadingSpine.setCurrentSpineIndex(currentFile);
 
         if(!BookHelper.isPreload){
-            mPagerAdapter.getLoadedViewMap().get(position).loadContent(mPageDataList.get(mCurrentPageIndex));
+            mPagerAdapter.getLoadedViewMap().get(position).loadContent(mPageDataList.get(mCurrentPagerIndex));
             mPagerAdapter.getLoadedViewMap().get(position).setJSInterface(ttsDataInfoManager, ttsHighlighter, mediaOverlayController);
             mPagerAdapter.getLoadedViewMap().get(position).setCurrentWebView(bgmPlayer);
             Iterator<Integer> iterator =  mPagerAdapter.getVisibleViewIndexList().iterator();
@@ -1935,6 +1944,8 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                     mPagerAdapter.getLoadedViewMap().get(targetIndex).loadEmptyPage();
                 }
             }
+        } else {
+            pageLoadFinished(contents);
         }
 
         isPageScrolling = false;
@@ -2016,6 +2027,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 }
             }
         }
-        setCurrentItem(mCurrentPageIndex+scrollDirection, pagerAnimation);
+        setCurrentItem(mCurrentPagerIndex+scrollDirection, pagerAnimation);
     }
 }

@@ -404,10 +404,6 @@ public class FixedLayoutContainerView extends LinearLayout {
 
     public void findTagUnderPoint(int x, int y){
         for(FixedLayoutWebview webview : mWebviewList){
-
-            if(webview.getCurrentPageData().getContentsString()==null)
-                continue;
-
             if(isTouchInView(webview,x,y)){
                 int[] touchedPosition = convertWebviewPosition(x, y,(FixedLayoutZoomView)getParent(), webview);
                 webview.findTagUnderPoint(touchedPosition[0],touchedPosition[1],x,y);

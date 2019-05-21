@@ -1876,7 +1876,7 @@ function getFirstVisibleItem(twoPageView) {
 			var node = data[i];
     		var elementoffset = $(node).offset();
 
-    		if ($(node).contents().filter( function(){ return this.nodeType == 3;}).text().trim() == "" &&
+    		if ($(node).contents().filter( function(){ return this.tagName == 'flk' || this.nodeType == 3;}).text().trim() == "" &&
     				node.tagName.toUpperCase() !='IMG' &&
     				node.tagName.toUpperCase() !='VIDEO' &&
     				node.tagName.toUpperCase() !='AUDIO' &&

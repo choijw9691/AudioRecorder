@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.103";
+    public static String VIEWER_VERSION = "3.104";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -1022,8 +1022,8 @@ public class BookHelper {
                     "\n padding-bottom: %feelingk_paddingbottom_value%px; " +
                     "\n text-align: justify; " +
                     "\n}" +
-                    "\nh1 { " +
-                    "\n line-height:110% !important; " +
+                    "\nh1,h2,h3,h4,h5,h6 { " +
+                    "\n line-height:115% !important; " +
                     "\n} " +
                     "\nbody { " +
                     "\n %feelingk_backgroundcolor_value%" +

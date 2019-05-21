@@ -506,9 +506,13 @@ public class TTSDataInfoManager {
 
                 case MSG_GET_FIRST_SENTENCE: {
                     String param = (String)msg.obj;
-                    if(isTwoPageMode)
-                        leftWebView.loadUrl( param );
-                    else {
+                    if(isTwoPageMode){
+                        if(((FixedLayoutPageData.ContentsData)leftWebView.getTag()).getContentsFilePath().equalsIgnoreCase("about:blank")){
+                            rightWebView.loadUrl( param );
+                        } else {
+                            leftWebView.loadUrl( param );
+                        }
+                    } else {
                         if(leftWebView!=null)
                             leftWebView.loadUrl( param );
                         else
@@ -524,7 +528,11 @@ public class TTSDataInfoManager {
 
                 case MSG_GET_START_POSITION: {
                     if(isTwoPageMode) {
-                        leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
+                        if(((FixedLayoutPageData.ContentsData)leftWebView.getTag()).getContentsFilePath().equalsIgnoreCase("about:blank")){
+                            rightWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
+                        } else {
+                            leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");
+                        }
                     } else {
                         if(leftWebView!=null) {
                             leftWebView.loadUrl("javascript:getPathOfFirstElement(" + elementXPathJsonArr.toString() + ")");

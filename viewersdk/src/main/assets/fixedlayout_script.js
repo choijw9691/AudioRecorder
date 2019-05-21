@@ -244,7 +244,7 @@ function log(text){
 //		var posRight = posLeft + $(videoElement).width();
 //		var posBottom = posTop + $(videoElement).height();
 //
-////		if(posLeft >= 0 && posRight <= gWindowInnerWidth)	// TODO :::
+////		if(posLeft >= 0 && posRight <= gWindowInnerWidth)
 ////		{
 //		if(posLeft >= 0) {
 //			//결과값에 SRC 추가
@@ -438,37 +438,6 @@ function innerSearchByKeywordIndex(node, keyword, keywordIndex) {
 		}
 	}
 	return keyIdx;
-}
-
-function getSpanElementRects(span, jqOffsetLeft)    // TODO :: 쓰이는건지 아닌건지 확인하기
-{
-	if( span === null ) {
-		return null;
-	}
-
-	var rect;
-	var rects=new Array();
-
-	if(span.getClientRects) {
-
-		var clientRects=span.getClientRects();
-		for(var i=0;i<clientRects.length;++i)
-		{
-			var left = clientRects[i].left;
-			if(jqOffsetLeft != left){
-				left = left+document.body.scrollLeft;
-			}
-
-			rects.push( getRectangleObject(left, clientRects[i].top, clientRects[i].width, clientRects[i].height) );
-		}
-
-		return rects;
-	}
-
-	rect=getElementRect(span);
-	rects.push(rect);
-
-	return rects;
 }
 
 function getRectangleObject(left,top,width,height){

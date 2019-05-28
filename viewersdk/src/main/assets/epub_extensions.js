@@ -115,6 +115,10 @@
 
             for (var i = 0; i < noterefArray.length; ++i) {
                 var noteref = $(noterefArray[i]);
+
+                if(noteref.attr('href').indexOf('#') != -1 && noteref.attr('href').indexOf('#') != 0)   // TODO :: 20190528 현재 챕터 케이스만 거르도록 수정 -> 외부 챕터 내 각주 내용 있는 경우 개발 시 수정 필요
+                    continue;
+
                 var noteLink = $(noteref.attr('href'));
                 $(noteLink).hide();
 

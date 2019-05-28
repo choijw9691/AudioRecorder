@@ -1681,11 +1681,16 @@ function gotoID(inputid, twoPageViewMode) {
 
 	resetBodyStatus();
 
+    var pageNum=0;
+    var left=0;
+    var top=0;
+    var checkid = '#'+inputid;
+
+    if($(checkid)[0] == undefined)
+        return;
+
     try {
         if(gCurrentViewMode!=3){
-            var pageNum=0;
-            var checkid = '#'+inputid;
-            var left=0;
             if($(checkid).css('display') == 'none'){
                 $(checkid).show();
                 left = $(checkid)[0].offsetLeft;
@@ -1701,8 +1706,6 @@ function gotoID(inputid, twoPageViewMode) {
             pageNum = Math.floor((retval / getWindowWidth(twoPageViewMode)));
             goPage(pageNum, twoPageViewMode);
         } else if(gCurrentViewMode==3){
-            var checkid = '#'+inputid;
-            var top;
             if($(checkid).css('display') == 'none'){
                 $(checkid).show();
                 top = $(checkid)[0].offsetTop;

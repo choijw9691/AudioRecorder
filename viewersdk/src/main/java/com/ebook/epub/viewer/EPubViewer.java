@@ -1644,15 +1644,16 @@ public class EPubViewer extends ViewerBase {
      */
     public void goPageByLink(String fileName, String id) {
 
+        int currentSpineIndex = mReadingSpine.getCurrentSpineIndex();
+
         if( fileName.endsWith("/") )
             fileName = fileName.substring(0, fileName.length()-1);
+        String targetFilePath = fileName.toLowerCase();
 
-        String current = mReadingSpine.getCurrentSpineInfo().getSpinePath().toLowerCase();
-        String file = fileName.toLowerCase();
+        mReadingSpine.setCurrentSpineIndex(targetFilePath);
 
-        if( !current.equals(file) ) {
+        if( currentSpineIndex != mReadingSpine.getCurrentSpineIndex()) {
 
-            mReadingSpine.setCurrentSpineIndex(fileName);
             if( mReadingSpine.getCurrentSpineIndex() >= 0 ) {
 
                 goPageByChapter();
@@ -4815,7 +4816,7 @@ public class EPubViewer extends ViewerBase {
 //        if( highlight.memo.length()>0 ) {
 //            BookHelper.lastMemoHighlightColor = colorIndex;
 //        } else {
-            BookHelper.lastHighlightColor = colorIndex;
+        BookHelper.lastHighlightColor = colorIndex;
 //        }
 
         finishTextSelectionMode();

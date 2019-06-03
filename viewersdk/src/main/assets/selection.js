@@ -741,6 +741,8 @@ function getPageCount(twoPageViewMode){
             gPageCount = 1;
         }
 
+        gPageCount = Math.ceil(gPageCount);
+
         console.log('setup >> ' + document.body.scrollWidth + ', ' + getWindowWidth(twoPageViewMode) + ', '+gPageCount);
 
         callPageReady(twoPageViewMode);

@@ -272,7 +272,7 @@ public class HtmlContentsManager {
                 for( int i = 0 ; i < metalist.getLength(); i++ ){
                     Node meta = metalist.item(i);
                     NamedNodeMap attrs = meta.getAttributes();
-                    if( attrs.getNamedItem("name") != null ) {
+                    if( attrs.getNamedItem("name") != null && attrs.getNamedItem("name").getNodeValue().equalsIgnoreCase("viewport")) {
                         String viewPort = attrs.getNamedItem("content") != null ? attrs.getNamedItem("content").getNodeValue() : null;
                         return viewPort.trim();
                     }

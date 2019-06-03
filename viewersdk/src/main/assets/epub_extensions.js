@@ -92,7 +92,7 @@
                             	noteref.scrollTop = scrollTop;
                         		var bodyEl = $('body')[0];
                         		bodyEl.style.position = "fixed";	
-                        		bodyEl.style.top = -1*scrollTop-18 + "px";
+                        		bodyEl.style.top = -1*scrollTop-parseFloat($('body').css('margin-top')) + "px";
                         	}
                         }
                     });

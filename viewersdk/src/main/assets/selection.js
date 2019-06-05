@@ -443,45 +443,48 @@ function resizingImage() {
 
     try{
         var booktableHeight = $('#feelingk_booktable').height();
-        	var bookcontentWidth = $('#feelingk_bookcontent').width();
-        	var list = new Array();
+        var bookcontentWidth = $('#feelingk_bookcontent').width();
 
-        	$('img').each(function (i, image) {
-        		var totalMargin = getComputedMargin(image);
-        		if ($(image).height() + totalMargin.horizontalMargin > booktableHeight || $(image).width() + totalMargin.verticalMargin > bookcontentWidth) {
-        			if ((($(image).height() + totalMargin.horizontalMargin) / booktableHeight) > (($(image).width() + totalMargin.verticalMargin)/bookcontentWidth)) {
-        				var obj = new Object();
-        				obj.e = image;
-        				obj.index = i;
-        				obj.width = 'auto';
-        				obj.height = (booktableHeight - totalMargin.horizontalMargin) + 'px';
-        				list.push(obj);
-        			} else {
-        				var obj = new Object();
-        				obj.e = image;
-        				obj.index = i;
-        				obj.width = (bookcontentWidth - totalMargin.verticalMargin) + 'px';
-        				obj.height = 'auto';
-        				list.push(obj);
-        			}
-        		}
-        	});
+        var list = new Array();
 
-        	var i=0;
-        	$(list).each(function () {
-        		this.e.style.width = "";
-        		this.e.style.width = this.width;
-        		this.e.style.height = "";
-        		this.e.style.height = this.height;
-        		++i;
-        	});
+        $('img').each(function (i, image) {
 
-            $('img').each(function(i,image){
-                image.style.display = imageDataInfo[i].display;
-            });
+            var totalMargin = getComputedMargin(image);
 
-        	if(i == list.length )
-        		window.selection.imgResizingDone();
+            if ($(image).height() + totalMargin.horizontalMargin > booktableHeight || $(image).width() + totalMargin.verticalMargin > bookcontentWidth) {
+                if ((($(image).height() + totalMargin.horizontalMargin) / booktableHeight) > (($(image).width() + totalMargin.verticalMargin)/bookcontentWidth)) {
+                    var obj = new Object();
+                    obj.e = image;
+                    obj.index = i;
+                    obj.width = 'auto';
+                    obj.height = (booktableHeight - totalMargin.horizontalMargin) + 'px';
+                    list.push(obj);
+                } else {
+                    var obj = new Object();
+                    obj.e = image;
+                    obj.index = i;
+                    obj.width = (bookcontentWidth - totalMargin.verticalMargin) + 'px';
+                    obj.height = 'auto';
+                    list.push(obj);
+                }
+            }
+        });
+
+        var i=0;
+        $(list).each(function () {
+            this.e.style.width = "";
+            this.e.style.width = this.width;
+            this.e.style.height = "";
+            this.e.style.height = this.height;
+            ++i;
+        });
+
+        $('img').each(function(i,image){
+            image.style.display = imageDataInfo[i].display;
+        });
+
+        if(i == list.length )
+            window.selection.imgResizingDone();
     } catch(error){
         console.log("resizingImage error : "+error);
         window.selection.imgResizingDone();
@@ -494,25 +497,18 @@ function getComputedMargin(el) {
     var horizontalMargin = 0;
     var tmpEl = el;
 
-    while (tmpEl.id != 'feelingk_bookcontent') {      // TODO :: feelingk_booktable
+    while (tmpEl.id != 'feelingk_bookcontent') {
     	var size = window.getComputedStyle(tmpEl);
     	if (size != null) {
-    		verticalMargin += Math.max(0, (parseInt(size['margin-left'], 10) || 0))
+
+            verticalMargin += Math.max(0, (parseInt(size['margin-left'], 10) || 0))
     		+ Math.max(0, (parseInt(size['margin-right'], 10) || 0))
     		+ (parseInt(size['text-indent'], 10) || 0);
 
-    		var lineHeight = parseInt(size['lineHeight'], 10);
-
-    		if (size['lineHeight'] == "normal") {
-    			lineHeight = Math.ceil(parseInt(size['fontSize'], 10) * 1.2) || 0;
-    		}
-
-    		horizontalMargin += lineHeight
-    		+ Math.max(0, (parseInt(size['margin-top'], 10) || 0))
-    		+ Math.max(0, (parseInt(size['margin-bottom'], 10) || 0));
+    		horizontalMargin += Math.max(0, (parseInt(size['margin-top'], 10) || 0))
 
     		if (el != tmpEl) {
-    			verticalMargin += Math.max(0, (parseInt(size['padding-left'], 10) || 0))
+    		   	verticalMargin += Math.max(0, (parseInt(size['padding-left'], 10) || 0))
     			+ Math.max(0, (parseInt(size['padding-right'], 10) || 0));
 
     			horizontalMargin += Math.max(0, (parseInt(size['padding-top'], 10) || 0))

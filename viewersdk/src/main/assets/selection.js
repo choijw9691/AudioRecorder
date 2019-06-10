@@ -505,7 +505,14 @@ function getComputedMargin(el) {
     		+ Math.max(0, (parseInt(size['margin-right'], 10) || 0))
     		+ (parseInt(size['text-indent'], 10) || 0);
 
-    		horizontalMargin += Math.max(0, (parseInt(size['margin-top'], 10) || 0))
+            var lineHeight = parseInt(size['lineHeight'], 10);
+
+            if (size['lineHeight'] == "normal") {
+                lineHeight = Math.ceil(parseInt(size['fontSize'], 10) * 1.2) || 0;
+            }
+
+    		horizontalMargin += lineHeight
+    		+Math.max(0, (parseInt(size['margin-top'], 10) || 0))
 
     		if (el != tmpEl) {
     		   	verticalMargin += Math.max(0, (parseInt(size['padding-left'], 10) || 0))

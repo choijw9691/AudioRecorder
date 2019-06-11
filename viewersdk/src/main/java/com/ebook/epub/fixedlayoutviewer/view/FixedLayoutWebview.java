@@ -1042,7 +1042,9 @@ public class FixedLayoutWebview extends ViewerBase {
             for(int i = 0; i < erases.size(); i++) {
                 if( erases.get(i) != prevHighlight ) {
                     if( !isMergedMemo && erases.get(i).isMemo() ) { // TODO :: 수정되는 메모는 이미 머지된 상태라
-                        memoText += "\n";
+                        if(!memoText.isEmpty()) {
+                            memoText += "\n";
+                        }
                         memoText += erases.get(i).memo;
                     }
                     prevHighlight = erases.get(i);

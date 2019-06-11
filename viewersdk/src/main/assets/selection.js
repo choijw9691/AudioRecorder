@@ -512,7 +512,7 @@ function getComputedMargin(el) {
             }
 
     		horizontalMargin += lineHeight
-    		+Math.max(0, (parseInt(size['margin-top'], 10) || 0))
+    		+Math.max(0, (parseInt(size['margin-top'], 10) || 0));
 
     		if (el != tmpEl) {
     		   	verticalMargin += Math.max(0, (parseInt(size['padding-left'], 10) || 0))

@@ -2410,6 +2410,8 @@ function deleteAnnotationInRange(){
     var flkTags = document.getElementsByTagName('flk');
     for(var i=0; i<flkTags.length; i++){
         if(totalRange.intersectsNode(flkTags[i])){
+            if(totalRange.endContainer.parentElement.title == flkTags[i].title && totalRange.endOffset == 0 )
+                continue;
             if($.inArray(flkTags[i].title, deleteTarget) === -1)
                 deleteTarget.push(flkTags[i].title);
         }

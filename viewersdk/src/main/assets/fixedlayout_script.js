@@ -1494,8 +1494,10 @@ function findTagUnderPoint(x, y, orgX, orgY, isSelectionDisabled){
     noteref.isPrevent=false;
 
     var element = document.elementFromPoint(x, y);
-    if(element==null || element==undefined)
+    if(element==null || element==undefined) {
+        window.fixedlayout.reportTouchPosition(orgX, orgY);
         return;
+    }
 
     var tagName = element.tagName.toUpperCase();
     console.log("SSIN findTagUnderPoint tagName : "+tagName);

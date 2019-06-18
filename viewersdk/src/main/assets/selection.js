@@ -11,7 +11,7 @@ const ATAG_CLASS='KYBAtag';
 
 var gPosition = 0;
 var gCurrentPage = 0;
-var gPageCount = 0;
+var gPageCount = 1;
 var gClientHeight = -1;
 var gWindowInnerHeight = 0;
 var gWindowInnerWidth = 0;

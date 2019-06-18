@@ -945,11 +945,11 @@ public class BookHelper {
             strBase=strBase.replaceAll("%feelingk_marginright_value%", ""+ 0);
         }
 
-        if(bottomMargin!=null){
-            strBase=strBase.replaceAll("%feelingk_paddingbottom_value%", ""+ bottomMargin);
-        } else {
-            strBase=strBase.replaceAll("%feelingk_paddingbottom_value%", ""+ 0);
-        }
+//        if(bottomMargin!=null){
+//            strBase=strBase.replaceAll("%feelingk_paddingbottom_value%", ""+ bottomMargin);
+//        } else {
+//            strBase=strBase.replaceAll("%feelingk_paddingbottom_value%", ""+ 0);
+//        }
 
         if(topMargin!=null){
             strBase=strBase.replaceAll("%feelingk_booktablemargintop_value%", ""+ topMargin);
@@ -963,7 +963,7 @@ public class BookHelper {
             strBase=strBase.replaceAll("%feelingk_backgroundcolor_value%", "");
         }
 
-        strBase+="\np,div,span {";
+        strBase+="\np,span,div:not([id=\"feelingk_booktable\"]):not([id=\"feelingk_bookcontent\"]) {";
 
         if(indent!=null){
             strBase+="\n text-indent : "+ indent+"em !important;";
@@ -976,9 +976,6 @@ public class BookHelper {
         if(lineSpace!=null){
             strBase+="\n line-height : "+ lineSpace+"% !important;";
         }
-//        else { // TODO :: 20190107 font size 큰 경우 테스트 필요
-//            strBase+="\n line-height : initial !important;";
-//        }
 
         strBase+="}";
 
@@ -1017,15 +1014,16 @@ public class BookHelper {
                     "\n}" +
                     "\ndiv#feelingk_bookcontent { " +
                     "\n %feelingk_fontsize_value% " +
-                    "\n margin-left: %feelingk_marginleft_value%px; " +
-                    "\n margin-right: %feelingk_marginright_value%px; " +
-                    "\n padding-bottom: %feelingk_paddingbottom_value%px; " +
+                    "\n padding-left: %feelingk_marginleft_value%px; " +
+                    "\n padding-right: %feelingk_marginright_value%px; " +
+//                    "\n padding-bottom: %feelingk_paddingbottom_value%px; " +
                     "\n text-align: justify; " +
                     "\n}" +
                     "\nh1,h2,h3,h4,h5,h6 { " +
                     "\n line-height:115% !important; " +
                     "\n} " +
                     "\nbody { " +
+                    "\n height : auto !important;"+
                     "\n %feelingk_backgroundcolor_value%" +
                     "\n margin : 0px !important;" +
                     "\n padding : 0px !important;" +

@@ -1484,6 +1484,7 @@ public class EPubViewer extends ViewerBase {
         script.append(BookHelper.topMargin).append(",");
         script.append(BookHelper.rightMargin).append(",");
         script.append(BookHelper.bottomMargin).append(",");
+        script.append(BookHelper.paraSpace).append(",");
         script.append(density).append(",");
         script.append(android.os.Build.VERSION.SDK_INT).append(",");
         script.append("").append(BookHelper.animationType).append(",");

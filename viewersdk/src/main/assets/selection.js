@@ -374,6 +374,7 @@ function setupChapter(	highlights,
 						marginTop,
 						marginRight,
 						marginBottom,
+						paraSpace,
 						density,
 						osVersion,
 						currentViewMode,
@@ -416,6 +417,12 @@ function setupChapter(	highlights,
 
         if (gClientHeight == -1) {
             gClientHeight = document.getElementById('feelingk_bookcontent').clientHeight;
+        }
+
+        var paragraphElement = $('#feelingk_bookcontent').children('p, div');
+        if(paraSpace!=null && paragraphElement.length>0 ) {
+            var lastParagraphElement = paragraphElement.last()[0];
+            $(lastParagraphElement).attr('style', 'margin-bottom : 0px !important;');
         }
 
         if(fontName!="null" && fontName!=""){

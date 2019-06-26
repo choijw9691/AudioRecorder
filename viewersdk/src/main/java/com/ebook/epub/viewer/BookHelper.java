@@ -463,14 +463,14 @@ public class BookHelper {
 
     public static String getHtmlAttribute(String s) {
         String result = "";
-        String temp = s.toLowerCase();
-        int start = temp.indexOf("<html>");
-        int end = temp.indexOf("</html>");
+        String temp = s.toUpperCase();
+        int start = temp.indexOf("<HTML>");
+        int end = temp.indexOf("</HTML>");
         if( start != -1 && end != -1 ) {
             result = s.substring(start, start+6);
         } else {
             if( end != -1 ) {
-                start = temp.indexOf("<html");
+                start = temp.indexOf("<HTML");
                 if(start == -1 )
                     return "";
 
@@ -486,13 +486,13 @@ public class BookHelper {
         return result;
     }
 
-    public static String getDoctType(String s){
+    public static String getDocType(String s){
         String result = "";
-        String temp = s.toLowerCase();
-        int start = temp.indexOf("<!doctype");
+        String temp = s.toUpperCase();
+        int start = temp.indexOf("<!DOCTYPE");
         int end = temp.indexOf(">", start);
         if( end != -1 ) {
-            start = temp.indexOf("<!doctype");
+            start = temp.indexOf("<!DOCTYPE");
             if(start == -1 )
                 return "";
 
@@ -532,17 +532,17 @@ public class BookHelper {
         return result;
     }
 
-    public static String getHtmlBody(String s)  {
+    public static String getHtmlBody(String htmlStr)  {
         String result = "";
-        String temp = s.toLowerCase();
-        int start = temp.indexOf("<body>");
-        int end = temp.indexOf("</body>");
+        String temp = htmlStr.toUpperCase();
+        int start = temp.indexOf("<BODY>");
+        int end = temp.indexOf("</BODY>");
         try {
             if( start != -1 && end != -1 ) {
-                result = s.substring(start + 6, end);
+                result = htmlStr.substring(start + 6, end);
             } else {
                 if( end != -1 ) {
-                    int index = temp.indexOf("<body");
+                    int index = temp.indexOf("<BODY");
                     if(index == -1 )
                         throw new Exception();
 
@@ -550,16 +550,16 @@ public class BookHelper {
                     if( index <= 0 || index >= end )
                         throw new Exception();
 
-                    result = s.substring(index+1, end);
+                    result = htmlStr.substring(index+1, end);
                 } else {
                     // body tag를 못찾은 경우
-                    start = temp.indexOf("<html>");
-                    end = temp.indexOf("</html>");
+                    start = temp.indexOf("<HTML>");
+                    end = temp.indexOf("</HTML>");
                     if( start != -1 && end != -1 ) {
-                        result = s.substring(start + 6, end);
+                        result = htmlStr.substring(start + 6, end);
                     } else {
                         if( end != -1 ) {
-                            int index = temp.indexOf("<html");
+                            int index = temp.indexOf("<HTML");
                             if(index == -1 )
                                 throw new Exception();
 
@@ -567,7 +567,7 @@ public class BookHelper {
                             if(index <=0 || index >= end )
                                 throw new Exception();
 
-                            result = s.substring(index+1, end);
+                            result = htmlStr.substring(index+1, end);
                         }
                     }
                 }

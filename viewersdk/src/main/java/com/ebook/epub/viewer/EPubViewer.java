@@ -2135,10 +2135,10 @@ public class EPubViewer extends ViewerBase {
                 headSrc = BookHelper.getHeadText(mContext) + makeSVGContentsHead(decodeStr);
             } else {
                 bodySrc = BookHelper.getHtmlBody(decodeStr);
-                bodyAttr = BookHelper.getBodyAttribute(decodeStr);
-                bodyAttr = BookHelper.getBodyDetail(bodyAttr);	// [ssin] add : content body id,dir,style
+//                bodyAttr = BookHelper.getBodyAttribute(decodeStr);
+                bodyAttr = BookHelper.getBodyDetail(decodeStr);	// [ssin] add : content body id,dir,style
                 htmlAttr = BookHelper.getHtmlAttribute(decodeStr);
-                docType = BookHelper.getDoctType(decodeStr);	// [ssin] add : content docType
+                docType = BookHelper.getDocType(decodeStr);	// [ssin] add : content docType
                 String head = BookHelper.getHtmlHead(decodeStr);
 //                String headTemplate = getHtmlHeadWithCustomJs(head, mEpubFile.getPublicationPath());
                 headSrc = head + "\n" + BookHelper.getHeadText(mContext);

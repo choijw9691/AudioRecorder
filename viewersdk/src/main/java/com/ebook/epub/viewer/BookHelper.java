@@ -463,14 +463,14 @@ public class BookHelper {
 
     public static String getHtmlAttribute(String s) {
         String result = "";
-        String temp = s.toUpperCase();
-        int start = temp.indexOf("<HTML>");
-        int end = temp.indexOf("</HTML>");
+        String temp = s.toLowerCase();
+        int start = temp.indexOf("<html>");
+        int end = temp.indexOf("</html>");
         if( start != -1 && end != -1 ) {
             result = s.substring(start, start+6);
         } else {
             if( end != -1 ) {
-                start = temp.indexOf("<HTML");
+                start = temp.indexOf("<html");
                 if(start == -1 )
                     return "";
 
@@ -488,11 +488,11 @@ public class BookHelper {
 
     public static String getDocType(String s){
         String result = "";
-        String temp = s.toUpperCase();
-        int start = temp.indexOf("<!DOCTYPE");
+        String temp = s.toLowerCase();
+        int start = temp.indexOf("<!doctype");
         int end = temp.indexOf(">", start);
         if( end != -1 ) {
-            start = temp.indexOf("<!DOCTYPE");
+            start = temp.indexOf("<!doctype");
             if(start == -1 )
                 return "";
 
@@ -533,37 +533,41 @@ public class BookHelper {
     }
 
     public static String getHtmlBody(String htmlStr)  {
+
         String result = "";
-        String temp = htmlStr.toUpperCase();
-        int start = temp.indexOf("<BODY>");
-        int end = temp.indexOf("</BODY>");
+
+        htmlStr = htmlStr.replaceAll("<BODY","<body");
+        htmlStr = htmlStr.replaceAll("BODY>","body>");
+
+        int start = htmlStr.indexOf("<body>");
+        int end = htmlStr.indexOf("</body>");
         try {
             if( start != -1 && end != -1 ) {
                 result = htmlStr.substring(start + 6, end);
             } else {
                 if( end != -1 ) {
-                    int index = temp.indexOf("<BODY");
+                    int index = htmlStr.indexOf("<body");
                     if(index == -1 )
                         throw new Exception();
 
-                    index = temp.indexOf(">", index);
+                    index = htmlStr.indexOf(">", index);
                     if( index <= 0 || index >= end )
                         throw new Exception();
 
                     result = htmlStr.substring(index+1, end);
                 } else {
                     // body tag를 못찾은 경우
-                    start = temp.indexOf("<HTML>");
-                    end = temp.indexOf("</HTML>");
+                    start = htmlStr.indexOf("<html>");
+                    end = htmlStr.indexOf("</html>");
                     if( start != -1 && end != -1 ) {
                         result = htmlStr.substring(start + 6, end);
                     } else {
                         if( end != -1 ) {
-                            int index = temp.indexOf("<HTML");
+                            int index = htmlStr.indexOf("<html");
                             if(index == -1 )
                                 throw new Exception();
 
-                            index = temp.indexOf(">", index);
+                            index = htmlStr.indexOf(">", index);
                             if(index <=0 || index >= end )
                                 throw new Exception();
 

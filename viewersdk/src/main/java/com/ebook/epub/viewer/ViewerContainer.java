@@ -1093,6 +1093,13 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return false;
     }
 
+    public boolean saveOption(){
+        if( mLayoutMode == LayoutMode.Reflowable ){
+            return mEPubViewer.saveOption();
+        }
+        return false;
+    }
+
     public void restoreHighlights(){
         if( mLayoutMode == LayoutMode.Reflowable ) {
             mEPubViewer.restoreHighlights();

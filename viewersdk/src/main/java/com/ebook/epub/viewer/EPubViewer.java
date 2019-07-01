@@ -783,6 +783,7 @@ public class EPubViewer extends ViewerBase {
          */
         @JavascriptInterface
         public void reportBookmarkPath(String path, boolean bShown) {
+            DebugSet.d(TAG, "reportBookmarkPath >>>> " + path);
 
             try {
                 Bookmark bmd = null;
@@ -1398,9 +1399,13 @@ public class EPubViewer extends ViewerBase {
 
         if( !__loadBook ) return;
 
-        if(BookHelper.animationType!=3)
-            saveLastPosition( null );
-
+        if(__anchorBookmark !=null) {
+            DebugSet.d(TAG, "saveAllViewerData >>>> __anchorBookmark path : " + __anchorBookmark.path +" || text : "+__anchorBookmark.text);
+            saveLastPosition(__anchorBookmark);
+        } else {
+            DebugSet.d(TAG, "saveAllViewerData >>>> __anchorBookmark null ");
+            saveLastPosition(null);
+        }
         saveHighlights();
         saveBookmarks();
         saveOption();
@@ -2503,6 +2508,7 @@ public class EPubViewer extends ViewerBase {
         }
 
         if( __anchorBookmark != null ) {
+            DebugSet.d(TAG, "reLoadBook >>>> __anchorBookmark path : " + __anchorBookmark.path +" || text : "+__anchorBookmark.text);
             if( __anchorBookmark.path.trim().length() > 0 ) {
                 __scrollByPATH = true;
                 __scrollPATH = __anchorBookmark.path;
@@ -2797,6 +2803,8 @@ public class EPubViewer extends ViewerBase {
     boolean saveLastPosition(Bookmark bm) {
 
         if( bm == null || (bm!=null && (bm.path.length()==0)) ) {
+            DebugSet.d(TAG, "saveLastPosition:: bm >> null ");
+
             try {
                 bm = new Bookmark();
                 ReadingOrderInfo currentSpine = mReadingSpine.getCurrentSpineInfo();
@@ -2826,6 +2834,8 @@ public class EPubViewer extends ViewerBase {
                 return false;
             }
         }
+
+        DebugSet.d(TAG, "saveLastPosition:: bm >> " + bm.text);
 
         boolean bSuccess = false;
 
@@ -3379,17 +3389,15 @@ public class EPubViewer extends ViewerBase {
             }
         }
         catch(Exception e) {
-            e.printStackTrace();
-            Log.d("DEBUG","[EPUBVIEWER] loadOption() exception");
+            DebugSet.e( TAG, e.getMessage() );
         }
-
         DebugSet.d(TAG, "load Option ..................... " + object.toString());
     }
 
-    public void saveOption() {
+    public boolean saveOption() {
 
         String fileName = getFullPath(BookHelper.optionFileName);
-        if( fileName.length() <= 0 ) return;
+        if( fileName.length() <= 0 ) return false;
 
         try {
 
@@ -3437,12 +3445,13 @@ public class EPubViewer extends ViewerBase {
             object.put("highlightColor", BookHelper.lastHighlightColor);
             object.put("viewStyleType", BookHelper.getViewStyleType());
 
-            DebugSet.d(TAG, "json array ................. " + object.toString(1));
+            DebugSet.d(TAG, "saveOption >> " + object.toString(1));
             output.write(object.toString(1).getBytes());
             output.close();
-        }
-        catch( Exception e ) {
+            return true;
+        } catch( Exception e ) {
             DebugSet.e( TAG, e.getMessage() );
+            return false;
         }
     }
 

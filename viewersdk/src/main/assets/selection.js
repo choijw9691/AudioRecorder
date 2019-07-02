@@ -635,7 +635,9 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     	$(outerSpan).addClass(HIGHLIGHT_CLASS);
         $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
         if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
-            $(outerSpan).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
+            if(!$(outerSpan).parent().hasClass(ATAG_CLASS)){
+                $(outerSpan).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
+            }
         }
     }
 
@@ -2510,36 +2512,6 @@ function changeIndentDirect(indent) {
 		str = '0em';
 
 	$('p, div').each(function(){this.style.setProperty('text-indent', str, 'important')});
-}
-
-function changeHighlightColorDirect(highlightID, clrIndex, callBack) {  // TODO :: new custom selection - deleted
-
-	try {
-
-        var highlightSpans=$("[title=\""+highlightID+"\"]");
-
-        for(var i=0; i<highlightSpans.length; i++) {
-            var span = highlightSpans[i];
-
-            var className = $(span).attr('class');
-            $(span).removeClass('FLKAnnotationColor0 FLKAnnotationColor1 FLKAnnotationColor2 FLKAnnotationColor3 FLKAnnotationColor4 FLKAnnotationColor5');
-            $(span).addClass(HIGHLIGHT_CLASS);
-            $(span).addClass('FLKAnnotationColor'+clrIndex);
-            if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
-                $(span).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
-            }
-
-            if(i==0){	// 색상 변경 시 기존 데이터 percent update
-                percent = getPercentOfElement($(span));
-            }
-        }
-
-        if(callBack)
-            window.selection.changeHighlightColor(highlightID, clrIndex, percent);
-
-    } catch(err) {
-        log("changeHighlightColorDirect err : "+err);
-    }
 }
 
 //function addCSSClass(className, classRule) {

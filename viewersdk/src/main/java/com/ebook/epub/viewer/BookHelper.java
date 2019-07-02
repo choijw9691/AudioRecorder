@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.112";
+    public static String VIEWER_VERSION = "3.113";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -1051,7 +1051,7 @@ public class BookHelper {
 
     private final static String font_style = "\n\n<style type='text/css' id='FONTFACE_%s'> @font-face { font-family: '%s'; src: url(%s); } \n* { font-family : '%s' !important; } </style>";
 
-    private final static String aTag_Style = "\n:not(a) { color : #999999 !important; } \na { color : #6887f7 !important; } ";
+    private final static String aTag_Style = "\n:not(a, flk) { color : #999999 !important; } \na { color : #6887f7 !important; } ";
 
     /**
      * 요청하는 dateFormat 형식으로 date 스트링을 가져옴.

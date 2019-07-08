@@ -50,8 +50,8 @@ public class HtmlContentsManager {
             bodybuilder.setLength(0);
             bodybuilder=null;
 
-//            bodyAttr = BookHelper.getBodyAttribute(htmlString);
-            bodyAttr = BookHelper.getBodyDetail(htmlString);	// [ssin] add : content body id,dir,style
+            bodyAttr = BookHelper.getBodyAttribute(htmlString);
+            bodyAttr = BookHelper.getBodyDetail(bodyAttr);	// [ssin] add : content body id,dir,style
 
             docType = BookHelper.getDocType(htmlString);
         }

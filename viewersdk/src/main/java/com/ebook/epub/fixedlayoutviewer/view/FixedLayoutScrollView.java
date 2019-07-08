@@ -44,6 +44,7 @@ import com.ebook.epub.viewer.data.ReadingOrderInfo;
 import com.ebook.epub.viewer.data.ReadingSpine;
 import com.ebook.mediaoverlay.MediaOverlayController;
 import com.ebook.tts.Highlighter;
+import com.ebook.tts.TTSDataInfo;
 import com.ebook.tts.TTSDataInfoManager;
 
 import org.json.JSONArray;
@@ -1599,11 +1600,12 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     public FixedLayoutPageData getPageData(boolean isBackground){
         if(isBackground) {
             int numChapter = mReadingSpine.getCurrentSpineIndex() + 1;
-            if (numChapter == mReadingSpine.getSpineInfos().size()) {
+            if( numChapter == mPagerAdapter.getCount()) {
                 mOnBookStartEnd.onEnd();
                 return null;
             } else {
                 mCurrentPagerIndex = numChapter;
+                mReadingSpine.setCurrentSpineIndex(mCurrentPagerIndex);
             }
         }
         return mPageDataList.get(mCurrentPagerIndex);
@@ -1760,6 +1762,15 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         saveBookmarks();
         saveLastPosition();
         saveHighlights();
+    }
+
+    public boolean saveLastPositionByTTSData(TTSDataInfo ttsDataInfo) {
+        Bookmark bm = new Bookmark();
+        bm.chapterFile = ttsDataInfo.getFilePath();
+        int page = getPageIndexFromFilePath( bm.chapterFile );
+        bm.percent = (double) page / (double)mReadingSpine.getSpineInfos().size() * 100.0d;
+        bm.path = ttsDataInfo.getXPath().replace("body:eq(0)>div:eq(0)>div:eq(0)>","div#feelingk_bookcontent>");
+        return mUserBookDataFileManager.saveLastPosition(bm);
     }
     /********************************************************************** e : annotation bookmark lastposition */
 

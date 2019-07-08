@@ -1217,7 +1217,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
 
         if( ttsDataInfoManager != null ) {
             if( mLayoutMode == LayoutMode.Reflowable ){
-                ttsDataList = ttsDataInfoManager.readContents(mEPubViewer, mEPubViewer.getCurrentHtmlString(), mEPubViewer.getCurrentChapterFile());
+                ttsDataList = ttsDataInfoManager.readContents(mEPubViewer, mEPubViewer.getCurrentHtmlString(), mSpineInfo.getCurrentSpineInfo().getSpinePath());
                 return ttsDataList;
             } else if(mLayoutMode == LayoutMode.FixedLayout){
                 ttsDataList = ttsDataInfoManager.readContents(mFixedLayoutView.getLeftWebView(), mFixedLayoutView.getRightWebView(), mFixedLayoutView.getPageData(false));
@@ -1232,12 +1232,12 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             if( mLayoutMode == LayoutMode.Reflowable ){
                 int nextChapterIndex = mEPubViewer.getNextChapterIndex();
                 if(nextChapterIndex!=-1){
-                    return ttsDataInfoManager.readContents(mEPubViewer, mEPubViewer.getCurrentHtmlString(), mEPubViewer.getCurrentChapterFile());
+                    return ttsDataInfoManager.readContents(mEPubViewer, mEPubViewer.getCurrentHtmlString(), mSpineInfo.getCurrentSpineInfo().getSpinePath());
                 }
             } else if( mLayoutMode == LayoutMode.FixedLayout ){
                 FixedLayoutPageData currentPageData = mFixedLayoutView.getPageData(true);
                 if(currentPageData!=null) {
-                    return ttsDataInfoManager.readContentsFromPageData(mFixedLayoutView.getPageData(true));
+                    return ttsDataInfoManager.readContentsFromPageData(currentPageData);
                 }
             }
         }
@@ -1798,5 +1798,13 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         } else if (mLayoutMode == LayoutMode.FixedLayout) {
             mFixedLayoutView.setSelectionDisabled(isTextSelectionDisabled);
         }
+    }
+
+    public boolean saveLastPositionByTTSData(TTSDataInfo ttsDataInfo){
+        if( mLayoutMode == LayoutMode.Reflowable )
+            return mEPubViewer.saveLastPositionByTTSData(ttsDataInfo);
+        else if( mLayoutMode == LayoutMode.FixedLayout )
+            return mFixedLayoutView.saveLastPositionByTTSData(ttsDataInfo);
+        return false;
     }
 }

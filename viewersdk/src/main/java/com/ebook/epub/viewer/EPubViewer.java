@@ -1399,13 +1399,7 @@ public class EPubViewer extends ViewerBase {
 
         if( !__loadBook ) return;
 
-        if(__anchorBookmark !=null) {
-            DebugSet.d(TAG, "saveAllViewerData >>>> __anchorBookmark path : " + __anchorBookmark.path +" || text : "+__anchorBookmark.text);
-            saveLastPosition(__anchorBookmark);
-        } else {
-            DebugSet.d(TAG, "saveAllViewerData >>>> __anchorBookmark null ");
-            saveLastPosition(null);
-        }
+        saveLastPosition(__anchorBookmark);
         saveHighlights();
         saveBookmarks();
         saveOption();
@@ -6250,5 +6244,45 @@ public class EPubViewer extends ViewerBase {
     private boolean isTextSelectionDisabled = false;
     public void setSelectionDisabled(boolean isTextSelectionDisabled){
         this.isTextSelectionDisabled = isTextSelectionDisabled;
+    }
+
+    public boolean saveLastPositionByTTSData(TTSDataInfo ttsDataInfo) {
+        DebugSet.d(TAG, "saveLastPositionWithTTSData ttsDataInfo file >>  " + ttsDataInfo.getFilePath());
+
+        boolean bSuccess = false;
+
+        try {
+            int spineIndex = getSpineIndex(ttsDataInfo.getFilePath());
+            double currentTempPercent = getChapterStartPercent(spineIndex) * 100;
+            if(Double.isInfinite(currentTempPercent) )
+                currentTempPercent = 0.0;
+
+            DebugSet.d(TAG, "saveLastPositionByTTSData::percent >> " + currentTempPercent);
+
+            String filePath = getFullPath(BookHelper.readPositionFileName);
+            File lastPositionDataFile = new File(filePath);
+            if( !lastPositionDataFile.exists()) {
+                lastPositionDataFile.createNewFile();
+            }
+            FileOutputStream output = new FileOutputStream(lastPositionDataFile);
+            JSONObject object = new JSONObject();
+            object.put(AnnotationConst.FLK_DATA_TYPE, AnnotationConst.READPOSITION);
+            object.put(AnnotationConst.FLK_READPOSITION_VERSION, "2.0");
+            object.put(AnnotationConst.FLK_READPOSITION_MODEL, DeviceInfoUtil.getDeviceModel());
+            object.put(AnnotationConst.FLK_READPOSITION_OS_VERSION, DeviceInfoUtil.getOSVersion());
+            object.put(AnnotationConst.FLK_READPOSITION_TIME, System.currentTimeMillis()/1000L);
+            object.put(AnnotationConst.FLK_READPOSITION_PATH, ttsDataInfo.getXPath().replace("body:eq(0)>div:eq(0)>div:eq(0)>","div#feelingk_bookcontent>"));
+            object.put(AnnotationConst.FLK_READPOSITION_FILE, BookHelper.getRelFilename(ttsDataInfo.getFilePath()));
+            object.put(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT, currentTempPercent);
+            object.put(AnnotationConst.FLK_READPOSITION_TOTAL_PERCENT, currentTempPercent);
+            DebugSet.d(TAG, "saveLastPositionWithTTSData >>  " + object.toString(1));
+            output.write(object.toString(1).getBytes());
+            output.close();
+            bSuccess = true;
+        } catch( Exception e ) {
+            e.printStackTrace();
+            bSuccess = false;
+        }
+        return bSuccess;
     }
 }

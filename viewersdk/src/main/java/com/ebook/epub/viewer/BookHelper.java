@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.113";
+    public static String VIEWER_VERSION = "3.114";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -537,37 +537,38 @@ public class BookHelper {
         String result = "";
 
         htmlStr = htmlStr.replaceAll("<BODY","<body");
-        htmlStr = htmlStr.replaceAll("BODY>","body>");
+        htmlStr = htmlStr.replaceAll("/BODY>","/body>");
+        String temp = htmlStr;
 
-        int start = htmlStr.indexOf("<body>");
-        int end = htmlStr.indexOf("</body>");
+        int start = temp.indexOf("<body>");
+        int end = temp.indexOf("</body>");
         try {
             if( start != -1 && end != -1 ) {
                 result = htmlStr.substring(start + 6, end);
             } else {
                 if( end != -1 ) {
-                    int index = htmlStr.indexOf("<body");
+                    int index = temp.indexOf("<body");
                     if(index == -1 )
                         throw new Exception();
 
-                    index = htmlStr.indexOf(">", index);
+                    index = temp.indexOf(">", index);
                     if( index <= 0 || index >= end )
                         throw new Exception();
 
                     result = htmlStr.substring(index+1, end);
                 } else {
                     // body tag를 못찾은 경우
-                    start = htmlStr.indexOf("<html>");
-                    end = htmlStr.indexOf("</html>");
+                    start = temp.indexOf("<html>");
+                    end = temp.indexOf("</html>");
                     if( start != -1 && end != -1 ) {
                         result = htmlStr.substring(start + 6, end);
                     } else {
                         if( end != -1 ) {
-                            int index = htmlStr.indexOf("<html");
+                            int index = temp.indexOf("<html");
                             if(index == -1 )
                                 throw new Exception();
 
-                            index = htmlStr.indexOf(">", index);
+                            index = temp.indexOf(">", index);
                             if(index <=0 || index >= end )
                                 throw new Exception();
 

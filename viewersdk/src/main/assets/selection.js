@@ -72,7 +72,7 @@ $(document).ready(function(){
     }
 
     if(currentAndroidVersion == "4.4.2"){
-		audios.removeAttr("loop")
+		audios.removeAttr("loop");
 	}
 
     $('*').contents().each(function() {
@@ -229,6 +229,8 @@ $(document).ready(function(){
             $(this).addClass(ATAG_CLASS);
         }
     });
+
+    setOrgFontSizeAttr();
 });
 /********************************************************************************************* e:ready */
 
@@ -383,6 +385,7 @@ function setupChapter(	highlights,
 						pMargin,
 						lineHeight,
 						fontName,
+						fontSize,
 						maxSelectionLength,
 						bodyMargin) {
     try {
@@ -435,6 +438,8 @@ function setupChapter(	highlights,
         first.css('marginTop', '0em', '!important');
         first.css('paddingTop', firstMarginTop, '!important');
 
+        changeFontSize(parseInt(fontSize)/100);
+
         resizingImage();
 
         setNightMode(isNightMode,true, backgroundColor);
@@ -444,6 +449,22 @@ function setupChapter(	highlights,
         log('setupChapter: ' + err);
         window.selection.reportError(0);
     }
+}
+
+function changeFontSize(ratio) {
+    $('body').find('*').each(function(){
+        var fontSize = $(this).attr('orgfontsize')*ratio;
+        if(!isNaN(fontSize))
+            $(this).css("font-size", fontSize + "px");
+    });
+}
+
+function setOrgFontSizeAttr() {
+    $('body').find('*').each(function(){
+        var fontSize = parseInt($(this).css("font-size"));
+        if(fontSize != undefined)
+            $(this).attr('orgfontsize', fontSize);
+    });
 }
 
 function resizingImage() {
@@ -2458,8 +2479,9 @@ function setFont(fontFamily, fontPath) {
 //}
 
 function changeFontSizeDirect(value) {
-	log('changeFontSizeDirect :' + value);
-	$('#feelingk_bookcontent').css('font-size', value, 'important');
+//	log('changeFontSizeDirect :' + value);
+//	$('#feelingk_bookcontent').css('font-size', value, 'important');
+    changeFontSize(parseInt(value)/100);
 }
 
 function changeLineHeightDirect(value) {

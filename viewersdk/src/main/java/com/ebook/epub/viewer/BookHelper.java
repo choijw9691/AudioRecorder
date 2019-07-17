@@ -932,11 +932,11 @@ public class BookHelper {
 
         String strBase = base_style;
 
-        if(fontSize!=null){
-            strBase=strBase.replaceAll("%feelingk_fontsize_value%", ""+ "font-size: "+fontSize +"%;");
-        } else {
-            strBase=strBase.replaceAll("%feelingk_fontsize_value%", "");
-        }
+//        if(fontSize!=null){
+//            strBase=strBase.replaceAll("%feelingk_fontsize_value%", ""+ "font-size: "+fontSize +"%;");
+//        } else {
+//            strBase=strBase.replaceAll("%feelingk_fontsize_value%", "");
+//        }
 
         if(leftMargin!=null){
             strBase=strBase.replaceAll("%feelingk_marginleft_value%", ""+ leftMargin);
@@ -1018,7 +1018,7 @@ public class BookHelper {
                     "\n column-fill : auto !important;"+
                     "\n}" +
                     "\ndiv#feelingk_bookcontent { " +
-                    "\n %feelingk_fontsize_value% " +
+//                    "\n %feelingk_fontsize_value% " +
                     "\n padding-left: %feelingk_marginleft_value%px; " +
                     "\n padding-right: %feelingk_marginright_value%px; " +
 //                    "\n padding-bottom: %feelingk_paddingbottom_value%px; " +
@@ -1041,6 +1041,9 @@ public class BookHelper {
                     "\n width : %feelingk_body_width_value%;" +
                     "\n %feelingk_body_touch_action%"+
                     "\n}" +
+                    "\ntable {" +
+                    "\n word-wrap : break-word;" +
+                    "\n}"+
                     "\npre {" +
                     "\n white-space : pre-wrap;"+
                     "\n word-wrap : break-word;" +

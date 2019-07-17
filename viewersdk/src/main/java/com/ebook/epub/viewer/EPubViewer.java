@@ -1497,6 +1497,7 @@ public class EPubViewer extends ViewerBase {
         script.append("'").append(BookHelper.paraSpace + "%").append("',");
         script.append("'").append(BookHelper.lineSpace + "%").append("',");
         script.append("'").append(BookHelper.faceName).append("',");
+        script.append(BookHelper.fontSize == null ? 100 : BookHelper.fontSize).append(",");
         script.append(BookHelper.maxSelectionLength).append(",");
         script.append("").append(bodyTopBottomMargin).append(")");
 

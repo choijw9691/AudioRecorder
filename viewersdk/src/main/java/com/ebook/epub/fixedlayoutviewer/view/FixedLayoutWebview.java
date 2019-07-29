@@ -178,6 +178,11 @@ public class FixedLayoutWebview extends ViewerBase {
     private class FixedLayoutJavaScriptInterface {
 
         @JavascriptInterface
+        public void handleNoterefData(String noterefData){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_HANDLE_NOTEREF,noterefData));
+        }
+
+        @JavascriptInterface
         public void overflowedMemoContent(){
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_OVERFLOW_MEMO_CONTENT));
         }
@@ -242,10 +247,10 @@ public class FixedLayoutWebview extends ViewerBase {
             return BookHelper.memoIconPath;
         }
 
-        @JavascriptInterface
-        public void setAsidePopupStatus(boolean status){
-            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS, status));   // TODO :: handler case 정의
-        }
+//        @JavascriptInterface
+//        public void setAsidePopupStatus(boolean status){
+//            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS, status));   // TODO :: handler case 정의
+//        }
 
         @JavascriptInterface
         public void stopMediaOverlay(){
@@ -1231,6 +1236,23 @@ public class FixedLayoutWebview extends ViewerBase {
                 break;
             }
 
+            case Defines.FIXEDLAYOUT_HANDLE_NOTEREF :
+
+                try {
+                    JSONObject jsonObject = new JSONObject((String) msg.obj);
+                    JSONObject aTagRectObj = new JSONObject(jsonObject.getString("position"));
+                    aTagRectObj.put("left", Web2Scr(aTagRectObj.getInt("left")));
+                    aTagRectObj.put("top", Web2Scr(aTagRectObj.getInt("top")));
+                    aTagRectObj.put("right", Web2Scr(aTagRectObj.getInt("right")));
+                    aTagRectObj.put("bottom", Web2Scr(aTagRectObj.getInt("bottom")));
+                    jsonObject.put("position", aTagRectObj.toString());
+                    mWebviewCallbackListener.reportNoterefData(jsonObject.toString(), currentPageData.getContentsPosition());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+
             case Defines.FIXEDLAYOUT_MEDIAOVERLAY_PAUSE : {
                 mWebviewCallbackListener.pauseMediaOverlay();
                 break;
@@ -1350,10 +1372,10 @@ public class FixedLayoutWebview extends ViewerBase {
                 break;
             }
 
-            case Defines.FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS : {
-                mWebviewCallbackListener.reportAsidePopupStatus((Boolean)msg.obj);
-                break;
-            }
+//            case Defines.FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS : {
+//                mWebviewCallbackListener.reportAsidePopupStatus((Boolean)msg.obj);
+//                break;
+//            }
 
             case Defines.FIXEDLAYOUT_REPORT_VIDEO_INFO : {
                 mWebviewCallbackListener.reportVideoInfo((String)msg.obj);
@@ -1496,7 +1518,7 @@ public class FixedLayoutWebview extends ViewerBase {
     public interface OnWebviewCallbackInterface {
         void reportPageLoadFinished(FixedLayoutPageData.ContentsData data);
         void reportVideoInfo(String videoSrc);
-        void reportAsidePopupStatus(boolean isAsidePopopShow);
+        void reportNoterefData(String noterefData, int contentPosition);
         void reportLinkClick(String href);
         void reportTouchPosition(int x, int y);
         void reportCurrentPageInfo(Bookmark bookmarkInfo);

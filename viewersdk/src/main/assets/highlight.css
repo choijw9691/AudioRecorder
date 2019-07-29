@@ -18,7 +18,7 @@
 	background-color: transparent !important;
 }
 
-.KYBUnderline 
+.KYBUnderline
 {
      text-decoration:underline; 
 }
@@ -100,4 +100,8 @@
     margin: -0.6em;
     text-indent : 0em !important;
     background-color : transparent !important;
+}
+
+aside {
+    display : none;
 }

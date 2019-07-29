@@ -555,14 +555,6 @@ public class FixedLayoutZoomView extends LinearLayout {
         return false;
     }
 
-    public void hideNoteref(){
-        mFixedLayoutContainerView.hideNoteref();
-    }
-
-    public void setPreventNoteref(boolean isPrevent){
-        mFixedLayoutContainerView.setPreventNoteref(isPrevent);
-    }
-
     public void onClose(){
         mFixedLayoutContainerView.onClose();
     }

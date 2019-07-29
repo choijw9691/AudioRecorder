@@ -16,89 +16,30 @@
  **/
 
 (function ($) {
-	
-    var isTouch = 'ontouchstart' in window;
-    var events = (isTouch) ? { start: 'touchstart', move: 'touchmove', end: 'touchend' }
-			: { start: 'mousedown', move: 'mousemove', end: 'mouseup' };
 
     $.epubType = function () {
         this.noterefDataList = null;
     };
 
     $.epubType.prototype = {
-        init: function () {
+        init: function (currentContentType) {
             this.noterefDataList = this.process();
 
-            var opt = {
-                content: '[title]',
-                className: 'flk_note',
-                width: 'auto',
-                height: 'auto',
-                scroll: 'hidden',
-                position: 'left',
-                extraSpace: 'padding',
-                paddingLeft: 'padding-left',
-                paddingRight: 'padding-right',
-                borderWidth: 'border-width',
-                styleTop: 2,
-                styleWidth: 2,
-                event: 'click',
-                root: '#feelingk_bookcontent'
-            };
-            
-            noteref.init(opt);
-            
             for (var i = 0; i < this.noterefDataList.length; i++) {
+                var noterefData = this.noterefDataList[i];
                 var aTag = $(this.noterefDataList[i].element);
-               if (aTag.attr("epub\:type") == "noteref") {
-
-                    var ref = $(aTag.attr("href"));
-                    var text = ref.html().trim();
-
-                    aTag.click(function (event) {
+                if (aTag.attr("epub\:type") == "noteref") {
+                    aTag.on('click', { value: noterefData }, function(event){
                         event.preventDefault();
-                        
-                        var a = $(this);
-                        var ref = $(a.attr("href"));
-                        var text = ref.html().trim();
-
-                        if(window.selection.getTextSelectionMode()){
-                            return;
+                        if(currentContentType == "reflowable"){
+                             window.selection.handleNoterefData(JSON.stringify(event.data.value));
+                        } else if(currentContentType == "fixedlayout"){
+                            window.fixedlayout.handleNoterefData(JSON.stringify(event.data.value));
                         }
-
-                        noteref.bind(a);
-                        noteref.position();
-                        noteref.text(text);
-                        
-                        if(noteref.status()){
-                        	noteref.hide();
-                        	window.selection.setAsidePopupStatus(false);
-                        	noteref.isChanged=true;
-                        	
-                        	if(noteref.getCurrentMode()==3){
-                        		var bodyEl = $('body')[0];
-                        		bodyEl.style.position = "static";	
-                        		bodyEl.style.top = "0px";
-                        		window.scrollTo(0,noteref.scrollTop);
-                        	}
-                            
-                        } else{
-                        	noteref.show();
-                        	window.selection.setAsidePopupStatus(true);
-                        	noteref.isChanged=true;
-                        	
-                        	if(noteref.getCurrentMode()==3){
-                        		var scrollTop =  $('body').scrollTop();
-                            	noteref.scrollTop = scrollTop;
-                        		var bodyEl = $('body')[0];
-                        		bodyEl.style.position = "fixed";	
-                        		bodyEl.style.top = -1*scrollTop-parseFloat($('body').css('margin-top')) + "px";
-                        	}
-                        }
+                        return;
                     });
                 }
             }
-
         },
         data: function () {
             return this.noterefDataList;
@@ -113,29 +54,21 @@
                 return $(this).attr('epub\:type') == 'noteref';
             });
 
+
             for (var i = 0; i < noterefArray.length; ++i) {
                 var noteref = $(noterefArray[i]);
-
-                if(noteref.attr('href').indexOf('#') != -1 && noteref.attr('href').indexOf('#') != 0)   // TODO :: 20190528 현재 챕터 케이스만 거르도록 수정 -> 외부 챕터 내 각주 내용 있는 경우 개발 시 수정 필요
-                    continue;
-
-                var noteLink = $(noteref.attr('href'));
-                $(noteLink).hide();
-
-                var noteLinkData = {
-                    id: noteLink.attr('id'),
-                    epubType: noteLink.attr('epub:type'),
-                    innerHtml: noteLink.html().trim(),
-                    tagName: $(noteLink)[0].tagName
+                var asideContent="";
+                if(noteref.attr('href').indexOf('#')==0){
+                    var targetId = noteref.attr('href');
+                    asideContent = $(targetId)[0].textContent;
                 }
-
                 var noterefData = {
                     href: noteref.attr('href'),
                     value: noteref.text(),
+                    asideContent : asideContent,
                     element: noteref,
-                    noteLinkData: noteLinkData
+                    position : JSON.stringify(noterefArray[i].getClientRects()[0])
                 }
-
                 this.noterefDataList[i] = noterefData;
             }
             return this.noterefDataList;

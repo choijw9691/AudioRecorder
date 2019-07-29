@@ -38,6 +38,7 @@ import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
 import com.ebook.epub.common.Defines;
+import com.ebook.epub.parser.common.AttributeName;
 import com.ebook.epub.parser.common.ElementName;
 import com.ebook.epub.parser.common.UnModifiableArrayList;
 import com.ebook.epub.parser.mediaoverlays.SmilSync;
@@ -54,7 +55,6 @@ import com.ebook.epub.viewer.ViewerContainer.OnMediaControlListener;
 import com.ebook.epub.viewer.ViewerContainer.OnMediaOverlayStateListener;
 import com.ebook.epub.viewer.ViewerContainer.OnMemoSelection;
 import com.ebook.epub.viewer.ViewerContainer.OnMoveToLinearNoChapterListener;
-import com.ebook.epub.viewer.ViewerContainer.OnNoterefListener;
 import com.ebook.epub.viewer.ViewerContainer.OnPageBookmark;
 import com.ebook.epub.viewer.ViewerContainer.OnPageScroll;
 import com.ebook.epub.viewer.ViewerContainer.OnReportError;
@@ -78,9 +78,15 @@ import com.ebook.tts.TTSDataInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.net.URLDecoder;
@@ -91,6 +97,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 @SuppressWarnings("deprecation")
 public class EPubViewer extends ViewerBase {
@@ -275,6 +284,8 @@ public class EPubViewer extends ViewerBase {
     private boolean scrollToBottom = false;
     private int[] touchedXY = new int[2];
 
+    private boolean asidePopupStatus = false;
+
     ViewerContainer.OnVideoInfoListener mOnVideoInfoListener=null;
     public void setOnVideoInfoListener(ViewerContainer.OnVideoInfoListener l) {
         mOnVideoInfoListener = l;
@@ -321,11 +332,11 @@ public class EPubViewer extends ViewerBase {
         mediaOverlayController.setOnMediaOverlayStateListener(listener);
     }
 
-    public boolean asidePopupStatus = false; 	// aside popup status -> touch event flag
-    OnNoterefListener mOnNoterefListener = null;
-    public void setOnNoterefListener(OnNoterefListener listener){
-        mOnNoterefListener= listener;
-    }
+//    public boolean asidePopupStatus = false; 	// aside popup status -> touch event flag
+//    OnNoterefListener mOnNoterefListener = null;
+//    public void setOnNoterefListener(OnNoterefListener listener){
+//        mOnNoterefListener= listener;
+//    }
 
     /**
      * 	 Drm을 사용할 경우 호출되는 이벤트
@@ -460,6 +471,11 @@ public class EPubViewer extends ViewerBase {
      * MyJavaScriptObject class - javascript interface용 클래스
      */
     class MyJavaScriptObject {
+
+        @JavascriptInterface
+        public void handleNoterefData(String noterefData){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_HANDLE_NOTEREF,noterefData));
+        }
 
         @JavascriptInterface
         public void setCurrentInnerChapter(String chapterId){
@@ -622,8 +638,10 @@ public class EPubViewer extends ViewerBase {
         public void HitTestResult(final String url, final int type, final int x, final int y, final boolean singleTap, final boolean isExceptionalTagOrAttr) {
             DebugSet.w(TAG, "HittestResult ========================== "  + type + "| " + url);
 
-            if(asidePopupStatus)
+            if(asidePopupStatus) {
+                asidePopupStatus = false;
                 return;
+            }
 
             Thread linkThread = new Thread(new Runnable() {
 
@@ -1142,17 +1160,17 @@ public class EPubViewer extends ViewerBase {
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SCROLL_PAGE_OR_CHAPTER, 1));
         }
 
-        @JavascriptInterface
-        public void setAsidePopupStatus(boolean status){
-            asidePopupStatus = status;
-            if(mOnNoterefListener!=null){
-                if( asidePopupStatus){
-                    mOnNoterefListener.didShowNoterefPopup();
-                } else{
-                    mOnNoterefListener.didHideNoterefPopup();
-                }
-            }
-        }
+//        @JavascriptInterface
+//        public void setAsidePopupStatus(boolean status){
+//            asidePopupStatus = status;
+//            if(mOnNoterefListener!=null){
+//                if( asidePopupStatus){
+//                    mOnNoterefListener.didShowNoterefPopup();
+//                } else{
+//                    mOnNoterefListener.didHideNoterefPopup();
+//                }
+//            }
+//        }
 
         @JavascriptInterface
         public String getMemoIconPath(){
@@ -4372,17 +4390,17 @@ public class EPubViewer extends ViewerBase {
         }
     }
 
-    public boolean isNoterefEnabled(){
-        return asidePopupStatus;
-    }
+//    public boolean isNoterefEnabled(){
+//        return asidePopupStatus;
+//    }
 
-    public void hideNoteref(){
-        loadUrl("javascript:resetBodyStatus()");
-    }
+//    public void hideNoteref(){
+//        loadUrl("javascript:resetBodyStatus()");
+//    }
 
-    public void setPreventNoteref(boolean isPrevent){
-        loadUrl("javascript:setPreventNoteref("+isPrevent+")");
-    }
+//    public void setPreventNoteref(boolean isPrevent){
+//        loadUrl("javascript:setPreventNoteref("+isPrevent+")");
+//    }
 
     public String getCurrentHtmlString(){
         return mChapterString.get(mReadingSpine.getCurrentSpineIndex());
@@ -4959,7 +4977,12 @@ public class EPubViewer extends ViewerBase {
     public void onFling(MotionEvent e, float dx, float dy, int direction) {
         DebugSet.d(TAG, "onFling direction : " + direction);
 
-        if(asidePopupStatus || isPreventPageMove || BookHelper.animationType==3){
+        if(asidePopupStatus){
+            asidePopupStatus = false;
+            return;
+        }
+
+        if (isPreventPageMove || BookHelper.animationType==3){
             return;
         }
 
@@ -5112,7 +5135,7 @@ public class EPubViewer extends ViewerBase {
         DebugSet.d(TAG, "onLongPress in x : "+x +" / y : "+y);
 
         if(asidePopupStatus) {
-            hideNoteref();
+            asidePopupStatus = false;
             return;
         }
 
@@ -5595,6 +5618,9 @@ public class EPubViewer extends ViewerBase {
             case Defines.REF_SCROLL_BY_CLICK :  // TODO :: REF_HANDLE_TOUCH_EVENT
                 DebugSet.d(TAG, "REF_SCROLL_BY_CLICK");
 
+                if(asidePopupStatus)
+                    return;
+
                 MotionEvent event = (MotionEvent)msg.obj;
                 if(mediaOverlayController.isMediaOverlayPlaying()){
                     int x = Scr2Web((int)event.getX());
@@ -5785,6 +5811,35 @@ public class EPubViewer extends ViewerBase {
 
                 __canFocusSearchResult = false;
                 __focusSearchResult = null;
+                break;
+
+            case Defines.REF_HANDLE_NOTEREF :
+                try {
+                    JSONObject jsonObject = new JSONObject((String)msg.obj);
+                    String href = jsonObject.getString("href").trim();
+                    String title = jsonObject.getString("value");
+                    String asideContents = jsonObject.getString("asideContent");
+                    JSONObject aTagRectObj = new JSONObject(jsonObject.getString("position"));
+                    Rect aTagRect = new Rect(Web2Scr(aTagRectObj.getInt("left")), Web2Scr(aTagRectObj.getInt("top")), Web2Scr(aTagRectObj.getInt("right")), Web2Scr(aTagRectObj.getInt("bottom")));
+                    if(BookHelper.animationType!=3) {
+                        aTagRect.left -= EPubViewer.this.getScrollX();
+                        aTagRect.right -= EPubViewer.this.getScrollX();
+                    } else {
+                        aTagRect.top -= EPubViewer.this.getScrollY();
+                        aTagRect.bottom -= EPubViewer.this.getScrollY();
+                    }
+                    if(href.indexOf("#") !=0 ){
+                        String targetFilePath = href.substring(0, href.indexOf("#"));
+                        String targetId = href.substring(href.indexOf("#")+1,href.length());
+                        asideContents = parsingNoterefData(targetFilePath, targetId);
+                    }
+                    if(mOnTagClick !=null){
+                        mOnTagClick.onNoteref(title, asideContents, aTagRect);
+                        asidePopupStatus = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
 
             case Defines.REF_VIDEO_TAG_CLICK :  // TODO :: 필요없으면 지우자 ?
@@ -6195,6 +6250,8 @@ public class EPubViewer extends ViewerBase {
         __chapterLoadNext=false;
         __forceChapterChanging = false;
 
+        asidePopupStatus = false;
+
         if( __focusedScroll ) {
             __focusedScroll = false;
         } else {
@@ -6284,5 +6341,61 @@ public class EPubViewer extends ViewerBase {
             bSuccess = false;
         }
         return bSuccess;
+    }
+
+    private String parsingNoterefData(String filePath, String id) {
+        String targetHtmlContent = "";
+        UnModifiableArrayList<ReadingOrderInfo> nonChapter = mReadingSpine.getNonLinearSpineInfos();
+        UnModifiableArrayList<ReadingOrderInfo> spineChapter = mReadingSpine.getSpineInfos();
+        for(int idx=0; idx<nonChapter.size(); idx++){
+            if(nonChapter.get(idx).getSpinePath().contains(filePath)){ // 목차에 없는 파일
+                if( __isIgnoreDrm ) {
+                    targetHtmlContent = BookHelper.file2String(nonChapter.get(idx).getSpinePath());
+                    break;
+                } else {
+                    if( mOnDecodeContent != null ) {
+                        targetHtmlContent = mOnDecodeContent.onDecode(getDrmKey(), nonChapter.get(idx).getSpinePath()); // TODO :: decode path 맞는지 테스트 해야함
+                        break;
+                    }
+                }
+            }
+        }
+        if(targetHtmlContent == "") { // 목차에 있는 파일
+            for(int idx=0; idx<spineChapter.size(); idx++){
+                if(spineChapter.get(idx).getSpinePath().contains(filePath)){
+                    if( __isIgnoreDrm ) {
+                        targetHtmlContent = BookHelper.file2String(spineChapter.get(idx).getSpinePath());
+                        break;
+                    } else {
+                        if( mOnDecodeContent != null ) {
+                            targetHtmlContent = mOnDecodeContent.onDecode(getDrmKey(), spineChapter.get(idx).getSpinePath()); // TODO :: decode path 맞는지 테스트 해야함
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        targetHtmlContent = targetHtmlContent.replaceAll("&nbsp;"," ");
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setIgnoringComments(true);
+            Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(targetHtmlContent)));
+            xml.normalize();
+            NodeList asideList = xml.getElementsByTagName("aside");
+            for (int i = 0; i < asideList.getLength(); ++i) {
+                String currentId =  asideList.item(i).getAttributes().getNamedItem(AttributeName.ID) != null ? asideList.item(i).getAttributes().getNamedItem(AttributeName.ID).getNodeValue() : "";
+                if(!currentId.isEmpty() && currentId.equalsIgnoreCase(id)){
+                    return asideList.item(i).getTextContent();
+                }
+            }
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

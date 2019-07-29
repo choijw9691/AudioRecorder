@@ -53,6 +53,7 @@ public class Defines {
     public static final int REF_SCROLL_AUTO = 145;
     public static final int REF_OVERFLOW_TEXT_SELECTION = 146;
     public static final int REF_OVERFLOW_MEMO_CONTENT = 147;
+    public static final int REF_HANDLE_NOTEREF = 148;
 
     public static final int REF_VIDEO_TAG_CLICK = 160;
     public static final int REF_VIDEO_CONTROL = 161;
@@ -81,7 +82,7 @@ public class Defines {
     public static final int FIXEDLAYOUT_SEARCH_END = 215;
     public static final int FIXEDLAYOUT_REPORT_CURRENT_PAGE_INFO = 216;
     public static final int FIXEDLAYOUT_LINK_CLICK = 217;
-    public static final int FIXEDLAYOUT_SET_ASIDEPOPUP_STATUS = 218;
+    public static final int FIXEDLAYOUT_HANDLE_NOTEREF = 218;
     public static final int FIXEDLAYOUT_OVERFLOW_MEMO_CONTENT = 219;
     public static final int FIXEDLAYOUT_SET_BGM_STATE = 220;
 

@@ -26,7 +26,6 @@ var gDirectionType = 0; // 0: ltr , 1 : rtl
 var gCurrentViewMode;
 var gTwoPageViewMode;
 var gOsVersion;
-var gNoteRefArray = new Array;
 var audioTimerID;
 var fontfaceLoadingDone=true;
 var chromeAgent;
@@ -81,26 +80,11 @@ $(document).ready(function(){
         }
     });
 
-    var epubtype = $.epubtype();
-    var epubswitch = $.epubswitch();
-    var epubtrigger = $.epubtrigger();
-    epubtype.init();
-    epubswitch.init();
-    epubtrigger.init();
-    gNoteRefArray = epubtype.data();
-
 	document.body.addEventListener('touchstart', function(event) {
 
-//        if(window.selection.getTextSelectionMode()){
-//            event.preventDefault();
-//        }
 		var touch = event.changedTouches[0];
-
-		if( noteref.isChanged )
-			 noteref.isChanged  = false;
-
     	if( touch.target.tagName.toUpperCase() == 'A' && touch.target.getAttribute('epub\:type') != 'noteref' /*|| touch.target.tagName == 'VIDEO'*/){
-//    		event.preventDefault();
+    		event.preventDefault();
     	}
 	}, {passive:false});
 
@@ -400,8 +384,6 @@ function setupChapter(	highlights,
         gMarginBottom = marginBottom;
         gMaxSelectionLength = maxSelectionLength;
 
-        noteref.setCurrentState(currentViewMode, twoPageViewMode, isNightMode, bodyMargin);
-
         if(gMarginTop == null){
         	gMarginTop = 0;
         }
@@ -444,6 +426,14 @@ function setupChapter(	highlights,
 
         setNightMode(isNightMode,true, backgroundColor);
         applyHighlights(highlights);
+
+        var epubtype = $.epubtype();
+        var epubswitch = $.epubswitch();
+        var epubtrigger = $.epubtrigger();
+        epubtype.init("reflowable");
+        epubswitch.init();
+        epubtrigger.init();
+        gNoteRefArray = epubtype.data();
 
     } catch(err) {
         log('setupChapter: ' + err);
@@ -1394,36 +1384,9 @@ function findTagUnderPoint(x,y,singleTap,isTextSelectionDisabled) {
     try {
         // aside popup 영역 예외처리
     	var element = document.elementFromPoint(x, y);
-    	if(element.className == "flk_inner")
-    		return;
-
-    	if( noteref.isChanged ){
-    		return;
-    	} else if( !noteref.isChanged && noteref.status()){
-    		var innerExist = false;
-    		var parents = $(element).parents();
-    		for (var i=0; i<parents.length; i++) {
-				var parent = parents[i];
-				if (parent.className == "flk_inner") {
-					innerExist=true;
-					break;
-				}
-			}
-
-    		if(!innerExist){
-    			noteref.hide();
-    			window.selection.setAsidePopupStatus(false);
-    			if(gCurrentViewMode==3){
-        			var bodyEl = $('body')[0];
-            		bodyEl.style.position = "static";
-            		bodyEl.style.top = "0px";
-            		window.scrollTo(0,noteref.scrollTop);
-            	}
-    			return;
-    		}
-    	}
-
      	log("-------------------------------------------------tagName : " + element.tagName);
+
+        if($(element).attr('epub\:type') == 'noteref' || $(element).parent().attr('epub\:type') == 'noteref') return;
 
         //trigger 버튼 예외 처리
      	var targetId = element.id;
@@ -1714,8 +1677,6 @@ function getTextFromSearchWord(node, pat, pos, maxLen) {
 /**************************************************** s:move page*/
 function gotoID(inputid, twoPageViewMode) {
 
-	resetBodyStatus();
-
     var pageNum=0;
     var left=0;
     var top=0;
@@ -1758,8 +1719,6 @@ function gotoID(inputid, twoPageViewMode) {
 
 function gotoHighlight(inputid, twoPageViewMode) {
 
-	resetBodyStatus();
-
 	if(gCurrentViewMode!=3){
 
 		var pageNum=0;
@@ -1786,8 +1745,6 @@ function gotoHighlight(inputid, twoPageViewMode) {
 }
 
 function gotoPATH(path, isReload, twoPageViewMode) {
-
-	resetBodyStatus();
 
 	path = stringDotRevision(path);
 
@@ -1847,51 +1804,12 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, updatePageInfo) {
         window.selection.setPercentInChapter(window.scrollY/document.body.scrollHeight*100);
     }
 
-    if(noteref.status()){
-        noteref.hide();
-        noteref.isChanged=false;
-        window.selection.setAsidePopupStatus(false);
-    }
-
     if( updatePageInfo || pageNumber == 0 ){
         window.selection.updatePosition(gCurrentPage, gPosition);
     }
     return gPosition;
 }
 /**************************************************** e:move page*/
-
-//function showNoteRefPopup(aTag) {
-//	try{
-//		if (aTag.attr("epub\:type") == "noteref") {
-//
-//			var href = aTag.attr("href");
-//
-//			for ( var i = 0; i < gNoteRefArray.length; i++) {
-//				var noteRef = gNoteRefArray[i];
-//
-//				if (href == noteRef.href) {
-//					var noteLink = noteRef.noteLinkData;
-//
-//					if (noteLink.tagName.toUpperCase() == "DIV" && noteLink.epubType != null) {
-////						var ref = $(noteRef.href);
-////						var text = noteLink.innerHTML;
-////						log('ref text : ' + text);
-////
-////						poshytip.bind(aTag);
-////						poshytip.position();
-////						poshytip.text(text);
-////						poshytip.show();
-//						return true;
-//					}
-//				}
-//			}
-//		}
-//	} catch(err) {
-//		log("showNoteRefPopup : " + err);
-//	}
-//
-//	return false;
-//}
 
 function getFirstVisibleItem(twoPageView) {
 
@@ -3190,8 +3108,6 @@ function scrollToBottom(){
 
 function scrollByPercent(percent, twoPageViewMode){
 
-	resetBodyStatus();
-
 	window.scrollTo(0,$('#feelingk_bookcontent').height()*percent/100);
 	if($(document).height()<=window.innerHeight || percent<=0)
 		goPage(0,twoPageViewMode);
@@ -3234,31 +3150,6 @@ function getIDListOnCurrentPage(filePath) {
 	}
 	log("getIDListOnCurrentPage : "+JSON.stringify(idList));
 	window.selection.setIDListOnCurrentPage(JSON.stringify(idList));
-}
-
-//function isChildOfInner(element) {
-//	while (element != null) {
-//		if (element.className == "flk_inner")
-//			return true;
-//		element = element.parentNode;
-//	}
-//	return false;
-//}
-
-function resetBodyStatus(){
-	noteref.hide();
-	noteref.isChanged=false;
-	window.selection.setAsidePopupStatus(false);
-	if(gCurrentViewMode==3){
-		var bodyEl = $('body')[0];
-		bodyEl.style.position = "static";
-		bodyEl.style.top = "0px";
-		window.scrollTo(0,noteref.scrollTop);
-	}
-}
-
-function setPreventNoteref(isPrevent){
-	noteref.setPrevent(isPrevent);
 }
 
 function getPercentOfElement(element) {

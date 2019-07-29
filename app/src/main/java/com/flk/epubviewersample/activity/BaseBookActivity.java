@@ -14,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -514,18 +515,19 @@ public class BaseBookActivity extends Activity implements Runnable {
         mViewer.setPageColumOnLandscape(2);
         mViewer.setPageEffect(1);
 
-        mViewer.setOnNoterefListener(new ViewerContainer.OnNoterefListener() {
+//        mViewer.setOnNoterefListener(new ViewerContainer.OnNoterefListener() {
+//
+//            @Override
+//            public void didShowNoterefPopup() {
+//                Log.d("DEBUG","show noteref ");
+//            }
+//
 
-            @Override
-            public void didShowNoterefPopup() {
-                Log.d("DEBUG","show noteref ");
-            }
-
-            @Override
-            public void didHideNoterefPopup() {
-                Log.d("DEBUG","hide noteref ");
-            }
-        });
+//            @Override
+//            public void didHideNoterefPopup() {
+//                Log.d("DEBUG","hide noteref ");
+//            }
+//        });
 
         mViewer.setMoveToLinearNoChapter(new ViewerContainer.OnMoveToLinearNoChapterListener() {
 
@@ -1317,6 +1319,11 @@ public class BaseBookActivity extends Activity implements Runnable {
                     }
                     mViewer.goPageByLink(hrefValue, id);
                 }
+            }
+
+            @Override
+            public void onNoteref(String title, String value, Rect position) {
+                Toast.makeText(BaseBookActivity.this, " title : "+title+ " \n value : "+value, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -2206,7 +2213,6 @@ public class BaseBookActivity extends Activity implements Runnable {
                 case R.id.backColor4:
                 case R.id.backColor5: {
                     int clrIndex = v.getId() - R.id.backColor1;
-//                    mViewer.changeHighlightColorDirect(clrIndex);
                     mViewer.modifyAnnotationColorAndRange(clrIndex);    // TODO :: new custom selection modified
                     break;
                 }
@@ -2325,7 +2331,6 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             @Override
             public void onClick(View v) {
-//                mViewer.changeHighlightColorDirect(0);
                 mViewer.modifyAnnotationColorAndRange(2);    // TODO :: new custom selection modified
             }
         });
@@ -2334,7 +2339,6 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             @Override
             public void onClick(View v) {
-//                mViewer.changeHighlightColorDirect(1);
                 mViewer.modifyAnnotationColorAndRange(3);    // TODO :: new custom selection modified
             }
         });
@@ -2343,7 +2347,6 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             @Override
             public void onClick(View v) {
-//                mViewer.changeHighlightColorDirect(2);
                 mViewer.modifyAnnotationColorAndRange(4);    // TODO :: new custom selection modified
             }
         });
@@ -2352,7 +2355,6 @@ public class BaseBookActivity extends Activity implements Runnable {
 
             @Override
             public void onClick(View v) {
-//                mViewer.changeHighlightColorDirect(3);
                 mViewer.modifyAnnotationColorAndRange(0);    // TODO :: new custom selection modified
             }
         });

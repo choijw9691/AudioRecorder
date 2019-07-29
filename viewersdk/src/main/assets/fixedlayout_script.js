@@ -8,7 +8,6 @@ const MEMO_CLASS='KYBMemo';
 
 var gWindowInnerHeight = 0;
 var gWindowInnerWidth = 0;
-var gNoteRefArray = new Array;
 
 $(document).ready(function(){
 
@@ -30,16 +29,6 @@ $(document).ready(function(){
 
     window.fixedlayout.setBGMState();
 
-//    $('#feelingk_bookcontent').on('scroll touchmove',function(e){
-//        if(isPreventMediaControl || textSelectionMode){
-//            e.preventDefault();
-//            e.stopPropagation();
-//            return false;
-//        } else {
-//            finishTextSelection();
-//        }
-//    });
-
 	document.addEventListener('scroll', function(event){
 	   if(isPreventMediaControl || textSelectionMode){
             event.preventDefault();
@@ -49,13 +38,6 @@ $(document).ready(function(){
             clearSelection();
 	   }
 	},false);
-
-//    var viewportmeta = document.querySelector('meta[name="viewport"]');
-//    var check = viewportmeta.content.match(/height=[^,]+/);
-//    var heightValue  = check[0].match(/\d/g);
-//    heightValue = heightValue.join("");
-//    $('#feelingk_booktable').css('height',heightValue,'important');
-//    $('#feelingk_bookcontent').css('height',heightValue,'important');
 
 	 $('video').bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
 
@@ -111,15 +93,14 @@ $(document).ready(function(){
 		 window.fixedlayout.stopMediaOverlay();	// 음원 재생 시 미디어오버레이 중지
 	 });
 
-	 var epubtype = $.epubtype();
-	 var epubswitch = $.epubswitch();
-	 var epubtrigger = $.epubtrigger();
-	 epubtype.init();
-	 epubswitch.init();
-	 epubtrigger.init();
-	 gNoteRefArray = epubtype.data();
-
     resizeWidth();
+
+    var epubtype = $.epubtype();
+    var epubswitch = $.epubswitch();
+    var epubtrigger = $.epubtrigger();
+    epubtype.init("fixedlayout");
+    epubswitch.init();
+    epubtrigger.init();
 
 	jQuery.fn.getPath=function() {
 
@@ -166,111 +147,6 @@ function log(text){
         window.fixedlayout.print(text);
     }
 }
-
-//function getSvgTag() {
-//    //모든 SVG 찾기
-//    var svgs = $('svg');
-//    for (var i = 0; i < svgs.length; i++) {
-//        var svgElement = svgs[i];
-//        svgReload(svgElement);
-//    }
-//}
-//function svgReload(element) {
-//    var node = $(element);
-//    var htmlText = new XMLSerializer().serializeToString(element);
-//    var prev = node.prev();
-//    var next = node.next();
-//    var parent = node.parent();
-//    node.remove();
-//
-//    //상위형제
-//    if (prev != null && prev.length > 0) {
-//        prev.after(htmlText);
-//    }
-//    //하위형제
-//    else if (next != null && next.length > 0) {
-//        next.before(htmlText);
-//    }
-//    //부모
-//    else {
-//        parent.append(htmlText);
-//    }
-//}
-
-//function checkAudioTag(){
-//	//모든 오디오 찾기
-//	var audios = $('audio');
-//	for(var i = 0; i < audios.length; i++) {
-//		var audioElement = audios[i];
-//
-//		//오디오 정지
-//		audioElement.pause();
-//
-//		//결과값에 SRC 추가
-//		var valueSRC = "";
-//		if(audioElement.src.length > 0){
-//			valueSRC = audioElement.src;
-//		} else {
-//			for(var j = 0; j < audioElement.children.length; j++){
-//				if(audioElement.children[j].src.length > 0){
-//					valueSRC = audioElement.children[j].src;
-//					break;
-//				}
-//			}
-//		}
-//
-//		if(valueSRC.length > 0){
-//			if(audioElement.autoplay == true){
-//				audioElement.play();
-//				break;
-//			}
-//		}
-//	}
-//}
-
-//function getVideoTag() {
-//	//모든 비디오 찾기
-//	var videos = $('video');
-//	var videoArray = new Array();
-//
-//	for(var i = 0; i < videos.length; i++){
-//		var videoElement = videos[i];
-//
-//		//비디오 정지
-//		videoElement.pause();
-//
-//		var posLeft = $(videoElement).offset().left - $(document).scrollLeft();
-//		var posTop = $(videoElement).offset().top - $(document).scrollTop();
-//		var posRight = posLeft + $(videoElement).width();
-//		var posBottom = posTop + $(videoElement).height();
-//
-////		if(posLeft >= 0 && posRight <= gWindowInnerWidth)
-////		{
-//		if(posLeft >= 0) {
-//			//결과값에 SRC 추가
-//			var valueSRC = "";
-//			if(videoElement.src.length > 0) {
-//				valueSRC = videoElement.src;
-//			} else {
-//				for(var j = 0; j < videoElement.children.length; j++) {
-//					if(videoElement.children[j].src.length > 0) {
-//						valueSRC = videoElement.children[j].src;
-//						if( videoElement.children[j].src.indexOf(".mp4") > -1 ){
-//							break;
-//						}
-//					}
-//				}
-//			}
-//
-//			if(valueSRC.length > 0){
-//				if(videoElement.autoplay == true){
-//					videoElement.play();
-//					break;
-//				}
-//			}
-//		}
-//	}
-//}
 
 function stopAllMedia(){
 	stopAllVideo();
@@ -1411,15 +1287,6 @@ function reloadPoster(){
 	 }
 }
 
-function hideNoteref(){
-	noteref.hide();
-	window.fixedlayout.setAsidePopupStatus(false);
-}
-
-function setPreventNoteref(isPrevent){
-	noteref.setPrevent(isPrevent);
-}
-
 function getPercentOfElement(element) {     // TODO :: 색상 변경 시 쓰였는데 어디다 써야하는지 확인하기
 
     var elementTop = element.offset().top;
@@ -1489,9 +1356,7 @@ function setMemoIcon() {
 
 function findTagUnderPoint(x, y, orgX, orgY, isSelectionDisabled){
 
-    console.log("SSIN findTagUnderPoint in");
-
-    noteref.isPrevent=false;
+    console.log("findTagUnderPoint in");
 
     var element = document.elementFromPoint(x, y);
     if(element==null || element==undefined) {
@@ -1500,15 +1365,9 @@ function findTagUnderPoint(x, y, orgX, orgY, isSelectionDisabled){
     }
 
     var tagName = element.tagName.toUpperCase();
-    console.log("SSIN findTagUnderPoint tagName : "+tagName);
+    console.log("findTagUnderPoint tagName : "+tagName);
 
-    if( noteref.isChanged ){
-        noteref.isChanged  = false;
-        return;
-    } else if( !noteref.isChanged && noteref.status()){
-        hideNoteref();
-        return;
-    }
+    if($(element).attr('epub\:type') == 'noteref' || $(element).parent().attr('epub\:type') == 'noteref') return;
 
     var isExceptionalTagOrAttr = false;
     if(!isSelectionDisabled){
@@ -1631,7 +1490,7 @@ var currentSelectionInfo;
 var currentSelectedHighlightId=null;    // 실제 움직임을 판단하기 위한 첫 글자 range
 
 var contextMenuTargetPosition = "END";  // 컨텍스트 메뉴 기준 핸들러 포지션
-/***************************************************** s : new custom selection - make totalRange with user action */
+/***************************************************** s : new custom selection */
 function setStartSelectionRange(x,y) {
 
     console.log("SSIN setStartSelectionRange in");
@@ -2012,7 +1871,6 @@ function showCurrentHighlightSelection(highlightID){
 
     setTimeout(function () { showCurrentContextMenu(highlightID, 2, contextMenuTargetPosition);}, 100);
 }
-/***************************************************** e : new custom selection - make totalRange with user action */
 
 function getStartElementInfoFromSelection(range) {
 
@@ -2506,6 +2364,7 @@ function removeCommentNode(){
         }
     });
 }
+/***************************************************** e : new custom selection */
 
 function resizeWidth(){
 
@@ -2521,4 +2380,3 @@ function resizeWidth(){
         }
     });
 }
-/********************************************************* e : selection common function test  */

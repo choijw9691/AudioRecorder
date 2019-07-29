@@ -148,8 +148,9 @@ public class HtmlContentsManager {
 
         StringBuilder bgmJsBuilder = new StringBuilder();
         bgmJsBuilder.append("\n<script src=\"file:///android_asset/json2.js\"></script>")
-                .append("\n<script src=\"file:///android_asset/noteref_fixed.js\"></script>")
-                .append("\n<script src=\"file:///android_asset/epub_extensions_fixed.js\"></script>")
+//                .append("\n<script src=\"file:///android_asset/noteref_fixed.js\"></script>")
+//                .append("\n<script src=\"file:///android_asset/epub_extensions_fixed.js\"></script>")
+                .append("\n<script src=\"file:///android_asset/epub_extensions.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/bgmplayer.js\"></script>");
 
         String bgmJs = bgmJsBuilder.toString();
@@ -164,7 +165,7 @@ public class HtmlContentsManager {
         StringBuilder templateBuilder = new StringBuilder();
         templateBuilder.append("\n<script src=\"file:///android_asset/jquery-2.1.4.min.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/fixedlayout_script.js\"></script>")
-                .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/noteref.css\" />")
+//                .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/noteref.css\" />")
                 .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/highlight.css\" />")
                 .append("\n<style>")
                 .append("\n body { margin : 0; border : 0 !important; }#feelingk_booktable, #feelingk_bookcontent { -webkit-user-select: none !important; position: static !important; }")  // body{ position: fixed;}

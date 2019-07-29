@@ -25,6 +25,7 @@ import com.ebook.epub.fixedlayoutviewer.manager.HighlightManager;
 import com.ebook.epub.fixedlayoutviewer.manager.HtmlContentsManager;
 import com.ebook.epub.fixedlayoutviewer.manager.SearchManager;
 import com.ebook.epub.fixedlayoutviewer.manager.UserBookDataFileManager;
+import com.ebook.epub.parser.common.AttributeName;
 import com.ebook.epub.parser.common.UnModifiableArrayList;
 import com.ebook.epub.parser.ocf.EpubFile;
 import com.ebook.epub.parser.ocf.EpubFileSystemException;
@@ -50,12 +51,21 @@ import com.ebook.tts.TTSDataInfoManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  @class FixedLayoutScrollView
@@ -152,7 +162,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     private ViewerContainer.OnBookStartEnd mOnBookStartEnd;
     private ViewerContainer.OnContextMenu mOnContextMenu = null;
     public ViewerContainer.OnBGMStateListener mOnBgmStateListener;
-    private ViewerContainer.OnNoterefListener mOnNoterefListener =null;
+//    private ViewerContainer.OnNoterefListener mOnNoterefListener =null;
     private ViewerContainer.OnMoveToLinearNoChapterListener mMoveToLinearNoChapter = null;
     private ViewerContainer.OnVideoInfoListener mOnVideoInfoListener =null;
     private ViewerContainer.OnTextSelection mOnTextSelection = null;
@@ -210,9 +220,9 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         mOnBgmStateListener = listener;
     }
 
-    public void setOnNoterefListener(ViewerContainer.OnNoterefListener listener){
-        mOnNoterefListener= listener;
-    }
+//    public void setOnNoterefListener(ViewerContainer.OnNoterefListener listener){
+//        mOnNoterefListener= listener;
+//    }
 
     public void setMoveToLinearNochapter(ViewerContainer.OnMoveToLinearNoChapterListener listener){
         mMoveToLinearNoChapter = listener;
@@ -785,7 +795,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             super.onLongPress(e);
 
             if(asidePopupStatus){
-                mPagerAdapter.getCurrentView().hideNoteref();
+                asidePopupStatus = false;
                 return;
             }
 
@@ -826,8 +836,9 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
             if(asidePopupStatus){
-                mPagerAdapter.getCurrentView().hideNoteref();
+                asidePopupStatus = false;
                 return true;
             }
 
@@ -890,8 +901,9 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     @Override
     public void onLeftTouched(float x, float y) {
+
         if(asidePopupStatus){
-            mPagerAdapter.getCurrentView().hideNoteref();
+            asidePopupStatus = false;
             return;
         }
 
@@ -927,8 +939,9 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     @Override
     public void onRightTouched(float x, float y) {
+
         if(asidePopupStatus){
-            mPagerAdapter.getCurrentView().hideNoteref();
+            asidePopupStatus = false;
             return;
         }
 
@@ -964,8 +977,9 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
     @Override
     public void onMiddleTouched(float x, float y) {
+
         if(asidePopupStatus){
-            mPagerAdapter.getCurrentView().hideNoteref();
+            asidePopupStatus = false;
             return;
         }
 
@@ -992,7 +1006,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         int page = data.getContentsPage();              // 실제 컨텐츠 기준 페이지
         int position = data.getContentsPosition();      // 두면보기 좌/우 여부
 
-        DebugSet.d(TAG,"SSIN FIXEDLAYOUT_PAGE_FINISHED page : "+page);
+        DebugSet.d(TAG,"FIXEDLAYOUT_PAGE_FINISHED page : "+page);
 
         if( mCurrentMode == CurrentMode.ViewerOpen && mCurrentPage == page){
             mDecodeThread = new Thread(FixedLayoutScrollView.this);
@@ -1049,6 +1063,8 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex).removeCommentNode(position);
 
             saveLastPosition();
+
+            asidePopupStatus = false;
         }
     }
 
@@ -1067,14 +1083,34 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         }
 
         @Override
-        public void reportAsidePopupStatus(boolean isAsidePopopShow) {
-            asidePopupStatus = isAsidePopopShow;
-            if(mOnNoterefListener!=null){
-                if( asidePopupStatus){
-                    mOnNoterefListener.didShowNoterefPopup();
-                } else{
-                    mOnNoterefListener.didHideNoterefPopup();
+        public void reportNoterefData(String noterefData, int contentsPosition) {
+            try {
+                JSONObject jsonObject = new JSONObject(noterefData);
+                String href = jsonObject.getString("href").trim();
+                String title = jsonObject.getString("value");
+                String asideContents = jsonObject.getString("asideContent");
+                JSONObject aTagRectObj = new JSONObject(jsonObject.getString("position"));
+                Rect aTagRect = new Rect(aTagRectObj.getInt("left"), aTagRectObj.getInt("top"), aTagRectObj.getInt("right"), aTagRectObj.getInt("bottom"));
+                if(contentsPosition!=-1){
+                    int[] containerViewLocation = getContextMenuTargetViewPosition(contentsPosition);
+                    aTagRect.left = aTagRect.left + containerViewLocation[0];
+                    aTagRect.top = aTagRect.top + containerViewLocation[1];
+                    aTagRect.right = aTagRect.right + containerViewLocation[0];
+                    aTagRect.bottom = aTagRect.bottom + containerViewLocation[1];
                 }
+
+                if(href.indexOf("#") !=0 ){
+                    String targetFilePath = href.substring(0, href.indexOf("#"));
+                    String targetId = href.substring(href.indexOf("#")+1,href.length());
+                    asideContents = parsingNoterefData(targetFilePath, targetId);
+                }
+
+                if(mOnTagClick !=null){
+                    mOnTagClick.onNoteref(title, asideContents, aTagRect);
+                    asidePopupStatus = true;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
@@ -1098,8 +1134,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 //                return;
 //            }
 
-//            if(asidePopupStatus)
-//                return;
+            if(asidePopupStatus) {
+                asidePopupStatus = false;
+                return;
+            }
 
             if(mediaOverlayController.isMediaOverlayPlaying()){
                 touchedPositionDuringPlaying = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y);   // 미디어오버레이 아닌 영역 터치 시 필요
@@ -1583,19 +1621,19 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         }
     }
 
-    public boolean isNoterefEnabled(){
-        return asidePopupStatus;
-    }
+//    public boolean isNoterefEnabled(){
+//        return asidePopupStatus;
+//    }
 
-    public void hideNoteref(){
-        if(mPagerAdapter!=null && mPagerAdapter.getCurrentView()!=null)
-            mPagerAdapter.getCurrentView().hideNoteref();
-    }
-
-    public void setPreventNoteref(boolean isPrevent){
-        if(mPagerAdapter!=null && mPagerAdapter.getCurrentView()!=null)
-            mPagerAdapter.getCurrentView().setPreventNoteref(isPrevent);
-    }
+//    public void hideNoteref(){
+//        if(mPagerAdapter!=null && mPagerAdapter.getCurrentView()!=null)
+//            mPagerAdapter.getCurrentView().hideNoteref();
+//    }
+//
+//    public void setPreventNoteref(boolean isPrevent){
+//        if(mPagerAdapter!=null && mPagerAdapter.getCurrentView()!=null)
+//            mPagerAdapter.getCurrentView().setPreventNoteref(isPrevent);
+//    }
 
     public FixedLayoutPageData getPageData(boolean isBackground){
         if(isBackground) {
@@ -2003,7 +2041,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     private void checkPageStatus(int scrollDirection){
 
         if(asidePopupStatus){
-            mPagerAdapter.getCurrentView().hideNoteref();
             return;
         }
 
@@ -2039,5 +2076,62 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             }
         }
         setCurrentItem(mCurrentPagerIndex+scrollDirection, pagerAnimation);
+    }
+
+    private String parsingNoterefData(String filePath, String id) {
+        String targetHtmlContent = "";
+        UnModifiableArrayList<ReadingOrderInfo> nonChapter = mReadingSpine.getNonLinearSpineInfos();
+        UnModifiableArrayList<ReadingOrderInfo> spineChapter = mReadingSpine.getSpineInfos();
+        for(int idx=0; idx<nonChapter.size(); idx++){
+            if(nonChapter.get(idx).getSpinePath().contains(filePath)){ // 목차에 없는 파일
+                if( isIgnoreDrm ) {
+                    targetHtmlContent = BookHelper.file2String(nonChapter.get(idx).getSpinePath());
+                    break;
+                } else {
+                    if( mOnDecodeContent != null ) {
+                        targetHtmlContent = mContentsManager.getDecodeContentsString(filePath, isIgnoreDrm, getDrmKey(), mOnDecodeContent, isViewerClosed);
+                        break;
+                    }
+                }
+            }
+        }
+        if(targetHtmlContent == "") { // 목차에 있는 파일
+            for(int idx=0; idx<spineChapter.size(); idx++){
+                if(spineChapter.get(idx).getSpinePath().contains(filePath)){
+                    if( isIgnoreDrm ) {
+                        targetHtmlContent = BookHelper.file2String(spineChapter.get(idx).getSpinePath());
+                        break;
+                    } else {
+                        if( mOnDecodeContent != null ) {
+                            targetHtmlContent = mContentsManager.getDecodeContentsString(filePath, isIgnoreDrm, getDrmKey(), mOnDecodeContent, isViewerClosed); // TODO :: decode path 맞는지 테스트 해야함
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        targetHtmlContent = targetHtmlContent.replaceAll("&nbsp;"," ");
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setIgnoringComments(true);
+            byte[] bytes = Charset.forName("UTF-8").encode(targetHtmlContent).array();
+            Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
+            xml.normalize();
+            NodeList asideList = xml.getElementsByTagName("aside");
+            for (int i = 0; i < asideList.getLength(); ++i) {
+                String currentId =  asideList.item(i).getAttributes().getNamedItem(AttributeName.ID) != null ? asideList.item(i).getAttributes().getNamedItem(AttributeName.ID).getNodeValue() : "";
+                if(!currentId.isEmpty() && currentId.equalsIgnoreCase(id)){
+                    return asideList.item(i).getTextContent();
+                }
+            }
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

@@ -1,6 +1,7 @@
 package com.ebook.epub.viewer;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -213,6 +214,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
          * @param url   : url 주소
          */
         void onLink(String url);
+        void onNoteref(String title, String value, Rect position);
     }
 
     public interface OnSearchResult {
@@ -1565,43 +1567,43 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return hasMediaOverlayContents;
     }
 
-    public interface OnNoterefListener {
-        void didShowNoterefPopup();
-        void didHideNoterefPopup();
-    }
+//    public interface OnNoterefListener {
+//        void didShowNoterefPopup();
+//        void didHideNoterefPopup();
+//    }
 
-    public void setOnNoterefListener(OnNoterefListener listener) {
-        if( mLayoutMode == LayoutMode.Reflowable ){
-            mEPubViewer.setOnNoterefListener(listener);
-        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-            mFixedLayoutView.setOnNoterefListener(listener);
-        }
-    }
+//    public void setOnNoterefListener(OnNoterefListener listener) {
+//        if( mLayoutMode == LayoutMode.Reflowable ){
+//            mEPubViewer.setOnNoterefListener(listener);
+//        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+//            mFixedLayoutView.setOnNoterefListener(listener);
+//        }
+//    }
 
-    public boolean isNoterefEnabled(){   // TODO : 프론트에서 안쓰면 없애자
-        if( mLayoutMode == LayoutMode.Reflowable ){
-            return mEPubViewer.isNoterefEnabled();
-        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-            return mFixedLayoutView.isNoterefEnabled();
-        }
-        return false;
-    }
-
-    public void hideNoteref(){  // TODO : 프론트에서 안쓰면 없애자
-        if( mLayoutMode == LayoutMode.Reflowable ){
-            mEPubViewer.hideNoteref();
-        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-            mFixedLayoutView.hideNoteref();
-        }
-    }
-
-    public void setPreventNoteref(boolean isPrevent){
-        if( mLayoutMode == LayoutMode.Reflowable ){
-            mEPubViewer.setPreventNoteref(isPrevent);
-        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-            mFixedLayoutView.setPreventNoteref(isPrevent);
-        }
-    }
+//    public boolean isNoterefEnabled(){
+//        if( mLayoutMode == LayoutMode.Reflowable ){
+//            return mEPubViewer.isNoterefEnabled();
+//        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+//            return mFixedLayoutView.isNoterefEnabled();
+//        }
+//        return false;
+//    }
+//
+//    public void hideNoteref(){
+//        if( mLayoutMode == LayoutMode.Reflowable ){
+//            mEPubViewer.hideNoteref();
+//        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+//            mFixedLayoutView.hideNoteref();
+//        }
+//    }
+//
+//    public void setPreventNoteref(boolean isPrevent){
+//        if( mLayoutMode == LayoutMode.Reflowable ){
+//            mEPubViewer.setPreventNoteref(isPrevent);
+//        } else if( mLayoutMode == LayoutMode.FixedLayout ){
+//            mFixedLayoutView.setPreventNoteref(isPrevent);
+//        }
+//    }
 
     public void setMemoIconPath(String iconPath){
         BookHelper.memoIconPath = iconPath;

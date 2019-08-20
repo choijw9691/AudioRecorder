@@ -91,7 +91,7 @@ $(document).ready(function(){
 	document.body.addEventListener('touchend', function(event) {
 
 		var touch = event.changedTouches[0];
-		log("touchend touch.target.tagName : " + touch.target.tagName);
+		console.log("touchend touch.target.tagName : " + touch.target.tagName);
 
     	if( touch.target.tagName.toUpperCase() == 'A' && touch.target.getAttribute('epub\:type') != 'noteref'){
     		event.preventDefault();	//20161228 주석 delete
@@ -433,7 +433,6 @@ function setupChapter(	highlights,
         epubtype.init("reflowable");
         epubswitch.init();
         epubtrigger.init();
-        gNoteRefArray = epubtype.data();
 
     } catch(err) {
         log('setupChapter: ' + err);
@@ -751,6 +750,9 @@ function getPageCount(twoPageViewMode){
         var bookContentHeight = parseInt($('#feelingk_bookcontent').css('height'));
         var bookTableHeight = parseInt($('#feelingk_booktable').css('height'));
         if(twoPageViewMode == 1 && document.body.scrollWidth % getWindowWidth(twoPageViewMode) != 0 ){
+            modifyBookContents();
+            bookContentHeight = parseInt($('#feelingk_bookcontent').css('height'));
+            bookTableHeight = parseInt($('#feelingk_booktable').css('height'));
             var tempAdditionalHeight = bookTableHeight - bookContentHeight%bookTableHeight;
             $('#feelingk_bookcontent').css('height', (bookContentHeight+tempAdditionalHeight)+'px');
         }
@@ -825,15 +827,6 @@ function getWindowWidth(twoPageViewMode) {
 //    }
 //    else {
         return gWindowInnerWidth;
-//    }
-}
-
-function setupBookColumns(twoPageViewMode) {
-    //2페이지 모드에서 페이지 갯수가 홀수일 경우 챕터 끝에서 반페이지만 넘어가는 현상 수정
-//    if(twoPageViewMode == 1 && document.body.scrollWidth % getWindowWidth(twoPageViewMode) != 0 ){
-//    	log('setup twoPageViewMode == 1 >> ' + document.body.scrollWidth / getWindowWidth(twoPageViewMode) + ', gCount : ' + gPageCount);
-//    	modifyBookContents();
-//    	gPageCount = Math.ceil(document.body.scrollWidth / getWindowWidth(twoPageViewMode));
 //    }
 }
 
@@ -1384,7 +1377,7 @@ function findTagUnderPoint(x,y,singleTap,isTextSelectionDisabled) {
     try {
         // aside popup 영역 예외처리
     	var element = document.elementFromPoint(x, y);
-     	log("-------------------------------------------------tagName : " + element.tagName);
+     	console.log("-------------------------------------------------tagName : " + element.tagName);
 
         if($(element).attr('epub\:type') == 'noteref' || $(element).parent().attr('epub\:type') == 'noteref') return;
 
@@ -2436,9 +2429,8 @@ function changeParaHeightDirect(value) {
 
 function changeMarginDirect(left,top,right,bottom) {
 	var height = gWindowInnerHeight - (top+bottom);
-	var bc = document.getElementById('feelingk_bookcontent');
-	$('#feelingk_bookcontent').css('marginLeft', left);
-	$('#feelingk_bookcontent').css('marginRight', right);
+	$('#feelingk_bookcontent').css('paddingLeft', left);
+	$('#feelingk_bookcontent').css('paddingRight', right);
 	$('#feelingk_booktable').css('marginTop', top);
 	$('#feelingk_booktable').css('height', height);
 }

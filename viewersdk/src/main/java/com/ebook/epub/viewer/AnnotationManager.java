@@ -142,7 +142,7 @@ public class AnnotationManager {
 					//기셀렉션도 한 문단인 경우 : Jeong, 2013-06-28 : iOS 추가병합로직
 					if( endChildIndex == h.endChild ){
 						//뉴셀렉션이 기셀렉션 앞쪽이나 같은지점에서 시작해 기셀렉션안에서 끝난경우.
-						if( startCharOffset <= h.startChar && endCharOffset >= h.startChar 
+						if( startCharOffset <= h.startChar && endCharOffset > h.startChar
 								&& endCharOffset <= h.endChar ) {
 							DebugSet.d(TAG, "PARTIAL startChild");
 							resultArr.add(h);
@@ -152,7 +152,7 @@ public class AnnotationManager {
 							endCharOffset = h.endChar;
 						}
 						//뉴셀렉션이 기셀렉션 안쪽이나 끝나는지점에서 시작해 기셀렉션보다 뒤쪽에서 끝난경우.
-						else if( startCharOffset <= h.endChar && endCharOffset >= h.endChar ) {
+						else if( startCharOffset < h.endChar && endCharOffset >= h.endChar ) {
 							DebugSet.d(TAG, "PARTIAL endChild"); 
 							resultArr.add(h);
 							
@@ -167,7 +167,7 @@ public class AnnotationManager {
 						//기셀렉션이 멀티인 경우 : Jeong, 2013-06-28 : iOS 추가병합로직
 					} else {
 						//셀렉션의 시작이 기셀렉션 의 시작보다 뒤이고 셀렉션의 끝이 기셀렉션의 시작보다 뒤인 경우
-                        if (startCharOffset <= h.startChar && endCharOffset >= h.startChar)
+                        if (startCharOffset <= h.startChar && endCharOffset > h.startChar)
                         {
                         	resultArr.add(h);
 
@@ -185,7 +185,7 @@ public class AnnotationManager {
 					if( startCharOffset <= h.endChar && endCharOffset <= h.endChar ) {
 						DebugSet.d(TAG, "INCLUDE 1");
 						resultArr.add(h);
-					} else if( startCharOffset <= h.endChar ) {
+					} else if( startCharOffset < h.endChar ) {
 						DebugSet.d(TAG, "PARTIAL endChar");
 						resultArr.add(h);
 						
@@ -205,7 +205,7 @@ public class AnnotationManager {
 							DebugSet.d(TAG, "INCLUDE 1");
 							resultArr.add(h);
 						}
-						else if( h.endChar >= startCharOffset ) {
+						else if( h.endChar > startCharOffset ) {
 							DebugSet.d(TAG, "PARTIAL 1");
 							resultArr.add(h);
 							
@@ -249,7 +249,7 @@ public class AnnotationManager {
 					}
 					//기셀렉션의 시작문단과 끝 문단이 다른경우
 					else {
-						if( startCharOffset <= h.endChar ) {
+						if( startCharOffset < h.endChar ) {
 							DebugSet.d(TAG, "PARTIAL 4");
 							resultArr.add(h);
 							
@@ -271,7 +271,7 @@ public class AnnotationManager {
 							DebugSet.d(TAG, "INCLUDE 4");
 							resultArr.add(h);
 						}
-						else if( h.startChar <= endCharOffset ) {
+						else if( h.startChar < endCharOffset ) {
 							DebugSet.d(TAG, "PARTIAL 5");
 							resultArr.add(h);
 							
@@ -281,7 +281,7 @@ public class AnnotationManager {
 						}
 					}
 					else {
-						if( endCharOffset >= h.startChar ) {
+						if( endCharOffset > h.startChar ) {
 							DebugSet.d(TAG, "PARTIAL 6");
 							resultArr.add(h);
 							
@@ -296,7 +296,7 @@ public class AnnotationManager {
 						DebugSet.d(TAG, "INCLUDE 5");
 						resultArr.add(h);
 					}
-					else if( endCharOffset <= h.endChar ) {
+					else if( endCharOffset < h.endChar ) {
 						DebugSet.d(TAG, "PARTIAL 7");
 						resultArr.add(h);
 						

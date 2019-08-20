@@ -131,12 +131,12 @@ public class FixedLayoutZoomView extends LinearLayout {
         } else {
             for( int i = 0 ; i < mPageData.getContentsCount(); i++ ){
                 String viewport = getViewPortSize(mPageData.getContentsDataList().get(i).getContentsFilePath(), mPageData.getContentsDataList().get(i).getContentsString());	// decode된 컨텐츠 string 으로 param 수정
-                int contentWidth = Integer.parseInt(viewport.split(",")[0]);
-                int contentHeight = Integer.parseInt(viewport.split(",")[1]);
+                float contentWidth = Float.parseFloat(viewport.split(",")[0]);
+                float contentHeight = Float.parseFloat(viewport.split(",")[1]);
 
                 //크기의 차이가 큰 쪽 비율을 맞춘다.
-                float widthScale = (float)mDisplayWidth/(float)contentWidth;
-                float heightScale = (float)mDisplayHeight/(float)contentHeight;
+                float widthScale = (float)mDisplayWidth/contentWidth;
+                float heightScale = (float)mDisplayHeight/contentHeight;
 //				if( (contentWidth - mDisplayWidth) > (contentHeight - mDisplayHeight) ){
                 if(widthScale <= heightScale) {
                     int webViewHeight = (int) Math.ceil((double)(mDisplayWidth) * contentHeight / contentWidth);
@@ -212,15 +212,15 @@ public class FixedLayoutZoomView extends LinearLayout {
             return mDisplayWidth + ",1";
 
         String viewPort = mContentsManager.getViewPort(decodeStr);
-        int width;
-        int height;
+        float width;
+        float height;
         if( viewPort == null ){
             width = mDisplayWidth;
             height = mDisplayHeight;
         } else {
             String[] viewPortValue = viewPort.split(",");
-            width = Integer.parseInt(viewPortValue[0].split("=")[1].trim());
-            height = Integer.parseInt(viewPortValue[1].split("=")[1].trim());
+            width = Float.parseFloat(viewPortValue[0].split("=")[1].replaceAll("[^0-9.]",""));
+            height = Float.parseFloat(viewPortValue[1].split("=")[1].replaceAll("[^0-9.]",""));
         }
 
         return width+","+height;

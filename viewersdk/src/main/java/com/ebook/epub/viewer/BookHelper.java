@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.115";
+    public static String VIEWER_VERSION = "3.116";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -1042,7 +1042,7 @@ public class BookHelper {
                     "\n %feelingk_body_touch_action%"+
                     "\n}" +
                     "\ntable {" +
-                    "\n word-wrap : break-word;" +
+                    "\n word-break:break-all; " +
                     "\n}"+
                     "\npre {" +
                     "\n white-space : pre-wrap;"+

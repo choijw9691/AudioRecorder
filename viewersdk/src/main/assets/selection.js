@@ -2642,11 +2642,14 @@ function setTTSHighlight(ttsData) {
 
 	var currentNode = $(ttsData.path)[0];
 
+    var docscrollleft = $(document).scrollLeft();
+    var scrollTop = $(document).scrollTop();
+
 	if (currentNode.tagName.toLowerCase() == "img" || currentNode.tagName.toLowerCase() == "video" || currentNode.tagName.toLowerCase() == "audio"
 		  || currentNode.tagName.toLowerCase() == "svg" || currentNode.tagName.toLowerCase() == "math") {
         var clientRects = currentNode.getClientRects();
         var rects = new Array();
-        var rect = getRectangleObject(document.body.scrollLeft + clientRects[0].left, document.body.scrollTop+clientRects[0].top, clientRects[0].width, clientRects[0].height);
+        var rect = getRectangleObject(docscrollleft + clientRects[0].left, scrollTop+clientRects[0].top, clientRects[0].width, clientRects[0].height);
         if (rect != null)
             rects.push(rect);
         var result = new Object();
@@ -2664,10 +2667,10 @@ function setTTSHighlight(ttsData) {
 	    }
 
     	if(gCurrentViewMode==3){
-    			var $target = $('body');
+    		var $target = $('html');
             if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
-    			$target.animate({scrollTop: (document.body.scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
-    		}
+    			$target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
+            }
     	}
     	window.highlighter.requestHighlightRect(JSON.stringify(result), nextPage);
         return;
@@ -2701,10 +2704,10 @@ function setTTSHighlight(ttsData) {
     for( var i=0; i < clientRects.length; i++ ){
     	var clientRect = clientRects[i];
         if(gCurrentViewMode==3)
-            rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, document.body.scrollTop+clientRect.top, clientRect.width, clientRect.height) );
+            rects.push( getRectangleObject(docscrollleft + clientRect.left, scrollTop+clientRect.top, clientRect.width, clientRect.height) );
         else
-            rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
-	}
+            rects.push( getRectangleObject(docscrollleft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
+    }
 
 	var result = new Object();
 	result.bounds = rects;
@@ -2713,10 +2716,10 @@ function setTTSHighlight(ttsData) {
 	var pageNum=0;
 
     if(gCurrentViewMode==3){
-   		var $target = $('body');
+   		var $target = $('html');
         if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
-    		$target.animate({scrollTop: (document.body.scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
-    	}
+    		$target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
+        }
     } else {
         try {
             var nextPage = false;
@@ -3092,7 +3095,7 @@ function getAndroidOsVersion() {
 
 //[ssin-scroll] s
 function scrollToBottom(){
-	var $target = $('body');
+	var $target = $('html');
 	$target.animate({scrollTop: $('#feelingk_bookcontent').height() + window.innerHeight}, 500, function(){
 		window.selection.finishScrollToBottom(window.scrollY/document.body.scrollHeight*100);
 	});
@@ -4065,13 +4068,7 @@ function getSelectedTextNodeRectList(totalRange) {
 }
 
 function drawSelectionRect(rectList, isExistHandler){
-    var rects = new Array();
-    for(var i=0; i<rectList.length; i++){
-        var rect = getSelectionRectObject(rectList[i].left, rectList[i].top,  rectList[i].right, rectList[i].bottom, rectList[i].width, rectList[i].height);
-        if (rect != null)
-            rects.push(rect);
-    }
-    window.selection.drawSelectionRect(JSON.stringify(rects), isExistHandler);
+    window.selection.drawSelectionRect(JSON.stringify(rectList), isExistHandler);
 }
 
 function checkNextPageContinuable(range) {
@@ -4327,7 +4324,11 @@ function selectionContinue(isHighlight, colorIndex){
 
         textSelectionMode=true;
 
-        setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 100);
+        if(currentAndroidVersion.charAt(0)<=4){
+            setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 300);
+        } else{
+            setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 100);
+        }
     }
 
     if(notifyOverflowedTextSelectionAfterPaging){

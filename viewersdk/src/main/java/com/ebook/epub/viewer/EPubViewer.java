@@ -2892,78 +2892,74 @@ public class EPubViewer extends ViewerBase {
 
         JSONObject object = EpubFileUtil.getJSONObjectFromFile(filePath);
 
-        try {
-            if( object == null ) {
-                throw new Exception();
-            }
-
-            DebugSet.d(TAG, "restore last file........................ " + object.toString(1));
-
-            String path = "";
-            String file = "";
-            if( object.isNull(AnnotationConst.FLK_READPOSITION_PATH) ||
-                    object.isNull(AnnotationConst.FLK_READPOSITION_FILE) ) {
-            } else {
-                path = object.getString(AnnotationConst.FLK_READPOSITION_PATH);
-                file = object.getString(AnnotationConst.FLK_READPOSITION_FILE);
-            }
-
-            if( file.trim().length() <= 0 ) {
-                // oldVersion data
-                if( object.isNull(AnnotationConst.FLK_READPOSITION_CHAPTER_INDEX) ||
-                        object.isNull(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT) ) {
-
-                    if( !object.isNull(AnnotationConst.FLK_READPOSITION_PERCENT) ) {
-                        // goPage by Percent when paging done
-                        __scrollByPercent = true;
-                        __scrollPercent = object.getDouble(AnnotationConst.FLK_READPOSITION_PERCENT);
-                    } else {
-                        //첫 번째 챕터부터 fileName이 없을 수 있기 때문에 네임 체크 후 챕터 번호를 부여한다.
-                        ReadingOrderInfo first = mReadingSpine.getSpineInfos().get(0);
-                        mReadingSpine.setCurrentSpineIndex(0);
-                        mReadingChapter.setCurrentChapter(first.getSpinePath());
-                    }
-                } else {
-                    int index = object.getInt(AnnotationConst.FLK_READPOSITION_CHAPTER_INDEX);
-                    double ch_percent = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
-                    ReadingOrderInfo spine = mReadingSpine.getSpineInfos().get(index);
-                    mReadingSpine.setCurrentSpineIndex(index);
-                    mReadingChapter.setCurrentChapter(spine.getSpinePath());
-                    __scrollByPercentInChapter = true;
-                    __scrollPercent = ch_percent;
-                }
-            } else {
-                // new version data
-                if( file.indexOf('\\') != -1 ) {
-                    file = file.replace('\\', '/');
-                }
-
-                mReadingChapter.setCurrentChapter(file);
-
-                if(file.indexOf("#")!=-1){
-                    file = file.substring(0,file.indexOf("#"));
-                }
-                mReadingSpine.setCurrentSpineIndex(getFullPath(file));
-
-                if( path.trim().length() <= 0 ) {
-                    double ch_percent = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
-                    __scrollByPercentInChapter = true;
-                    __scrollPercent = ch_percent;
-                } else {
-                    if(!object.isNull(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT)){
-                        perInchapter = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
-                    }
-                    __scrollByPATH = true;
-                    __scrollPATH = path;
-                }
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-            // first load시 exception 강제 발생
+        if( object == null ) {
             mReadingSpine.setCurrentSpineIndex(0);
             mCurrentPageInChapter = 0;
             mTotalPageInChapter = 0;
             mCurrentPageIndexInChapter = 0;
+        } else {
+            try{
+                DebugSet.d(TAG, "restore last file........................ " + object.toString(1));
+
+                String path = "";
+                String file = "";
+                if( !object.isNull(AnnotationConst.FLK_READPOSITION_PATH) && !object.isNull(AnnotationConst.FLK_READPOSITION_FILE) ) {
+                    path = object.getString(AnnotationConst.FLK_READPOSITION_PATH);
+                    file = object.getString(AnnotationConst.FLK_READPOSITION_FILE);
+                }
+
+                if( file.trim().length() <= 0 ) {
+                    // oldVersion data
+                    if( object.isNull(AnnotationConst.FLK_READPOSITION_CHAPTER_INDEX) ||
+                            object.isNull(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT) ) {
+
+                        if( !object.isNull(AnnotationConst.FLK_READPOSITION_PERCENT) ) {
+                            // goPage by Percent when paging done
+                            __scrollByPercent = true;
+                            __scrollPercent = object.getDouble(AnnotationConst.FLK_READPOSITION_PERCENT);
+                        } else {
+                            //첫 번째 챕터부터 fileName이 없을 수 있기 때문에 네임 체크 후 챕터 번호를 부여한다.
+                            ReadingOrderInfo first = mReadingSpine.getSpineInfos().get(0);
+                            mReadingSpine.setCurrentSpineIndex(0);
+                            mReadingChapter.setCurrentChapter(first.getSpinePath());
+                        }
+                    } else {
+                        int index = object.getInt(AnnotationConst.FLK_READPOSITION_CHAPTER_INDEX);
+                        double ch_percent = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
+                        ReadingOrderInfo spine = mReadingSpine.getSpineInfos().get(index);
+                        mReadingSpine.setCurrentSpineIndex(index);
+                        mReadingChapter.setCurrentChapter(spine.getSpinePath());
+                        __scrollByPercentInChapter = true;
+                        __scrollPercent = ch_percent;
+                    }
+                } else {
+                    // new version data
+                    if( file.indexOf('\\') != -1 ) {
+                        file = file.replace('\\', '/');
+                    }
+
+                    mReadingChapter.setCurrentChapter(file);
+
+                    if(file.indexOf("#")!=-1){
+                        file = file.substring(0,file.indexOf("#"));
+                    }
+                    mReadingSpine.setCurrentSpineIndex(getFullPath(file));
+
+                    if( path.trim().length() <= 0 ) {
+                        double ch_percent = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
+                        __scrollByPercentInChapter = true;
+                        __scrollPercent = ch_percent;
+                    } else {
+                        if(!object.isNull(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT)){
+                            perInchapter = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
+                        }
+                        __scrollByPATH = true;
+                        __scrollPATH = path;
+                    }
+                }
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
         }
     }
 

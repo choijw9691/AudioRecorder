@@ -97,7 +97,7 @@ public class ChapterSelector extends AlertDialog implements OnItemClickListener 
             } else {
                 v = convertView;
             }
-
+            v.findViewById(R.id.tvSnippet).setVisibility(View.GONE);
             ChapterInfo item = mChapters.get(position);
             if( item != null ) {
                 TextView chapterTitle = v.findViewById(R.id.tvChapter);

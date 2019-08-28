@@ -22,7 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.BaseBookActivity"
-                  android:configChanges="orientation">
+                  android:windowSoftInputMode="stateAlwaysHidden"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout">
         </activity>
         <activity android:name=".activity.ImageViewer">
         </activity>

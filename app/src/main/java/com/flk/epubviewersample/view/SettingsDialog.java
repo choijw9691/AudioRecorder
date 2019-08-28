@@ -459,7 +459,7 @@ public class SettingsDialog {
                 
                 case R.id.smaller: {
                     if( mOnSettingsListener != null ) {
-                        __fontSize -= 15;
+                        __fontSize -= 5;
                         mOnSettingsListener.onFontSmaller(__fontSize);
                     }
                     
@@ -468,7 +468,7 @@ public class SettingsDialog {
                 }
                 case R.id.bigger: {
                     if( mOnSettingsListener != null ) {
-                        __fontSize += 15;
+                        __fontSize += 5;
                         mOnSettingsListener.onFontBigger(__fontSize);
                     }
                     

@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +20,9 @@ import com.ebook.epub.viewer.BookHelper;
 import com.ebook.epub.viewer.DebugSet;
 import com.flk.epubviewersample.R;
 import com.flk.epubviewersample.view.FileList;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class BookListActivity extends Activity {
 

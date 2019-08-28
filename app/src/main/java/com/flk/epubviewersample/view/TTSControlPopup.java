@@ -163,7 +163,6 @@ public class TTSControlPopup {
                         textToSpeech.stop();
                     } else {
                         isSelectionPlaying = false;
-                        mViewer.setPreventNoteref(true);
                         ((Button)v).setBackgroundResource(R.drawable.btn_puese_nor);
                         speak();
                         isPlaying = true;
@@ -171,7 +170,6 @@ public class TTSControlPopup {
                     break;
                 case R.id.exit:
                     dismissPopup();
-                    mViewer.setPreventNoteref(false);
                     break;
 
                 case R.id.btn_tts_style :
@@ -376,6 +374,9 @@ public class TTSControlPopup {
     }
 
     private void speak() {
+        if(isPaused)
+            mViewer.saveLastPositionByTTSData(ttsDataList.get(ttsCurrentIndex));
+
         speak(ttsDataList.get(ttsCurrentIndex).getText());
     }
 

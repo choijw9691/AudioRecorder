@@ -645,7 +645,7 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     	$(outerSpan).addClass(HIGHLIGHT_CLASS);
         $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
         if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
-            if($(outerSpan).parent()[0].tagName != 'a'){
+            if($(outerSpan)[0].tagName.toLowerCase() !='a' && $(outerSpan).parent()[0].tagName.toLowerCase() != 'a'){
                 $(outerSpan).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
             }
         }
@@ -792,8 +792,8 @@ function setNightMode(isNightMode, doCallback, backgroundColor) {
 
     if(isNightMode==true || isNightMode==1) {
         textColor="#bebebe";
-        $('body').find('*').not('flk').not('a').not($('#flk_note')).not($('#flk_note').find('*')).css('backgroundColor', backgroundColor, 'important');
-        $('body').find('*').not('flk').not('a').not($('#flk_note')).not($('#flk_note').find('*')).css('color', textColor, 'important');
+        $('body').find('*').not('flk').not('a').css('backgroundColor', backgroundColor, 'important');
+        $('body').find('*').not('flk').not('a').css('color', textColor, 'important');
         $('body').find('a').css('color','#6887f7', 'important');
         $('body').css('backgroundColor', backgroundColor, 'important');
         $('body').css('color', textColor, 'important');

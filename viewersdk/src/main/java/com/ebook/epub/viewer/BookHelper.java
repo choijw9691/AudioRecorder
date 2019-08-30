@@ -985,8 +985,7 @@ public class BookHelper {
         strBase+="}";
 
         if(nightMode==1){
-            strBase+="\n* :not(.flk_note .flk_note *){ background-color : "+ String.format("#%06X", backgroundColor) +" !important; }";
-            strBase+=aTag_Style;
+            strBase+="\n* { background-color : "+ String.format("#%06X", backgroundColor) +" !important; }";
         }
 
         return strBase;

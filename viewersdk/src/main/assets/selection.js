@@ -7,7 +7,7 @@ const SEARCH_HIGHLIGHT='KYBSearchHighlight';
 const TTS_HIGHLIGHT_CLASS = "FLKTTSHighlight";
 const ANNOTATION_LASTSPAN_CLASS='KYBAnnotatedLastSpan';
 const MEMO_CLASS='KYBMemo';
-const ATAG_CLASS='KYBAtag';
+//const ATAG_CLASS='KYBAtag';
 
 var gPosition = 0;
 var gCurrentPage = 0;
@@ -208,11 +208,11 @@ $(document).ready(function(){
         image.style.display = 'block';
     });
 
-    $('a').each(function () {
-        if(this.hasAttribute('href')) {
-            $(this).addClass(ATAG_CLASS);
-        }
-    });
+//    $('a').each(function () {
+//        if(this.hasAttribute('href')) {
+//            $(this).addClass(ATAG_CLASS);
+//        }
+//    });
 
     setOrgFontSizeAttr();
 });
@@ -645,7 +645,7 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     	$(outerSpan).addClass(HIGHLIGHT_CLASS);
         $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
         if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
-            if(!$(outerSpan).parent().hasClass(ATAG_CLASS)){
+            if($(outerSpan).parent()[0].tagName != 'a'){
                 $(outerSpan).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로
             }
         }

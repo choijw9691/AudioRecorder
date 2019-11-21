@@ -793,10 +793,9 @@ function setNightMode(isNightMode, doCallback, backgroundColor) {
     if(isNightMode==true || isNightMode==1) {
         textColor="#bebebe";
         $('body').find('*').not('flk').not('a').css('backgroundColor', backgroundColor, 'important');
-        $('body').find('*').not('flk').not('a').css('color', textColor, 'important');
+        $('body').find('*').not('flk, flk *, a').css('color', textColor, 'important');
         $('body').find('a').css('color','#6887f7', 'important');
         $('body').css('backgroundColor', backgroundColor, 'important');
-        $('body').css('color', textColor, 'important');
     } else if(isNightMode!=true && isNightMode!=1){
     	if(backgroundColor != null && backgroundColor.toUpperCase() != "#FFFFFF")
     		$('body').css('backgroundColor', backgroundColor, 'important');

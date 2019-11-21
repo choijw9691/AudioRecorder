@@ -66,7 +66,7 @@
                     href: noteref.attr('href'),
                     value: noteref.text(),
                     asideContent : asideContent,
-                    element: noteref,
+                    element: noteref.getPath(),
                     position : JSON.stringify(noterefArray[i].getClientRects()[0])
                 }
                 this.noterefDataList[i] = noterefData;

@@ -4324,6 +4324,8 @@ function selectionContinue(isHighlight, colorIndex){
 
         textSelectionMode=true;
 
+        setSelectedText(totalRange.toString());
+
         if(currentAndroidVersion.charAt(0)<=4){
             setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 300);
         } else{

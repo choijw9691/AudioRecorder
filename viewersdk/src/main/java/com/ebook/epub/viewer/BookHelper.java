@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.116";
+    public static String VIEWER_VERSION = "3.117";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -917,11 +917,9 @@ public class BookHelper {
                 .append("\n<script src=\"file:///android_asset/json2.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/jquery-2.1.4.min.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/bgmplayer.js\"></script>")
-//                .append("\n<script src=\"file:///android_asset/noteref.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/svg_check_min.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/epub_extensions.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/selection.js\"></script>")
-//                .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/noteref.css\"></link>")
                 .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/highlight.css\"></link>")
                 .append("<meta charset=\"utf-8\"/>")
                 .append("<meta name=\"viewport\" content=\"width=device-width, user-scalable=no\" />")

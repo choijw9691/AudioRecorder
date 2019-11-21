@@ -2715,9 +2715,9 @@ function setTTSHighlight(ttsData) {
 	var pageNum=0;
 
     if(gCurrentViewMode==3){
-   		var $target = $('html');
+   		var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
         if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
-    		$target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
+    		target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
         }
     } else {
         try {

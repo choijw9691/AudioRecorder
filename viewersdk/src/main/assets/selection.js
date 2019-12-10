@@ -2715,9 +2715,15 @@ function setTTSHighlight(ttsData) {
 	var pageNum=0;
 
     if(gCurrentViewMode==3){
+        var prevScrollPosition = window.scrollY;
    		var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
         if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
-    		target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
+//    		target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
+            target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500, function(){
+                if(prevScrollPosition != window.scrollY){
+                    window.selection.stopScrolling(window.scrollY/document.body.scrollHeight*100);
+                }
+            });
         }
     } else {
         try {
@@ -3094,10 +3100,10 @@ function getAndroidOsVersion() {
 
 //[ssin-scroll] s
 function scrollToBottom(){
-	var $target = $('html');
-	$target.animate({scrollTop: $('#feelingk_bookcontent').height() + window.innerHeight}, 500, function(){
-		window.selection.finishScrollToBottom(window.scrollY/document.body.scrollHeight*100);
-	});
+    var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
+    target.animate({scrollTop: $('#feelingk_bookcontent').height() + window.innerHeight}, 500, function(){
+        window.selection.finishScrollToBottom(window.scrollY/document.body.scrollHeight*100);
+    });
 }
 
 function scrollByPercent(percent, twoPageViewMode){

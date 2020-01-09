@@ -1064,8 +1064,15 @@ public class EPubViewer extends ViewerBase {
 
                     if(!jsObj.isNull("xpath"))
                         audioContent.setXPath(jsObj.getString("xpath"));
-                    if(!jsObj.isNull("source"))
-                        audioContent.setSource(jsObj.getString("source"));
+                    if(!jsObj.isNull("source")) {
+                        String src = jsObj.getString("source");
+                        if(src.startsWith("/") || src.startsWith("../")){
+                            src=src.replace("../","/");
+                            src=src.substring(1, src.length());
+                        }
+                        String fullPath = mEpubFile.getPublicationPath()+"/"+src;
+                        audioContent.setSource(fullPath);
+                    }
                     if(!jsObj.isNull("loop"))
                         audioContent.setLoop(true);
                     if(!jsObj.isNull("autoplay"))

@@ -163,9 +163,8 @@ public class HtmlContentsManager {
     private String getTemplateScript(Context context) {
 
         StringBuilder templateBuilder = new StringBuilder();
-        templateBuilder.append("\n<script src=\"file:///android_asset/jquery-2.1.4.min.js\"></script>")
+        templateBuilder.append("\n<script src=\"file:///android_asset/jquery-3.4.1.min.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/fixedlayout_script.js\"></script>")
-//                .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/noteref.css\" />")
                 .append("\n<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/highlight.css\" />")
                 .append("\n<style>")
                 .append("\n body { margin : 0; border : 0 !important; }#feelingk_booktable, #feelingk_bookcontent { -webkit-user-select: none !important; position: static !important; }")  // body{ position: fixed;}

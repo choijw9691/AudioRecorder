@@ -39,7 +39,7 @@ $(document).ready(function(){
 	   }
 	},false);
 
-	 $('video').bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
+	 $('video').on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
 
 		 var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
 		 var event = state ? 'FullscreenOn' : 'FullscreenOff';
@@ -51,7 +51,7 @@ $(document).ready(function(){
 		 }
 	 });
 
-	 $('video').bind('play', function(){
+	 $('video').on('play', function(){
 
 		 if(isPreventMediaControl){
 			 $(this)[0].pause();
@@ -73,7 +73,7 @@ $(document).ready(function(){
         audios[i].pause();
     }
 
-	 $('audio').bind('play', function(){
+	 $('audio').on('play', function(){
 
 		 if(isPreventMediaControl){
 			 $(this)[0].pause();
@@ -1309,8 +1309,9 @@ function getPercentOfRange(range) {
     var body = $('body')[0];
 
     if (clientRect) {
-    	var totalRect = body.scrollWidth * body.scrollHeight;
-    	var top = clientRect.top + body.scrollTop;
+        var bodyScrollHeight = body.scrollHeight == 0 ? document.documentElement.scrollHeight : body.scrollHeight;
+        var totalRect = body.scrollWidth * bodyScrollHeight;
+        var top = clientRect.top + body.scrollTop;
     	var left = clientRect.left;
     	var topRect = top * window.innerWidth;
     	var rect = topRect + left;

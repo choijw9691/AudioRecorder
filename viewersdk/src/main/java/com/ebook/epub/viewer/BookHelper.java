@@ -915,7 +915,7 @@ public class BookHelper {
     private static String getTemplateScript(Context context) {
         return (new StringBuilder())
                 .append("\n<script src=\"file:///android_asset/json2.js\"></script>")
-                .append("\n<script src=\"file:///android_asset/jquery-2.1.4.min.js\"></script>")
+                .append("\n<script src=\"file:///android_asset/jquery-3.4.1.min.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/bgmplayer.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/svg_check_min.js\"></script>")
                 .append("\n<script src=\"file:///android_asset/epub_extensions.js\"></script>")

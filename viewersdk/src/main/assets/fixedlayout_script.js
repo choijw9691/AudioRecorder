@@ -59,11 +59,6 @@ $(document).ready(function(){
 			 return false;
 		 }
 
-		 var osVersion = getAndroidOsVersion();
-		 if(osVersion.charAt(0)<=4 && osVersion.charAt(2)<=0){	//ics만 fullscreen으로 재생되도록 함 4.0~4.0.4
-			 playVideoFullScreen($(this)[0]);
-		 }
-
 		 window.fixedlayout.stopMediaOverlay();	//영상 재생 시 미디어오버레이 중지
 	 });
 
@@ -1193,18 +1188,22 @@ function playVideoFullScreen(videoElement){
 		}
 	}
 
-	 var osVersion = getAndroidOsVersion();
-	 if(osVersion.charAt(0)>=7){
-		 window.fixedlayout.reportVideoInfo(valueSRC);	// 누가 예외처리
-	 } else{
-		 window.fixedlayout.playVideo(valueSRC);
-	 }
+    var osVersion = getAndroidOsVersion();
+    var sliceVersion = osVersion.split('.');
+    if(sliceVersion[0]>=7){
+        window.fixedlayout.reportVideoInfo(valueSRC);	// 누가 예외처리
+    } else{
+        window.fixedlayout.playVideo(valueSRC);
+    }
 }
 
 function getAndroidOsVersion() {
     var userAgent = navigator.userAgent.toLowerCase();
-    var check = userAgent.match(/android\s([0-9\.]*)/);
-    return check ? check[1] : false;
+    var check = userAgent.match(/android\s([0-9\.]*)/).toString();
+    var start = check.indexOf("android");
+    var end = check.indexOf(',');
+    check = check.slice(start,end).replace('android','').trim();
+    return check ? check : -1;
 }
 
 function getIDListByPoint(x, y, filePath) {

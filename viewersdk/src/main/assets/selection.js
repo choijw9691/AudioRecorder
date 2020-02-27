@@ -31,6 +31,7 @@ var fontfaceLoadingDone=true;
 var chromeAgent;
 var currentChromeVersion;
 var currentAndroidVersion;
+var splitAndroidVersion;
 var imageDataInfo= new Array();
 /********************************************************************************************* s:ready */
 $(document).ready(function(){
@@ -46,6 +47,7 @@ $(document).ready(function(){
     window.selection.reportDirectionType(gDirectionType);
 
     currentAndroidVersion = getAndroidOsVersion();
+    splitAndroidVersion = currentAndroidVersion.split('.');
     chromeAgent = ((navigator.userAgent || "").match(/chrome\/[\d]+/gi) || [""])[0];
     currentChromeVersion = parseInt((chromeAgent .match(/[\d]+/g) || [""])[0], 10);
     if(35 < currentChromeVersion){
@@ -140,7 +142,7 @@ $(document).ready(function(){
 
 	$('video').on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
         var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
-        if(state && currentAndroidVersion.charAt(0)>=5){
+        if(state && splitAndroidVersion[0]>=5){
         	$(this)[0].pause();
 			document.webkitCancelFullScreen();
 			playVideoFullScreen($(this)[0]);
@@ -148,16 +150,16 @@ $(document).ready(function(){
     });
 
     $('video').on('play', function(){
-    	if(isPreventMediaControl){
-    		$(this)[0].pause();
-    		window.selection.didPlayPreventMedia($($(this)[0]).getPath(), "video");
-    		return false;
-    	} else {
-    		if(currentAndroidVersion.charAt(0)<=4 && currentAndroidVersion.charAt(2)<=3){
-    			playVideoFullScreen($(this)[0]);
-    		}
-    	}
-    	window.selection.stopMediaOverlay();
+        if(isPreventMediaControl){
+            $(this)[0].pause();
+            window.selection.didPlayPreventMedia($($(this)[0]).getPath(), "video");
+            return false;
+        } else {
+            if(splitAndroidVersion[0]<=4 && splitAndroidVersion[1]<=3){
+                playVideoFullScreen($(this)[0]);
+            }
+        }
+        window.selection.stopMediaOverlay();
     });
 
     $('audio').on('play', function(){
@@ -2716,7 +2718,7 @@ function setTTSHighlight(ttsData) {
 
     if(gCurrentViewMode==3){
         var prevScrollPosition = window.scrollY;
-   		var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
+   		var target = splitAndroidVersion[0]>=5 ? $('html') : $('body');
         if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
 //    		target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
             target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500, function(){
@@ -3084,7 +3086,7 @@ function playVideoFullScreen(videoElement){
 		}
 	}
 
-	if(currentAndroidVersion.charAt(0)>=7){
+    if(splitAndroidVersion[0]>=7){
 		window.selection.videocontrol(valueSRC);	// 누가 예외처리
 	} else{
 		window.selection.playVideo(valueSRC);
@@ -3093,14 +3095,17 @@ function playVideoFullScreen(videoElement){
 
 function getAndroidOsVersion() {
     var userAgent = navigator.userAgent.toLowerCase();
-    var check = userAgent.match(/android\s([0-9\.]*)/);
-    return check ? check[1] : false;
+    var check = userAgent.match(/android\s([0-9\.]*)/).toString();
+    var start = check.indexOf("android");
+    var end = check.indexOf(',');
+    check = check.slice(start,end).replace('android','').trim();
+    return check ? check : -1;
 }
 //[ssin-audio] e
 
 //[ssin-scroll] s
 function scrollToBottom(){
-    var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
+    var target = splitAndroidVersion[0]>=5 ? $('html') : $('body');
     target.animate({scrollTop: $('#feelingk_bookcontent').height() + window.innerHeight}, 500, function(){
         window.selection.finishScrollToBottom(window.scrollY/document.body.scrollHeight*100);
     });
@@ -3435,7 +3440,7 @@ function setMoveRange(x,y) {
         }
 
         if(gCurrentViewMode!=3 && !isStartWordOverNextPage){
-            if(currentAndroidVersion.charAt(0)<=4){
+            if(splitAndroidVersion[0]<=4){
                 if(totalRange.endOffset>0){
                     var tempTotalRange = totalRange.cloneRange();
                     tempTotalRange.setEnd(tempTotalRange.endContainer, tempTotalRange.endOffset-1);
@@ -3629,7 +3634,7 @@ function setMoveRangeWithHandler(x ,y, isStartHandlerTouched, isEndHandlerTouche
         }
 
         if(gCurrentViewMode!=3 && !isStartWordOverNextPage){
-            if(currentAndroidVersion.charAt(0)<=4){
+            if(splitAndroidVersion[0]<=4){
                 if(totalRange.endOffset>0){
                     var tempTotalRange = totalRange.cloneRange();
                     tempTotalRange.setEnd(tempTotalRange.endContainer, tempTotalRange.endOffset-1);
@@ -4331,7 +4336,7 @@ function selectionContinue(isHighlight, colorIndex){
 
         setSelectedText(totalRange.toString());
 
-        if(currentAndroidVersion.charAt(0)<=4){
+        if(splitAndroidVersion[0]<=4){
             setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 300);
         } else{
             setTimeout(function () { showCurrentContextMenu(null, menuTypeIndex, contextMenuTargetPosition);}, 100);

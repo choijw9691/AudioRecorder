@@ -1195,7 +1195,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
 
         if( ttsDataInfoManager != null ) {
             if( mLayoutMode == LayoutMode.Reflowable ){
-                ttsDataInfoManager.requestTTSDataFromSelection(0);
+                ttsDataInfoManager.requestTTSDataFromSelection(-1);
             } else if(mLayoutMode == LayoutMode.FixedLayout){
                 ttsDataInfoManager.requestTTSDataFromSelection(mFixedLayoutView.getTouchedWebviewPosition());
             }

@@ -5,7 +5,7 @@ const COMMENT_NODE = 8;
 const HIGHLIGHT_CLASS='KYBH';
 const ANNOTATION_LASTSPAN_CLASS='KYBAnnotatedLastSpan';
 const MEMO_CLASS='KYBMemo';
-
+var cloneBody;
 var gWindowInnerHeight = 0;
 var gWindowInnerWidth = 0;
 
@@ -96,6 +96,12 @@ $(document).ready(function(){
     epubtype.init("fixedlayout");
     epubswitch.init();
     epubtrigger.init();
+
+    var allElements = document.body.getElementsByTagName("*");
+    for(var index=0; index < allElements.length ; index++) {
+        $(allElements[index]).addClass("flk_"+index);
+    }
+    cloneBody = document.body.cloneNode(document.body);
 
 	jQuery.fn.getPath=function() {
 
@@ -1065,94 +1071,194 @@ function setTTSHighlight(ttsData) {
         return;
     }
 
-	var ranges = [ ttsData.start, ttsData.end ];
-	var range = document.createRange();
-	var elements = [currentNode];
+    // s : tts modify - div>text structure
+    var parentElement = getTTSParentElement(ttsData.path);
+    var className = parentElement.className;
+    var targetElement = document.getElementsByClassName(className)[0];
+    var childNodes = new Array();
+    getChildTextNodesForTTS(childNodes, $(targetElement)[0]);
 
-	getCharElement(elements, ranges);
-	range.setStart(ranges[0].el, ranges[0].count);
-    range.setEnd(ranges[1].el, ranges[1].count);
+    var nodes = getNodeWithoutBlank(childNodes);
 
-    var notSame = false;
-    if( (ranges[0].el.parentElement == ranges[1].el.parentElement.parentElement) ||( ranges[0].el != ranges[1].el && ranges[0].el.parentElement.parentElement == ranges[1].el.parentElement.parentElement) )
-    	notSame = true;
+    if(nodes.length > 0) {
 
-    var endElementRects = ranges[1].el.parentElement.getClientRects();
-    var endRects = [];
-    for( var i = 0 ; i < endElementRects.length; i++ ) {
-    	endRects.push(endElementRects[i]);
+        var startNodeObj, endNodeObj;
+        var ttsStartNode, ttsEndNode;
+        var appendTTSTextLength = 0;
+        var ttsStartOffset = 0, ttsEndOffset = 0;
+
+        for(var childNodeIndex=0; childNodeIndex < nodes.length; childNodeIndex++) {
+            var nodeObj = nodes[childNodeIndex];
+            if(nodeObj.startOffset <= ttsData.start && ttsData.start < nodeObj.endOffset) {
+                ttsStartNode = nodeObj.node;
+                startNodeObj = nodeObj;
+                break;
+            }
+        }
+
+        var ttsTextLength = ttsData.end - ttsData.start;
+
+        for(var childNodeIndex=0; childNodeIndex < nodes.length; childNodeIndex++) {
+            var nodeObj = nodes[childNodeIndex];
+            if(nodeObj.startOffset < ttsData.end && ttsData.end <= nodeObj.endOffset) {
+                ttsEndNode = nodeObj.node;
+                endNodeObj = nodeObj;
+                break;
+            }
+        }
+
+        if(startNodeObj != undefined && endNodeObj != undefined) {
+            var start = -1, end = -1;
+            var ttsTextLen = ttsData.end - ttsData.start;
+            var startContainerText = startNodeObj.textContent;
+            var endContainerText = endNodeObj.textContent;
+            for(var index = 0; index < startContainerText.length; index++) {
+                if(startContainerText.charAt(index).trim().length == 1) {
+                    start++;
+                }
+                if(startNodeObj.startOffset + start == ttsData.start) {
+                    ttsStartOffset = index;
+                    break;
+                }
+            }
+        }
+
+        var range = document.createRange();
+        range.setStart(ttsStartNode, ttsStartOffset);
+        if(ttsStartNode == ttsEndNode) {
+            ttsEndOffset = ttsStartOffset;
+        }
+        range.setEnd(ttsEndNode, ttsEndOffset);
+
+        var ttsText = range.toString();
+        var resultText = getTextWithoutBlank(ttsText);
+
+        while(resultText.length < ttsTextLen) {
+            ttsEndOffset++;
+            range.setEnd(ttsEndNode, ttsEndOffset);
+            ttsText = range.toString();
+            resultText = getTextWithoutBlank(ttsText);
+        }
+
+        var clientRects = range.getClientRects();
+        var rects = new Array();
+        for(var i=0; i<clientRects.length; i++) {
+            var rect = getRectangleObject(clientRects[i].left, clientRects[i].top, clientRects[i].width, clientRects[i].height, rects);
+            if (rect != null)
+                rects.push(rect);
+        }
+
+        var result = new Object();
+        result.bounds = rects;
+        result.filePath = ttsData.filePath;
+        window.highlighter.requestHighlightRect(JSON.stringify(result), false);
     }
-
-    var clientRects = range.getClientRects();
-
-    var rects = new Array();
-
-    for( var i=0; i < clientRects.length; i++ ){
-
-    	var clientRect = clientRects[i];
-    	var valid = true;
-    	var exist = false;
-
-    	for( var j = 0; j < rects.length; j++ ){
-    		var rect = rects[j];
-    		if( (document.body.scrollLeft + clientRect.left) == rect.left && clientRect.top == rect.top && clientRect.width == rect.width && clientRect.height == rect.height ){ //똑같은 rect 값을 걸러주기 위함
-    			exist = true;
-    			break;
-    		}
-    	}
-
-    	if ( notSame && !exist ){
-	    	for( var j = 0; j < endRects.length; j++ ) {
-	    		var rect = endRects[j];
-	    		if( clientRect.left == rect.left && clientRect.top == rect.top && clientRect.width == rect.width && clientRect.height == rect.height ){ //end element rect와 똑같은 rect 값을 걸러주기 위함
-	    			endRects.splice(j,1);
-	    			valid = false;
-	    			break;
-	    		}
-	    	}
-    	}
-
-    	if( valid && !exist )
-    		rects.push( getRectangleObject(document.body.scrollLeft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
-	}
-
-	var result = new Object();
-	result.bounds = rects;
-    result.filePath = ttsData.filePath;
-    window.highlighter.requestHighlightRect(JSON.stringify(result), false);
 }
 
-function getCharElement(elems, range, len) {
-    var elem, start;
-    len = len || 0;
-    for (var i = 0; i<elems.length; i++) {
-        elem = elems[i];
-        if (elem.nodeType === 3 || elem.nodeType === 4) {
-            start = len;
-            len += elem.nodeValue.length;
-            replaceWithLess(start, len, range, elem);
-        } else if (elem.nodeType !== 8) {
-            len = getCharElement(elem.childNodes, range, len);
+
+function getTextWithoutBlank(text) {
+    return text = text.replace(/(\s*)/g,"");
+}
+
+function getNodeWithoutBlank(childNodes) {
+
+    var nodes = new Array();
+
+    var checkOffset = 0;
+    for(var index = 0; index < childNodes.length; index++) {
+
+        var childNode = childNodes[index];
+        var nodeObj = new Object();
+        nodeObj.node = childNode;
+        nodeObj.textContent = childNode.textContent;
+
+        var text = childNode.textContent;
+        text = getTextWithoutBlank(text);
+        nodeObj.textWithoutBlank = text;
+        nodeObj.startOffset = checkOffset;
+        nodeObj.endOffset = checkOffset + text.length;
+        checkOffset = nodeObj.endOffset;
+        nodes.push(nodeObj);
+    }
+    return nodes;
+}
+
+function getChildTextNodesForTTS(childNodes, targetNode) {
+   for(var index=0; index<targetNode.childNodes.length; index++){
+       var node = targetNode.childNodes[index];
+       if(node.nodeType === TEXT_NODE && node.textContent.trim().length>0) {
+            childNodes.push(node);
+       } else if(node.nodeType === ELEMENT_NODE && node.tagName.toLowerCase() == 'flk') {
+            getChildTextNodesForTTS(childNodes, node);
+       }
+   }
+}
+
+function getTTSParentElement(path) {
+    var currentPath  = path.replace(/eq/g,'').replace(/\(/g,'').replace(/\)/g,'');
+    var arr = currentPath.split(/[:|>]/);
+    var parentElement = cloneBody;
+    for(var index = 2; index < arr.length; index = index+2) {
+        var nodeName = arr[index];
+        var childIndex = arr[index+1];
+        parentElement = $(parentElement).children(nodeName)[childIndex];
+    }
+    return parentElement;
+}
+
+function getElementInfoFromSelection(filePath) {    // getSelectedElementPath()
+
+    if(totalRange == undefined || totalRange == null || totalRange.toString().length==0)
+        return;
+
+    var range = totalRange.cloneRange();
+
+    if (checkContainSVG(range))
+        return null;
+
+    var startContainerElement = range.startContainer.parentElement;
+    while(startContainerElement.tagName.toLowerCase() == 'flk') {
+       startContainerElement = startContainerElement.parentElement;
+    }
+
+    var startElementPath = getTTSPath(startContainerElement);
+
+    var parentElement = startContainerElement;
+    var className = parentElement.className;
+    var targetElement = document.getElementsByClassName(className)[0];
+    var childNodes = new Array();
+    getChildTextNodesForTTS(childNodes, $(targetElement)[0]);
+
+    var nodes = getNodeWithoutBlank(childNodes);
+
+    if(nodes.length > 0) {
+        var selectedTextStartOffset = range.startOffset;
+        // start container 이전 노드들의 텍스트 길이(공백 제거) 더해주는 변수.
+        var checkOffset = 0;
+        for(var childNodeIndex=0; childNodeIndex < nodes.length; childNodeIndex++) {
+           var nodeObj = nodes[childNodeIndex];
+           if(nodeObj.node == range.startContainer) {
+               break;
+           }
+           checkOffset += nodeObj.textWithoutBlank.length;
         }
     }
-    return len;
-}
 
-function replaceWithLess(start, len, range, el) {
-    if (typeof range[0] === 'number' && range[0] < len) {
-        range[0] = {
-            el: el,
-            count: range[0] - start
-        };
+    // 셀렉션 range의 startOffset까지 공백 제거한 길이 구해주기
+    var index = 0;
+    var startOffset = 0;
+    while(index < selectedTextStartOffset) {
+        if(range.startContainer.textContent.charAt(index).trim().length == 1) {
+           startOffset++;
+        }
+        index++;
     }
-    if (typeof range[1] === 'number' && range[1] <= len) {
-        range[1] = {
-            el: el,
-            count: range[1] - start
-        };
-        ;
-    }
+
+    // 구한 startOffset에 이전 텍스트의 길이 더해준다.
+    startOffset += checkOffset;
+	window.ttsDataInfo.setSelectedElementPath(startElementPath, startOffset, filePath);
 }
+/**************************************************** e:TTS */
 
 function clearSelection(){
     textSelectionMode = false;
@@ -2341,20 +2447,6 @@ function setSelectedText(selectedText){
 
 function finishTextSelection(){
     textSelectionMode = false;
-}
-
-function getSelectedElementPath() {
-
-    if(totalRange == undefined || totalRange == null || totalRange.toString().length==0)
-        return;
-
-    var currentSelectionInfo = requestAnnotationInfo(totalRange, true);
-    var startElementPath = getTTSPath($(currentSelectionInfo.startElementPath)[0]);
-    var endElementPath = getTTSPath($(currentSelectionInfo.endElementPath)[0]);
-    var startCharOffset = currentSelectionInfo.startCharOffset;
-    var endCharOffset = currentSelectionInfo.endCharOffset;
-
-	window.ttsDataInfo.setSelectedElementPath(startElementPath, endElementPath, startCharOffset, endCharOffset);
 }
 
 function removeCommentNode(){

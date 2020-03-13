@@ -7,6 +7,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
 import com.ebook.epub.fixedlayoutviewer.data.FixedLayoutPageData;
+import com.ebook.epub.fixedlayoutviewer.view.FixedLayoutWebview;
 import com.ebook.epub.parser.common.AttributeName;
 import com.ebook.epub.viewer.BookHelper;
 import com.ebook.epub.viewer.DebugSet;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.BreakIterator;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -51,10 +53,11 @@ public class TTSDataInfoManager {
     private JSONArray ttsDataJsonArr;
     private JSONArray elementXPathJsonArr;
 
-    public String selectedStartElementPath;
-    public String selectedEndElementPath;
-    public int selectedStartCharOffset;
-    public int selectedEndCharOffset;
+//    public String selectedStartElementPath;
+//    public String selectedEndElementPath;
+//    public int selectedStartCharOffset;
+//    public int selectedEndCharOffset;
+//    public String selectedFilePath="";
 
     public TTSDataInfoManager() {
         ttsDataInfoList = new ArrayList<>();
@@ -206,6 +209,8 @@ public class TTSDataInfoManager {
 //		            return;
 //                }
 //            }
+            if(node.getNodeName().equalsIgnoreCase("aside"))
+                return;
 
             if(node.getNodeName().equalsIgnoreCase("div") ||
                     node.getNodeName().equalsIgnoreCase("section") ||
@@ -321,36 +326,14 @@ public class TTSDataInfoManager {
                 }
 
             } else {
-
-                if(node.getTextContent()!=null && node.getTextContent().trim().replaceAll("\\p{Z}", "").length()>0){
-
-                    try {
-                        String xPath = getXPath(node);
-
-                        JSONObject jsonObj = new JSONObject();
-                        jsonObj.put("text", node.getTextContent());
-                        jsonObj.put("path", xPath);
-                        jsonObj.put("parentText", "");
-                        jsonObj.put("filePath", filePath);
-
-                        elementXPathJsonArr.put(xPath);
-
-                        ttsDataJsonArr.put(jsonObj);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    for( int i=0; i < childNodes.getLength(); i++ ){
-                        Node child = childNodes.item(i);
-                        getTextFromNode(child, filePath);
-                    }
+                for( int i =0; i < childNodes.getLength(); i++ ){
+                    Node child = childNodes.item(i);
+                    getTextFromNode(child, filePath);
                 }
             }
         } else if(node.getNodeType() == Node.TEXT_NODE){
 
-            if(node.getTextContent().trim().length()>0){
+            if(node.getTextContent()!=null && node.getTextContent().trim().replaceAll("\\p{Z}", "").length()>0){
 
                 try {
                     String xPath = getXPath(node.getParentNode());
@@ -369,7 +352,6 @@ public class TTSDataInfoManager {
                     e.printStackTrace();
                 }
             }
-
         }
     }
 
@@ -411,41 +393,45 @@ public class TTSDataInfoManager {
 
     private boolean setTTSDataList(String currentFilePath){
 
+        HashMap<String, Integer> tempTotalLengthData = new HashMap<>();
+
         try {
             for(int idx=0; idx<ttsDataJsonArr.length(); idx++){
 
                 JSONObject obj = ttsDataJsonArr.getJSONObject(idx);
                 String text = obj.getString("text");
                 String path = obj.getString("path");
-                String parentText = obj.getString("parentText");
                 String filePath = obj.getString("filePath");
 
                 if(!currentFilePath.equalsIgnoreCase(filePath))
                     continue;
 
-                int prevIndex = 0;
-                if(!parentText.isEmpty() && !text.equalsIgnoreCase(parentText)){
-                    int tempIdx = parentText.indexOf(text);
-                    if(tempIdx!=-1)
-                        prevIndex = tempIdx;
-                }
-
                 if( text.startsWith("flk_") ){ // math, svg, img 태그 처리
                     ttsDataInfoList.add(new TTSDataInfo(text , path, 0, 0, currentFilePath));
                 } else {
                     BreakIterator iterator = BreakIterator.getSentenceInstance();
-                    iterator.setText(text);
+                    iterator.setText(text.trim());
 
                     int index = 0;
+                    int prevLength=0;
+                    if(tempTotalLengthData.get(path)!=null){
+                        prevLength = tempTotalLengthData.get(path).intValue();
+                    }
+
                     while (iterator.next() != BreakIterator.DONE) {
-                        String sentence = text.substring(index, iterator.current());
+                        String sentence = text.trim().substring(index, iterator.current());
                         DebugSet.d("TAG","Sentence: " + sentence);
                         DebugSet.d("TAG","Path: " + path);
 
-                        if(sentence.trim().length()>0)  // sentence.trim() 으로 데이터 넣지 않도록 수정함
-                            ttsDataInfoList.add(new TTSDataInfo(sentence, path, index+prevIndex, iterator.current()+prevIndex,  currentFilePath));
+                        if(sentence.trim().length()>0) {
+                            String trimSentence = sentence.replaceAll("[\\p{Zs}\\s]+", "").replaceAll(" ","");
+//                            String trimSentence = sentence.replaceAll("\u2002","").replaceAll("\u00a0","").replaceAll(" ", "").replaceAll("\n","");
+                            ttsDataInfoList.add(new TTSDataInfo(sentence, path, prevLength, prevLength+trimSentence.length(), currentFilePath));
+                            prevLength += trimSentence.length();
+                        }
                         index = iterator.current();
                     }
+                    tempTotalLengthData.put(path, prevLength);
                 }
             }
         } catch (JSONException e) {
@@ -459,40 +445,55 @@ public class TTSDataInfoManager {
     }
 
     public void requestTTSDataFromSelection(int touchedposition){   // TODO :: new custom selection - modified
-        if(touchedposition == -1)
-            return;
-
-        if(touchedposition==0)
-            leftWebView.loadUrl("javascript:getSelectedElementPath()");
-        else if(touchedposition==1)
-            rightWebView.loadUrl("javascript:getSelectedElementPath()");
+        if(touchedposition == -1) {
+            leftWebView.loadUrl("javascript:getElementInfoFromSelection()");
+        } else if(touchedposition==0) {
+            String currentFilePath = ((FixedLayoutWebview) leftWebView).getCurrentPageData().getContentsFilePath();
+            leftWebView.loadUrl("javascript:getElementInfoFromSelection('"+currentFilePath+"')");
+        } else if(touchedposition==1) {
+            String currentFilePath = ((FixedLayoutWebview) rightWebView).getCurrentPageData().getContentsFilePath();
+            rightWebView.loadUrl("javascript:getElementInfoFromSelection('"+currentFilePath+"')");
+        }
     }
 
-    public void getTTSDataFromSelection() {
+    public void getTTSDataFromSelection(JSONObject selectionInfo) {
         // TODO :: new custom selection - modified
 
-        TTSDataInfo selectedTTSDataInfo = null;
-        String currentReadingText="";
-        int startTextIndex = -1;
+        try {
+            String selectedStartElementPath = (String) selectionInfo.get("startElementPath");
+            int selectedStartCharOffset = (int) selectionInfo.get("startCharOffset");
+            String selectedFilePath = (String) selectionInfo.get("filePath");
 
-        for(int i=0; i<ttsDataInfoList.size(); i++) {
+            TTSDataInfo selectedTTSDataInfo = null;
+            String currentReadingText="";
+            int startTextIndex = -1;
 
-            String ttsPath = ttsDataInfoList.get(i).getXPath().trim().toLowerCase();
-            int ttsStartOffset = ttsDataInfoList.get(i).getStartOffset();
-            int ttsEndOffset = ttsDataInfoList.get(i).getEndOffset();
+            for(int i=0; i<ttsDataInfoList.size(); i++) {
 
-            if( selectedStartElementPath.trim().toLowerCase().equals(ttsPath) ){
-                if( ttsStartOffset <= selectedStartCharOffset && selectedStartCharOffset < ttsEndOffset){
-                    startTextIndex = i;
-                    currentReadingText = ttsDataInfoList.get(i).getText().substring(selectedStartCharOffset-ttsStartOffset);
-                    selectedTTSDataInfo = new TTSDataInfo(currentReadingText, ttsDataInfoList.get(i).getXPath(), selectedStartCharOffset, ttsEndOffset, ttsDataInfoList.get(i).getFilePath());
-                    break;
+                String ttsPath = ttsDataInfoList.get(i).getXPath().trim().toLowerCase();
+                int ttsStartOffset = ttsDataInfoList.get(i).getStartOffset();
+                int ttsEndOffset = ttsDataInfoList.get(i).getEndOffset();
+                String ttsFilePath = ttsDataInfoList.get(i).getFilePath();
+
+                if( selectedStartElementPath.trim().toLowerCase().equals(ttsPath)){
+                    if(selectedFilePath.isEmpty() || selectedFilePath.equalsIgnoreCase(ttsFilePath)){
+                        if( ttsStartOffset <= selectedStartCharOffset && selectedStartCharOffset < ttsEndOffset){
+                            startTextIndex = i;
+                            currentReadingText = ttsDataInfoList.get(i).getText().substring(selectedStartCharOffset-ttsStartOffset);
+                            selectedTTSDataInfo = new TTSDataInfo(currentReadingText, ttsDataInfoList.get(i).getXPath(), selectedStartCharOffset, ttsEndOffset, ttsDataInfoList.get(i).getFilePath());
+                            break;
+                        }
+                    }
+
                 }
             }
-        }
 
-        if( onTTSDataInfoListener != null )
-            onTTSDataInfoListener.ttsDataFromSelection(selectedTTSDataInfo, startTextIndex);
+            if( onTTSDataInfoListener != null )
+                onTTSDataInfoListener.ttsDataFromSelection(selectedTTSDataInfo, startTextIndex);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressLint("HandlerLeak")
@@ -522,7 +523,8 @@ public class TTSDataInfoManager {
                 }
 
                 case MSG_GET_SELECTED_DATA : {
-                    getTTSDataFromSelection();
+                    if(msg.obj!=null)
+                        getTTSDataFromSelection((JSONObject)msg.obj);
                     break;
                 }
 
@@ -617,15 +619,23 @@ public class TTSDataInfoManager {
         }
 
         @JavascriptInterface
-        public void setSelectedElementPath(String startElementPath, String endElementPath, int startCharOffset, int endCharOffset){
+        public void setSelectedElementPath(String startElementPath, int startCharOffset, String filePath){
             // TODO :: new custom selection modified
+            try {
+                JSONObject selectionInfo = new JSONObject();
+                selectionInfo.put("startElementPath", startElementPath);
+                selectionInfo.put("startCharOffset", startCharOffset);
+                selectionInfo.put("filePath", filePath);
+                SendMessage(MSG_GET_SELECTED_DATA, selectionInfo);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-            selectedStartElementPath = startElementPath;
-            selectedEndElementPath = endElementPath;
-            selectedStartCharOffset = startCharOffset;
-            selectedEndCharOffset = endCharOffset;
-
-            SendMessage(MSG_GET_SELECTED_DATA, null);
+//            selectedStartElementPath = startElementPath;
+//            selectedEndElementPath = endElementPath;
+//            selectedStartCharOffset = startCharOffset;
+//            selectedEndCharOffset = endCharOffset;
+//            SendMessage(MSG_GET_SELECTED_DATA, selectedElementInfo);
         }
     }
 

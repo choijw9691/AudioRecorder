@@ -32,6 +32,7 @@ var chromeAgent;
 var currentChromeVersion;
 var currentAndroidVersion;
 var splitAndroidVersion;
+var cloneBody;
 var imageDataInfo= new Array();
 /********************************************************************************************* s:ready */
 $(document).ready(function(){
@@ -217,6 +218,13 @@ $(document).ready(function(){
 //    });
 
     setOrgFontSizeAttr();
+
+    var allElements = document.body.getElementsByTagName("*");
+    for(var index=0; index < allElements.length ; index++) {
+        $(allElements[index]).addClass("flk_"+index);
+    }
+    cloneBody = document.body.cloneNode(document.body);
+
 });
 /********************************************************************************************* e:ready */
 
@@ -2605,40 +2613,6 @@ function getFirstSentence(ttsDataArray, path, listStartIndex) {
 	window.ttsDataInfo.setStartPosition(path, 0, listStartIndex);
 }
 
-function applyTTSHighlight(highlight) {
-    try {
-    	log("applyHighlight" );
-        var startElement=getNodeFromElementPath(highlight.startElementPath, 0);
-        var endElement=getNodeFromElementPath(highlight.endElementPath, 0);
-
-        if(startElement===null) {
-            log("No highlight start element");
-        } else if(endElement===null) {
-            log("No highlight end element");
-        } else {
-            var range=document.createRange();
-            if(setPointInRange(startElement,highlight.startCharOffset,range,setRangeStart)) {
-                if(setPointInRange(endElement,highlight.endCharOffset,range,setRangeEnd)) {
-                    highlightRange(range,highlight.isDeleted,highlight.isAnnotation,highlight.highlightID,highlight.colorIndex);
-                } else {
-                    log("Could not set end of selection range");
-                }
-            } else {
-                log("Could not set start of selection range");
-            }
-        }
-    } catch(err) {
-        log("applyHighlight: "+err);
-    }
-}
-
-function removeTTSHighlight() {
-	var highlightSpans=$('.'+TTS_HIGHLIGHT_CLASS);
-	if( highlightSpans.length > 0 ) {
-    	$(highlightSpans).contents().unwrap();
-    }
-}
-
 function setTTSHighlight(ttsData) {
 
 	var currentNode = $(ttsData.path)[0];
@@ -2677,83 +2651,232 @@ function setTTSHighlight(ttsData) {
         return;
     }
 
-	log('start : ' + ttsData.start);
-	log('end : ' + ttsData.end);
-	var ranges = [ ttsData.start, ttsData.end ];
-	var range = document.createRange();
+    // s : tts modify - div>text structure
+    var parentElement = getTTSParentElement(ttsData.path);
+    var className = parentElement.className;
+    var targetElement = document.getElementsByClassName(className)[0];
+    var childNodes = new Array();
+    getChildTextNodesForTTS(childNodes, $(targetElement)[0]);
 
-	var elements = [currentNode];
+    var nodes = getNodeWithoutBlank(childNodes);
 
-	getCharElement(elements, ranges);
+    if(nodes.length > 0) {
 
-	range.setStart(ranges[0].el, ranges[0].count);
-    range.setEnd(ranges[1].el, ranges[1].count);
+        var startNodeObj, endNodeObj;
+        var ttsStartNode, ttsEndNode;
+        var appendTTSTextLength = 0;
+        var ttsStartOffset = 0, ttsEndOffset = 0;
 
-    var notSame = false;
-    if( (ranges[0].el.parentElement == ranges[1].el.parentElement.parentElement) ||( ranges[0].el != ranges[1].el && ranges[0].el.parentElement.parentElement == ranges[1].el.parentElement.parentElement) )
-    	notSame = true;
-
-    var endElementRects = ranges[1].el.parentElement.getClientRects();
-    var endRects = [];
-    for( var i = 0 ; i < endElementRects.length; i++ ) {
-    	endRects.push(endElementRects[i]);
-    }
-
-    var clientRects = range.getClientRects();
-
-    var rects = new Array();
-    for( var i=0; i < clientRects.length; i++ ){
-    	var clientRect = clientRects[i];
-        if(gCurrentViewMode==3)
-            rects.push( getRectangleObject(docscrollleft + clientRect.left, scrollTop+clientRect.top, clientRect.width, clientRect.height) );
-        else
-            rects.push( getRectangleObject(docscrollleft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
-    }
-
-	var result = new Object();
-	result.bounds = rects;
-    result.filePath = ttsData.filePath;
-
-	var pageNum=0;
-
-    if(gCurrentViewMode==3){
-        var prevScrollPosition = window.scrollY;
-   		var target = splitAndroidVersion[0]>=5 ? $('html') : $('body');
-        if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
-//    		target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
-            target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500, function(){
-                if(prevScrollPosition != window.scrollY){
-                    window.selection.stopScrolling(window.scrollY/document.body.scrollHeight*100);
-                }
-            });
-        }
-    } else {
-        try {
-            var nextPage = false;
-            var leftVal = clientRects[0].left;
-            var twoPageViewMode = 0;
-            if( $('#feelingk_booktable').css('-webkit-column-width') != $('#feelingk_booktable').css('width') )
-                twoPageViewMode = 1;
-
-            if(clientRects[0].left < 0){
-                var left = $(ttsData.path).offset().left;
-
-                if( gDirectionType == 1 )
-                    left = left - getWindowWidth(twoPageViewMode);
-
-                var retval = Math.abs(left);
-                pageNum = Math.floor((retval / getWindowWidth(gTwoPageViewMode)));
-                goPage(pageNum, gTwoPageViewMode, true);
-            } else if( clientRects[0].left > getWindowWidth(twoPageViewMode)){
-                nextPage = true;
+        for(var childNodeIndex=0; childNodeIndex < nodes.length; childNodeIndex++) {
+            var nodeObj = nodes[childNodeIndex];
+            if(nodeObj.startOffset <= ttsData.start && ttsData.start < nodeObj.endOffset) {
+                ttsStartNode = nodeObj.node;
+                startNodeObj = nodeObj;
+                break;
             }
-            pageNum = Math.floor((leftVal / getWindowWidth(twoPageViewMode)));
-        } catch(err) {
-            log("setTTSHighlight err :  : "+err);
-            pageNum = 0;
+        }
+
+        var ttsTextLength = ttsData.end - ttsData.start;
+
+        for(var childNodeIndex=0; childNodeIndex < nodes.length; childNodeIndex++) {
+            var nodeObj = nodes[childNodeIndex];
+            if(nodeObj.startOffset < ttsData.end && ttsData.end <= nodeObj.endOffset) {
+                ttsEndNode = nodeObj.node;
+                endNodeObj = nodeObj;
+                break;
+            }
+        }
+
+        if(startNodeObj != undefined && endNodeObj != undefined) {
+            var start = -1, end = -1;
+            var ttsTextLen = ttsData.end - ttsData.start;
+            var startContainerText = startNodeObj.textContent;
+            var endContainerText = endNodeObj.textContent;
+            for(var index = 0; index < startContainerText.length; index++) {
+                if(startContainerText.charAt(index).trim().length == 1) {
+                    start++;
+                }
+                if(startNodeObj.startOffset + start == ttsData.start) {
+                    ttsStartOffset = index;
+                    break;
+                }
+            }
+        }
+
+        var range = document.createRange();
+        range.setStart(ttsStartNode, ttsStartOffset);
+        if(ttsStartNode == ttsEndNode) {
+            ttsEndOffset = ttsStartOffset;
+        }
+        range.setEnd(ttsEndNode, ttsEndOffset);
+
+        var ttsText = range.toString();
+        var resultText = getTextWithoutBlank(ttsText);
+
+        while(resultText.length < ttsTextLen) {
+            ttsEndOffset++;
+            range.setEnd(ttsEndNode, ttsEndOffset);
+            ttsText = range.toString();
+            resultText = getTextWithoutBlank(ttsText);
+        }
+
+        var clientRects = range.getClientRects();
+        var rects = new Array();
+        for( var i=0; i < clientRects.length; i++ ){
+            var clientRect = clientRects[i];
+            if(gCurrentViewMode==3)
+                rects.push( getRectangleObject(docscrollleft + clientRect.left, scrollTop+clientRect.top, clientRect.width, clientRect.height) );
+            else
+                rects.push( getRectangleObject(docscrollleft + clientRect.left, clientRect.top, clientRect.width, clientRect.height) );
+        }
+
+        var result = new Object();
+        result.bounds = rects;
+        result.filePath = ttsData.filePath;
+
+        var pageNum=0;
+        if(gCurrentViewMode==3){
+            var prevScrollPosition = window.scrollY;
+            var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
+            if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
+                target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500, function(){
+                    if(prevScrollPosition != window.scrollY){
+                        window.selection.stopScrolling(window.scrollY/document.body.scrollHeight*100);
+                    }
+                });
+            }
+        } else {
+            try {
+                var nextPage = false;
+                var leftVal = clientRects[0].left;
+                var twoPageViewMode = 0;
+                if( $('#feelingk_booktable').css('-webkit-column-width') != $('#feelingk_booktable').css('width') )
+                    twoPageViewMode = 1;
+
+                if(clientRects[0].left < 0){
+                    var left = $(ttsData.path).offset().left;
+
+                    if( gDirectionType == 1 )
+                        left = left - getWindowWidth(twoPageViewMode);
+
+                    var retval = Math.abs(left);
+                    pageNum = Math.floor((retval / getWindowWidth(gTwoPageViewMode)));
+                    goPage(pageNum, gTwoPageViewMode, true);
+                } else if( clientRects[0].left > getWindowWidth(twoPageViewMode)){
+                    nextPage = true;
+                }
+                pageNum = Math.floor((leftVal / getWindowWidth(twoPageViewMode)));
+            } catch(err) {
+                log("setTTSHighlight err :  : "+err);
+                pageNum = 0;
+            }
+        }
+        window.highlighter.requestHighlightRect(JSON.stringify(result), nextPage);
+    }
+}
+
+
+function getTextWithoutBlank(text) {
+    return text = text.replace(/(\s*)/g,"");
+}
+
+function getNodeWithoutBlank(childNodes) {
+
+    var nodes = new Array();
+
+    var checkOffset = 0;
+    for(var index = 0; index < childNodes.length; index++) {
+
+        var childNode = childNodes[index];
+        var nodeObj = new Object();
+        nodeObj.node = childNode;
+        nodeObj.textContent = childNode.textContent;
+
+        var text = childNode.textContent;
+        text = getTextWithoutBlank(text);
+        nodeObj.textWithoutBlank = text;
+        nodeObj.startOffset = checkOffset;
+        nodeObj.endOffset = checkOffset + text.length;
+        checkOffset = nodeObj.endOffset;
+        nodes.push(nodeObj);
+    }
+    return nodes;
+}
+
+function getChildTextNodesForTTS(childNodes, targetNode) {
+   for(var index=0; index<targetNode.childNodes.length; index++){
+       var node = targetNode.childNodes[index];
+       if(node.nodeType === TEXT_NODE && node.textContent.trim().length>0) {
+            childNodes.push(node);
+       } else if(node.nodeType === ELEMENT_NODE && node.tagName.toLowerCase() == 'flk') {
+            getChildTextNodesForTTS(childNodes, node);
+       }
+   }
+}
+
+function getTTSParentElement(path) {
+    var currentPath  = path.replace(/eq/g,'').replace(/\(/g,'').replace(/\)/g,'');
+    var arr = currentPath.split(/[:|>]/);
+    var parentElement = cloneBody;
+    for(var index = 2; index < arr.length; index = index+2) {
+        var nodeName = arr[index];
+        var childIndex = arr[index+1];
+        parentElement = $(parentElement).children(nodeName)[childIndex];
+    }
+    return parentElement;
+}
+
+function getElementInfoFromSelection() {    //getSelectedElementPath() {
+
+    if(totalRange == undefined || totalRange == null || totalRange.toString().length==0)
+        return;
+
+    var range = totalRange.cloneRange();
+
+    if (checkContainSVG(range))
+        return null;
+
+    var startContainerElement = range.startContainer.parentElement;
+    while(startContainerElement.tagName.toLowerCase() == 'flk') {
+       startContainerElement = startContainerElement.parentElement;
+    }
+
+    var startElementPath = getTTSPath(startContainerElement);
+
+    var parentElement = startContainerElement;
+    var className = parentElement.className;
+    var targetElement = document.getElementsByClassName(className)[0];
+    var childNodes = new Array();
+    getChildTextNodesForTTS(childNodes, $(targetElement)[0]);
+
+    var nodes = getNodeWithoutBlank(childNodes);
+
+   if(nodes.length > 0) {
+        var selectedTextStartOffset = range.startOffset;
+        // start container 이전 노드들의 텍스트 길이(공백 제거) 더해주는 변수.
+        var checkOffset = 0;
+        for(var childNodeIndex=0; childNodeIndex < nodes.length; childNodeIndex++) {
+            var nodeObj = nodes[childNodeIndex];
+            if(nodeObj.node == range.startContainer) {
+                break;
+            }
+            checkOffset += nodeObj.textWithoutBlank.length;
         }
     }
-    window.highlighter.requestHighlightRect(JSON.stringify(result), nextPage);
+
+    // 셀렉션 range의 startOffset까지 공백 제거한 길이 구해주기
+    var index = 0;
+    var startOffset = 0;
+    while(index < selectedTextStartOffset) {
+        if(range.startContainer.textContent.charAt(index).trim().length == 1) {
+            startOffset++;
+        }
+        index++;
+    }
+
+    // 구한 startOffset에 이전 텍스트의 길이 더해준다.
+    startOffset += checkOffset;
+	window.ttsDataInfo.setSelectedElementPath(startElementPath, startOffset, "");
 }
 /**************************************************** e:TTS */
 

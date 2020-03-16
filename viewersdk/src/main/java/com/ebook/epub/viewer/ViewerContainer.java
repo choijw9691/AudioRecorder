@@ -313,7 +313,7 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public ViewerContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mAttrs = attrs;
+//        mAttrs = attrs;
     }
 
     public ViewerContainer(Context context) {

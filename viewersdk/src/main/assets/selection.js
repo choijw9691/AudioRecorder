@@ -2642,9 +2642,9 @@ function setTTSHighlight(ttsData) {
 	    }
 
     	if(gCurrentViewMode==3){
-    		var $target = $('html');
+            var target = splitAndroidVersion[0]>=5 ? $('html') : $('body');
             if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
-    			$target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
+    			target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500);
             }
     	}
     	window.highlighter.requestHighlightRect(JSON.stringify(result), nextPage);
@@ -2737,7 +2737,7 @@ function setTTSHighlight(ttsData) {
         var pageNum=0;
         if(gCurrentViewMode==3){
             var prevScrollPosition = window.scrollY;
-            var target = currentAndroidVersion.charAt(0)>=5 ? $('html') : $('body');
+            var target = splitAndroidVersion[0]>=5 ? $('html') : $('body');
             if(clientRects[0].top > window.innerHeight*0.25 || clientRects[0].top<0){
                 target.animate({scrollTop: (scrollTop+clientRects[0].top-window.innerHeight*0.25)}, 500, function(){
                     if(prevScrollPosition != window.scrollY){

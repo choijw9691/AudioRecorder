@@ -3319,17 +3319,17 @@ function getPercentOfRange(range) {
 
 	var clientRect = range.getClientRects()[0];
 
-    var body = $('body')[0];
+    var body = splitAndroidVersion[0]>=5 ? $('html') : $('body');
 
     if (clientRect) {
         if (gCurrentViewMode==3) {
-            var pageHeight = window.innerHeight - parseInt($("#feelingk_booktable").css("margin-top")) - parseInt($("#feelingk_booktable").css("margin-bottom"));
+            var pageHeight = window.innerHeight;
             var totalHeight = $("#feelingk_booktable")[0].scrollHeight;
             if (totalHeight % pageHeight != 0) {
                 totalHeight = pageHeight * (Math.ceil(totalHeight / pageHeight));
             }
             var totalRect = $("#feelingk_booktable").width() * totalHeight;
-            var top = clientRect.top + $("body").scrollTop() - parseInt($("#feelingk_booktable").css("margin-top"));
+            var top = clientRect.top + body.scrollTop() - parseInt($("#feelingk_booktable").css("margin-top"));
             var left = clientRect.left;
             var topRect = top * $("#feelingk_booktable").width();
             var rect = topRect + left;

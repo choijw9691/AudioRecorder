@@ -3640,7 +3640,7 @@ public class EPubViewer extends ViewerBase {
     }
 
     public void removeSearchHighlight(){
-        loadUrl("javascript:removeSearchHighlight()");
+//        loadUrl("javascript:removeSearchHighlight()");
         __canFocusSearchResult = false;
         __focusedScroll = false;
         __focusSearchResult = null;
@@ -5441,6 +5441,8 @@ public class EPubViewer extends ViewerBase {
 
             case Defines.REF_STOP_SCROLLING :
                 DebugSet.d(TAG, "REF_STOP_SCROLLING");
+
+                removeSearchHighlight();
 
                 getCurrentTopPath();
 

@@ -135,8 +135,8 @@ $(document).ready(function(){
 			clearTimeout(timer);
 			if(gCurrentViewMode==3){
 				window.selection.stopScrolling(window.scrollY/document.body.scrollHeight*100);
-				if(isSearchHighlightInCurrentPage())
-					removeSearchHighlight();
+//				if(isSearchHighlightInCurrentPage())
+//					removeSearchHighlight();
 			}
 		}
     };
@@ -894,6 +894,8 @@ function getSpanElementRects(span, jqOffsetLeft) {
 
 	var rect;
 	var rects=new Array();
+    var scrollTop = $(document).scrollTop();
+    var scrollLeft = $(document).scrollLeft();
 
 	if(span.getClientRects) {
 		var clientRects=span.getClientRects();
@@ -904,7 +906,9 @@ function getSpanElementRects(span, jqOffsetLeft) {
 			if(jqOffsetLeft != left){
 				left = left+document.body.scrollLeft;
 			}
-			rects.push( getRectangleObject(left, clientRects[i].top+document.body.scrollTop, clientRects[i].width, clientRects[i].height) );
+
+            left = splitAndroidVersion[0]>=5 ? left+scrollLeft : left;
+			rects.push( getRectangleObject(left, clientRects[i].top+scrollTop, clientRects[i].width, clientRects[i].height) );
 		}
 		return rects;
 	}
@@ -3323,7 +3327,7 @@ function getPercentOfRange(range) {
 
     if (clientRect) {
         if (gCurrentViewMode==3) {
-            var pageHeight = window.innerHeight;
+            var pageHeight = window.innerHeight - parseInt($("#feelingk_booktable").css("margin-top")) - parseInt($("#feelingk_booktable").css("margin-bottom"));
             var totalHeight = $("#feelingk_booktable")[0].scrollHeight;
             if (totalHeight % pageHeight != 0) {
                 totalHeight = pageHeight * (Math.ceil(totalHeight / pageHeight));
@@ -3379,7 +3383,7 @@ function isSearchHighlightInCurrentPage() {
     if ($("." + SEARCH_HIGHLIGHT).length <= 0) {
         return false;
     }
-    var scrollTop = $('body').scrollTop();
+    var scrollTop = $(document).scrollTop();
     var scrollBottom = scrollTop + window.innerHeight;
     var searchHighlightTop = $("." + SEARCH_HIGHLIGHT).offset().top;
 

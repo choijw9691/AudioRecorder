@@ -1750,6 +1750,14 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         }
     }
 
+    public void setAnnotationVisibility(boolean annotationVisibility){  // UI에서 하이라이트 show/hide
+        if(mLayoutMode == LayoutMode.Reflowable) {
+            mEPubViewer.setAnnotationVisibility(annotationVisibility);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.setAnnotationVisibility(annotationVisibility);
+        }
+    }
+
     public void selectionContinue(boolean isHighlight){
         // TODO : new
         if(mLayoutMode == LayoutMode.Reflowable){

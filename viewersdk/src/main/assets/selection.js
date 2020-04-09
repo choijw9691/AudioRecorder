@@ -559,7 +559,6 @@ function getComputedMargin(el) {
     return totalMargin;
 }
 
-/******************************************************************************************** s: highlight */
 function applyHighlights(highlights) {
     try {
         for(var i=0;i<highlights.length;i++) {
@@ -599,6 +598,33 @@ function applyHighlight(highlight) {
     } catch(err) {
         log("applyHighlight: "+err);
     }
+}
+
+function deleteHighlights(highlights) {
+	try {
+	    for(var i=0;i<highlights.length;++i) {
+	        deleteHighlight(highlights[i]);
+	    }
+	    setMemoIcon();
+	} catch(err) {
+		log('deleteHighlights : ' + err);
+	}
+}
+
+function deleteHighlight(highlight) {
+	try {
+    	var id = highlight.highlightID;
+        var highlightSpans=$("[title=\"" + id + "\"]");
+        if( highlightSpans != null ) {
+        	$(highlightSpans).contents().unwrap();
+        }
+        var snode = $(highlight.startElementPath)[0];
+        var enode = $(highlight.endElementPath)[0];
+        snode.normalize();
+        enode.normalize();
+	} catch(err) {
+		console.log('deleteHighlight : ' + err);
+	}
 }
 
 function findHighlight(x, y, element) {
@@ -664,62 +690,6 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     if (spans.length > 0) {
         $(spans[spans.length-1]).addClass(ANNOTATION_LASTSPAN_CLASS);
     }
-}
-
-function deleteHighlight(highlight) {
-	try {
-    	var id = highlight.highlightID;
-    	console.log("deleteHighlight id : " + id);
-        var highlightSpans=$("[title=\"" + id + "\"]");
-        if( highlightSpans != null ) {
-        	$(highlightSpans).contents().unwrap();
-        }
-        var snode = $(highlight.startElementPath)[0];
-        var enode = $(highlight.endElementPath)[0];
-        snode.normalize();
-        enode.normalize();
-	} catch(err) {
-		console.log('deleteAllHighlights : ' + err);
-	}
-}
-
-function deleteHighlights( highlights) {
-	try {
-	    for(var i=0;i<highlights.length;++i) {
-	    	var id = highlights[i].highlightID;
-	        var highlightSpans=$("[title=\"" + id + "\"]");
-	        if( highlightSpans != null ) {
-	        	$(highlightSpans).contents().unwrap();
-	        }
-	        var snode = $(highlights[i].startElementPath)[0];
-	        var enode = $(highlights[i].endElementPath)[0];
-	        snode.normalize();
-	        enode.normalize();
-	    }
-	    setMemoIcon();
-	} catch(err) {
-		log('deleteHighlights : ' + err);
-	}
-}
-
-function deleteAllHighlights(highlights) {
-	try {
-	    for(var i=0;i<highlights.length;++i) {
-	    	var id = highlights[i].highlightID;
-	    	log("deleteHighlights " + i + ", id : " + id);
-	        var highlightSpans=$("[title=\"" + id + "\"]");
-	        if( highlightSpans != null ) {
-	        	$(highlightSpans).contents().unwrap();
-	        }
-	        var snode = $(highlights[i].startElementPath)[0];
-	        var enode = $(highlights[i].endElementPath)[0];
-	        snode.normalize();
-	        enode.normalize();
-	    }
-	    setMemoIcon();
-	} catch(err) {
-		log('deleteAllHighlights : ' + err);
-	}
 }
 
 function getPageCount(twoPageViewMode){
@@ -2101,7 +2071,7 @@ function searchTextByKeywordIndex(highlights, keyword,keywordIndex,twoPageView) 
 
 	var element = $('#feelingk_bookcontent')[0];
 
-	deleteAllHighlights(highlights);
+	deleteHighlights(highlights);
 
 	var keyIdx = keywordIndex;
 

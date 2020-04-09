@@ -1492,7 +1492,7 @@ public class EPubViewer extends ViewerBase {
                 String hFile = h.chapterFile.toLowerCase();
                 String chapterFile = spine.getSpinePath().toLowerCase();
                 if(hFile.equals(chapterFile)) {
-                    array.put(h.get2());
+                    array.put(h.convertJsonData());
                 }
             }
         }
@@ -2178,110 +2178,6 @@ public class EPubViewer extends ViewerBase {
         System.gc();
     }
 
-//    TODO :: font size 변환 건 원복 3.053
-//    private String getHtmlHeadWithCustomJs(String headSrc, String epubFilePath) {
-//        String linkReg = "<link[^>]+href\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
-//        Pattern pattern = Pattern.compile(linkReg);
-//        Matcher matcher = pattern.matcher(headSrc);
-//        while (matcher.find()) {
-//            String cssPath = matcher.group(1).toString();
-//            if( cssPath.toLowerCase().endsWith(".css")) {
-//                headSrc = headSrc.replace(matcher.group(1), changeStyleSheetStr(matcher.group(1), cssPath, epubFilePath));
-//            }
-//        }
-//        return headSrc;
-//    }
-//
-//    private String changeStyleSheetStr(String targetLinkStr, String cssPath, String epubFilePath){
-//
-//        cssPath = cssPath.replaceAll("\\../", "");
-//
-//        String customFileDir = cssPath.substring(0, cssPath.lastIndexOf("/")+1);
-//        String customFileName = BookHelper.getOnlyFilename(cssPath)+"_flk.css";
-//        String customFilePath = customFileDir+customFileName;
-//
-//        FileInfo orgStyleSheetFileInfo = EpubFileUtil.getResourceFile(epubFilePath,cssPath);
-//
-//        if(orgStyleSheetFileInfo == null)
-//            return targetLinkStr;
-//
-//        FileInfo customStyleSheetFullPath = EpubFileUtil.getResourceFile(epubFilePath, customFilePath);
-//
-//        if(customStyleSheetFullPath==null){
-//
-//            String orgStyleSheetStr = EpubFileUtil.readFile(orgStyleSheetFileInfo.filePath);
-//
-//            if(orgStyleSheetStr.isEmpty()) return orgStyleSheetFileInfo.filePath;
-//
-//            orgStyleSheetStr = replaceFixedUnit("font-size", ";", orgStyleSheetStr, 0);
-//            orgStyleSheetStr = replaceFixedUnit("line-height", ";", orgStyleSheetStr, 0);
-//
-//            try {
-//                String customFileFullPath;
-//                if(epubFilePath.endsWith("/"))
-//                    customFileFullPath = epubFilePath+customFilePath;
-//                else
-//                    customFileFullPath = epubFilePath+"/"+customFilePath;
-//                File customStyleSheetFile = new File(customFileFullPath);
-//                if( !customStyleSheetFile.exists() )
-//                    customStyleSheetFile.createNewFile();
-//                FileOutputStream outputStream = new FileOutputStream( customStyleSheetFile );
-//                outputStream.write( orgStyleSheetStr.getBytes() );
-//                outputStream.close();
-//                return customFileFullPath;
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        } else {
-//            return customStyleSheetFullPath.filePath;
-//        }
-//        return orgStyleSheetFileInfo.filePath;
-//    }
-//
-//    private String replaceFixedUnit(String startStr, String endStr, String targetStr, int startIndex){
-//        int nextStartIndex = targetStr.indexOf(startStr, startIndex);
-//        int nextEndIndex = targetStr.indexOf(endStr, nextStartIndex);
-//        if(nextStartIndex!=-1 && nextEndIndex!=1){
-//            String targetReplaceStr = targetStr.substring(nextStartIndex, nextEndIndex);
-//            targetStr=targetStr.replace(targetReplaceStr, convertFontSize(targetReplaceStr));
-//            return replaceFixedUnit(startStr, endStr, targetStr, nextEndIndex);
-//        }
-//        return targetStr;
-//    }
-//
-//    private String convertFontSize(String targetReplaceStr) {
-//
-//        String[] sizeWithUnit = targetReplaceStr.split(":");
-//
-//        if(sizeWithUnit.length==0 || sizeWithUnit[1].contains("%"))
-//            return targetReplaceStr;
-//
-//        if(sizeWithUnit[1].contains("px")){
-//            double orgFontSize = Double.parseDouble(sizeWithUnit[1].replace("px",""));
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], String.format("%s%%",String.valueOf(orgFontSize * 6.25)));
-//        } else if(sizeWithUnit[1].contains("pt")){
-//            double orgFontSize = Double.parseDouble(sizeWithUnit[1].replace("pt",""));
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], String.format("%s%%",String.valueOf(orgFontSize *8.3)));
-//        } else if(sizeWithUnit[1].contains("xx-small")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "50%");
-//        } else if(sizeWithUnit[1].contains("x-small")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "62.50%");
-//        } else if(sizeWithUnit[1].contains("small")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "80%");
-//        } else if(sizeWithUnit[1].contains("medium")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "100%");
-//        } else if(sizeWithUnit[1].contains("large")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "112.5%");
-//        }  else if(sizeWithUnit[1].contains("x-large")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "150%");
-//        }  else if(sizeWithUnit[1].contains("xx-large")){
-//            targetReplaceStr = targetReplaceStr.replace(sizeWithUnit[1], "250%");
-//        }
-//        return targetReplaceStr;
-//    }
-
     private String makeSVGContentsHead(String fileName){
         StringBuilder svgHead = new StringBuilder();
 
@@ -2388,35 +2284,35 @@ public class EPubViewer extends ViewerBase {
         mContextMenu = pw;
     }
 
-    public void applyChapterAllHighlight(){
-        JSONArray array = new JSONArray();
-        ReadingOrderInfo chapter = mReadingSpine.getCurrentSpineInfo();
-        for(Highlight h : mHighlights) {
-            if( chapter != null ) {
-                String hFile = h.chapterFile.toLowerCase();
-                String chapterFile = chapter.getSpinePath().toLowerCase();
-                if(hFile.equals(chapterFile)) {
-                    array.put(h.get2());
-                }
-            }
-        }
-        loadUrl("javascript:applyHighlights(" + array.toString() + ")");
-    }
-
-    public void deleteChapterAllHighlight(){
-        JSONArray array = new JSONArray();
-        ReadingOrderInfo chapter = mReadingSpine.getCurrentSpineInfo();
-        for(Highlight h : mHighlights) {
-            if( chapter != null ) {
-                String hFile = h.chapterFile.toLowerCase();
-                String chapterFile = chapter.getSpinePath().toLowerCase();
-                if(hFile.equals(chapterFile)) {
-                    array.put(h.get2());
-                }
-            }
-        }
-        loadUrl("javascript:deleteAllHighlights(" + array.toString() + ")");
-    }
+//    public void applyChapterAllHighlight(){
+//        JSONArray array = new JSONArray();
+//        ReadingOrderInfo chapter = mReadingSpine.getCurrentSpineInfo();
+//        for(Highlight h : mHighlights) {
+//            if( chapter != null ) {
+//                String hFile = h.chapterFile.toLowerCase();
+//                String chapterFile = chapter.getSpinePath().toLowerCase();
+//                if(hFile.equals(chapterFile)) {
+//                    array.put(h.get2());
+//                }
+//            }
+//        }
+//        loadUrl("javascript:applyHighlights(" + array.toString() + ")");
+//    }
+//
+//    public void deleteChapterAllHighlight(){
+//        JSONArray array = new JSONArray();
+//        ReadingOrderInfo chapter = mReadingSpine.getCurrentSpineInfo();
+//        for(Highlight h : mHighlights) {
+//            if( chapter != null ) {
+//                String hFile = h.chapterFile.toLowerCase();
+//                String chapterFile = chapter.getSpinePath().toLowerCase();
+//                if(hFile.equals(chapterFile)) {
+//                    array.put(h.get2());
+//                }
+//            }
+//        }
+//        loadUrl("javascript:deleteAllHighlights(" + array.toString() + ")");
+//    }
 
     public void searchResultFocusRect(String json) {
 
@@ -3121,6 +3017,7 @@ public class EPubViewer extends ViewerBase {
             object.put(AnnotationConst.FLK_ANNOTATION_LIST, array);
 
             DebugSet.d(TAG, "json array ................. " + object.toString(1));
+            Log.d("SSIN", "json array ................. " + object.toString(1));
             output.write(object.toString(1).getBytes());
             output.close();
 
@@ -3187,12 +3084,7 @@ public class EPubViewer extends ViewerBase {
                 int colorIndex;
                 if( jobj.isNull(AnnotationConst.FLK_ANNOTATION_COLOR) ) {
                     colorIndex = BookHelper.lastHighlightColor;
-                }
-//                else if(jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR) == 5){
-//                    colorIndex = BookHelper.lastMemoHighlightColor;
-//                    uniqueID = addColorIndexHistory(uniqueID, i);
-//                }
-                else {
+                } else {
                     colorIndex = jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR);
                 }
 
@@ -4470,7 +4362,7 @@ public class EPubViewer extends ViewerBase {
             boolean isMemo = object.getBoolean("isMemo");
             String memoText = "";
             if(isMemo)
-                memoText = object.getString("memo").replace("'","\\'").trim();
+                memoText = object.getString("memo").replaceAll("'","\'").trim();
 
             String currentChapterFilePath = mReadingSpine.getCurrentSpineInfo().getSpinePath().toLowerCase();
 
@@ -4705,7 +4597,7 @@ public class EPubViewer extends ViewerBase {
                 }
 
                 JSONArray hiLite = new JSONArray();
-                hiLite.put(erases.get(i).get2());
+                hiLite.put(erases.get(i).convertJsonData());
                 mHighlights.remove(erases.get(i));
                 if( BookHelper.useHistory ) {
                     __hlHistory.mergeRemove(erases.get(i).uniqueID, newHighlight.uniqueID);
@@ -4828,7 +4720,7 @@ public class EPubViewer extends ViewerBase {
 
     public void deleteAnnotation(Highlight highlight){
         JSONArray highlightJsonArr = new JSONArray();
-        highlightJsonArr.put(highlight.get2());
+        highlightJsonArr.put(highlight.convertJsonData());
         mHighlights.remove(highlight);
         if( BookHelper.useHistory ) {
             __hlHistory.remove(highlight.uniqueID);
@@ -4861,6 +4753,26 @@ public class EPubViewer extends ViewerBase {
         finishTextSelectionMode();
     }
     /******************************************************************** e : modify annotation */
+
+    public void setAnnotationVisibility(boolean annotationVisibility){
+        JSONArray jsonArray = new JSONArray();
+        ReadingOrderInfo currentChapter = mReadingSpine.getCurrentSpineInfo();
+        for(Highlight highlight : mHighlights) {
+            if( currentChapter != null ) {
+                String highlightFile = highlight.chapterFile.toLowerCase();
+                String chapterFile = currentChapter.getSpinePath().toLowerCase();
+                if(highlightFile.equals(chapterFile)) {
+                    jsonArray.put(highlight.convertJsonData());
+                }
+            }
+        }
+
+        if(annotationVisibility) {
+            loadUrl("javascript:applyHighlights(" + jsonArray.toString() + ")");
+        } else {
+            loadUrl("javascript:deleteHighlights(" + jsonArray.toString() + ")");
+        }
+    }
 
     /******************************************************************** s : context menu */
     private void hideAnnotationMenu(){
@@ -5535,7 +5447,7 @@ public class EPubViewer extends ViewerBase {
                         String hFile = h.chapterFile.toLowerCase();
                         String currentFile = spine.getSpinePath().toLowerCase();
                         if(hFile.equals(currentFile)) {
-                            array.put(h.get2());
+                            array.put(h.convertJsonData());
                         }
                     }
                 }
@@ -6045,7 +5957,7 @@ public class EPubViewer extends ViewerBase {
                 }
             }
 
-            highlight.memo = Uri.decode(memo);
+            highlight.memo = memo;
             highlight.colorIndex = colorIndex;
             highlight.page = -1;
             highlight.percent = percent;

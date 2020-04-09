@@ -578,7 +578,7 @@ public class FixedLayoutWebview extends ViewerBase {
                 }
             }
 
-            highlight.memo = Uri.decode(memo);
+            highlight.memo = memo;
             highlight.colorIndex = colorIndex;
             highlight.page = currentPageData.getContentsPage();
             highlight.percent = percent;
@@ -662,38 +662,6 @@ public class FixedLayoutWebview extends ViewerBase {
 
         if(BookHelper.useHistory)
             UserBookDataFileManager.__hlHistory.read(UserBookDataFileManager.getFullPath(BookHelper.annotationHistoryFileName));
-    }
-
-    public void applyAllHighlight() {
-
-        JSONArray array = new JSONArray();
-
-        for(Highlight h : mHighlights) {
-            if( UserBookDataFileManager.getChapter().getCurrentChapter() != null ) {
-                if(currentPageData.getContentsFilePath().equalsIgnoreCase(h.chapterFile)) {
-                    array.put(h.get2());
-                }
-            }
-        }
-
-        if(array.length()>0)
-            loadUrl("javascript:applyHighlights(" + array.toString() + ")");
-    }
-
-    public void deleteAllHighlight(){
-
-        JSONArray array = new JSONArray();
-
-        for(Highlight h : mHighlights) {
-            if( UserBookDataFileManager.getChapter().getCurrentChapter() != null ) {
-                if(currentPageData.getContentsFilePath().equals(h.chapterFile)) {
-                    array.put(h.get2());
-                }
-            }
-        }
-
-        if(array.length()>0)
-            loadUrl("javascript:deleteAllHighlights(" + array.toString() + ")");
     }
 
     public void scrollToAnnotationId(String id){
@@ -797,7 +765,7 @@ public class FixedLayoutWebview extends ViewerBase {
             boolean isMemo = object.getBoolean("isMemo");
             String memoText = "";
             if(isMemo)
-                memoText = object.getString("memo").replace("'","\\'").trim();
+                memoText = object.getString("memo").replaceAll("'","\'").trim();
 
             String currentChapterFilePath = currentPageData.getContentsFilePath().toLowerCase();
 
@@ -1031,7 +999,7 @@ public class FixedLayoutWebview extends ViewerBase {
                 }
 
                 JSONArray hiLite = new JSONArray();
-                hiLite.put(erases.get(i).get2());
+                hiLite.put(erases.get(i).convertJsonData());
                 mHighlights.remove(erases.get(i));
                 if( BookHelper.useHistory ) {
                     UserBookDataFileManager.__hlHistory.mergeRemove(erases.get(i).uniqueID, newHighlight.uniqueID);
@@ -1411,13 +1379,33 @@ public class FixedLayoutWebview extends ViewerBase {
 
     public void deleteAnnotation(Highlight highlight){
         JSONArray highlightJsonArr = new JSONArray();
-        highlightJsonArr.put(highlight.get2());
+        highlightJsonArr.put(highlight.convertJsonData());
         mHighlights.remove(highlight);
         if( BookHelper.useHistory ) {
             UserBookDataFileManager.__hlHistory.remove(highlight.uniqueID);
         }
-        this.loadUrl("javascript:deleteHighlights(" + highlightJsonArr.toString() + ")");
+        loadUrl("javascript:deleteHighlights(" + highlightJsonArr.toString() + ")");
         HighlightManager.setHighlightList(mHighlights);
+    }
+
+    public void setAnnotationVisibility(boolean annotationVisibility){
+        JSONArray jsonArray = new JSONArray();
+        if( UserBookDataFileManager.getChapter().getCurrentChapter() != null ) {
+            for(Highlight highlight : mHighlights) {
+                if(currentPageData.getContentsFilePath().equalsIgnoreCase(highlight.chapterFile)) {
+                    jsonArray.put(highlight.convertJsonData());
+                }
+            }
+        }
+
+        if(jsonArray.length()==0)
+            return;
+
+        if(annotationVisibility) {
+            loadUrl("javascript:applyHighlights(" + jsonArray.toString() + ")");
+        } else {
+            loadUrl("javascript:deleteHighlights(" + jsonArray.toString() + ")");
+        }
     }
 
     public void modifyAnnotationColorAndRange(int colorIndex){

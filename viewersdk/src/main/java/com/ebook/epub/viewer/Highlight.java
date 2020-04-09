@@ -1,9 +1,9 @@
 package com.ebook.epub.viewer;
 
-import java.io.Serializable;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.Serializable;
 
 public class Highlight implements Serializable {
     private static final long serialVersionUID = 4462428130891863851L;
@@ -57,7 +57,7 @@ public class Highlight implements Serializable {
     }
     
     // 이 메소드는 javascript와의 데이타 교환용으로 사용한다.
-    public JSONObject get2() {
+    public JSONObject convertJsonData() {
         
         try {
             JSONObject object = new JSONObject();

@@ -452,16 +452,8 @@ public class FixedLayoutZoomView extends LinearLayout {
         return mFixedLayoutContainerView.saveHighlights();
     }
 
-    public void applyAllHighlight(){
-        mFixedLayoutContainerView.applyAllHighlight();
-    }
-
     public void applyCurrentChapterHighlight(int position){
         mFixedLayoutContainerView.applyCurrentChapterHighlight(position);
-    }
-
-    public void deleteAllHighlight(){
-        mFixedLayoutContainerView.deleteAllHighlight();
     }
 
     public void scrollToAnnotationId(String id){
@@ -630,6 +622,10 @@ public class FixedLayoutZoomView extends LinearLayout {
 
     public void deleteAnnotation(Highlight highlight){
         mFixedLayoutContainerView.deleteAnnotation(highlight);
+    }
+
+    public void setAnnotationVisibility(boolean annotationVisibility){
+        mFixedLayoutContainerView.setAnnotationVisibility(annotationVisibility);
     }
 
     public void modifyAnnotationColorAndRange(int colorIndex){

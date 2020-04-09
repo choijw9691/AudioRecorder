@@ -225,19 +225,8 @@ public class FixedLayoutContainerView extends LinearLayout {
         return mWebviewList.get(getCurrentWebviewPosition()).saveHighlights();
     }
 
-    public void applyAllHighlight(){
-        for(FixedLayoutWebview webview : mWebviewList){
-            webview.applyAllHighlight();
-        }
-    }
     public void applyCurrentChapterHighlight(int position){
-        mWebviewList.get(position).applyAllHighlight();
-    }
-
-    public void deleteAllHighlight(){
-        for(FixedLayoutWebview webview : mWebviewList){
-            webview.deleteAllHighlight();
-        }
+        mWebviewList.get(position).setAnnotationVisibility(true);
     }
 
     public void scrollToAnnotationId(String id){
@@ -479,6 +468,12 @@ public class FixedLayoutContainerView extends LinearLayout {
     public void deleteAnnotation(Highlight highlight){
         for(FixedLayoutWebview webview : mWebviewList){
             webview.deleteAnnotation(highlight);
+        }
+    }
+
+    public void setAnnotationVisibility(boolean annotationVisibility){
+        for(FixedLayoutWebview webview : mWebviewList){
+            webview.setAnnotationVisibility(annotationVisibility);
         }
     }
 

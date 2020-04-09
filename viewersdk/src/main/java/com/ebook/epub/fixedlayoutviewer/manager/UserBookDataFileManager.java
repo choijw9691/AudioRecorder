@@ -347,11 +347,7 @@ public class UserBookDataFileManager {
                 int colorIndex;
                 if( jobj.isNull(AnnotationConst.FLK_ANNOTATION_COLOR) ) {
                     colorIndex = BookHelper.lastHighlightColor;
-                }
-//                else if(jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR) == 5){
-//                    colorIndex = BookHelper.lastMemoHighlightColor;
-//                }
-                else {
+                } else {
                     colorIndex = jobj.getInt(AnnotationConst.FLK_ANNOTATION_COLOR);
                 }
 

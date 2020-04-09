@@ -2028,6 +2028,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     }
     /******************************************************************** e : delete annotation */
 
+    public void setAnnotationVisibility(boolean annotationVisibility){
+        mPagerAdapter.getCurrentView().setAnnotationVisibility(annotationVisibility);
+    }
+
     /******************************************************************** s : modify annotation */
     public void  modifyAnnotationColorAndRange(int colorIndex){
         mPagerAdapter.getCurrentView().modifyAnnotationColorAndRange(colorIndex);

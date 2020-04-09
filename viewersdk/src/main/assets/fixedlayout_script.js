@@ -784,6 +784,75 @@ function createSpanForTextNodeContainer(container,startOffset,endOffset,childCou
     return childSpan;
 }
 
+function applyHighlights(highlights) {
+    try {
+        for(var i=0;i<highlights.length;i++) {
+            applyHighlight(highlights[i]);
+            if(highlights[i].memo.length>0){
+                var highlightSpans=$("[title=\""+highlights[i].highlightID+"\"]");
+                highlightSpans.addClass(MEMO_CLASS);
+            }
+        }
+        setMemoIcon();
+    } catch(err) {
+        console.log("applyHighlights err : "+err);
+    }
+}
+
+function applyHighlight(highlight) {
+
+    try {
+        var startElement=getNodeFromElementPath(highlight.startElementPath, 0);
+        var endElement=getNodeFromElementPath(highlight.endElementPath, 0);
+
+        if(startElement===null) {
+            log("No highlight start element");
+        } else if(endElement===null) {
+            log("No highlight end element");
+        } else {
+            var range=document.createRange();
+            if(setPointInRange(startElement,highlight.startCharOffset,range,setRangeStart)) {
+                if(setPointInRange(endElement,highlight.endCharOffset,range,setRangeEnd)) {
+                    highlightRange(range,highlight.isDeleted,highlight.isAnnotation,highlight.highlightID,highlight.colorIndex);
+                } else {
+                    log("Could not set end of selection range");
+                }
+            } else {
+                log("Could not set start of selection range");
+            }
+        }
+    } catch(err) {
+        console.log("applyHighlight err : "+err);
+    }
+}
+
+function deleteHighlights(highlights) {
+	try {
+	    for(var i=0;i<highlights.length;++i) {
+            deleteHighlight(highlights[i]);
+	    }
+	    setMemoIcon();
+	} catch(err) {
+		log('deleteHighlights : ' + err);
+	}
+}
+
+function deleteHighlight(highlight) {
+	try {
+    	var id = highlight.highlightID;
+        var highlightSpans=$("[title=\"" + id + "\"]");
+        if( highlightSpans != null ) {
+        	$(highlightSpans).contents().unwrap();
+        }
+        var snode = $(highlight.startElementPath)[0];
+        var enode = $(highlight.endElementPath)[0];
+        snode.normalize();
+        enode.normalize();
+	} catch(err) {
+		console.log('deleteHighlight : ' + err);
+	}
+}
+
 function saveHighlight(highlight) {
     if(highlightIsValid(highlight)){
         window.fixedlayout.saveHighlight(JSON.stringify(highlight));
@@ -824,26 +893,6 @@ function getColumnGap(twoPageViewMode) {     // TODO :: 픽스드는 필요 없�
     }
 }
 
-function deleteHighlights( highlights) {
-	try {
-	    for(var i=0;i<highlights.length;++i) {
-	    	var id = highlights[i].highlightID;
-	        var highlightSpans=$("[title=\"" + id + "\"]");
-	        if( highlightSpans != null ) {
-	        	$(highlightSpans).contents().unwrap();
-	        }
-	        var snode = $(highlights[i].startElementPath)[0];
-	        var enode = $(highlights[i].endElementPath)[0];
-	        snode.normalize();
-	        enode.normalize();
-	    }
-	    setMemoIcon();
-	} catch(err) {
-		log('deleteHighlights : ' + err);
-	}
-
-}
-
 //function changeHighlightColorDirect(highlightID, clrIndex, callBack) {
 //
 //	var percent;
@@ -871,74 +920,6 @@ function deleteHighlights( highlights) {
 //		log("changeHighlightColorDirect err : "+err);
 //	}
 //}
-
-function applyHighlights(highlights) {
-    try {
-        for(var i=0;i<highlights.length;i++) {
-            applyHighlight(highlights[i]);
-            if(highlights[i].memo.length>0){
-                var highlightSpans=$("[title=\""+highlights[i].highlightID+"\"]");
-                highlightSpans.addClass(MEMO_CLASS);
-            }
-        }
-        setMemoIcon();
-    } catch(err) {
-        console.log("applyHighlights err : "+err);
-    }
-}
-
-function applyHighlight(highlight) {
-
-    try {
-
-        var startElement=getNodeFromElementPath(highlight.startElementPath, 0);
-        var endElement=getNodeFromElementPath(highlight.endElementPath, 0);
-
-        if(startElement===null) {
-            log("No highlight start element");
-        } else if(endElement===null) {
-            log("No highlight end element");
-        } else {
-            var range=document.createRange();
-            if(setPointInRange(startElement,highlight.startCharOffset,range,setRangeStart)) {
-                if(setPointInRange(endElement,highlight.endCharOffset,range,setRangeEnd)) {
-                    highlightRange(range,highlight.isDeleted,highlight.isAnnotation,highlight.highlightID,highlight.colorIndex);
-                } else {
-                    log("Could not set end of selection range");
-                }
-            } else {
-                log("Could not set start of selection range");
-            }
-        }
-    } catch(err) {
-        console.log("applyHighlight err : "+err);
-    }
-}
-
-function deleteAllHighlights(highlights) {
-
-	try {
-
-	    for(var i=0;i<highlights.length;++i) {
-	    	var id = highlights[i].highlightID;
-
-	    	log("deleteHighlights " + i + ", id : " + id);
-
-	        var highlightSpans=$("[title=\"" + id + "\"]");
-	        if( highlightSpans != null ) {
-	        	$(highlightSpans).contents().unwrap();
-	        }
-
-	        var snode = $(highlights[i].startElementPath)[0];
-	        var enode = $(highlights[i].endElementPath)[0];
-	        snode.normalize();
-	        enode.normalize();
-	    }
-	}
-	catch(err) {
-		log('deleteAllHighlights : ' + err);
-	}
-}
 
 function scrollToElement(element) {
 

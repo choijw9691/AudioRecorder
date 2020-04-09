@@ -824,29 +824,21 @@ function getColumnGap(twoPageViewMode) {     // TODO :: 픽스드는 필요 없�
     }
 }
 
-function deleteHighlights( highlights) {    // TODO :: 프론트에서 쓰이는 경우 있는지 확인하고 안쓰면 없애기
-
+function deleteHighlights( highlights) {
 	try {
 	    for(var i=0;i<highlights.length;++i) {
 	    	var id = highlights[i].highlightID;
-
-	    	log("deleteHighlights " + i + ", id : " + id);
-
 	        var highlightSpans=$("[title=\"" + id + "\"]");
 	        if( highlightSpans != null ) {
 	        	$(highlightSpans).contents().unwrap();
 	        }
-
 	        var snode = $(highlights[i].startElementPath)[0];
 	        var enode = $(highlights[i].endElementPath)[0];
 	        snode.normalize();
 	        enode.normalize();
-
-	        window.fixedlayout.reportHighlightPosition(id,0,0,0,0,false);
 	    }
 	    setMemoIcon();
-	}
-	catch(err) {
+	} catch(err) {
 		log('deleteHighlights : ' + err);
 	}
 

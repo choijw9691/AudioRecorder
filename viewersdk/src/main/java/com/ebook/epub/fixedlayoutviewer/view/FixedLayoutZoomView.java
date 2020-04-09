@@ -19,6 +19,7 @@ import com.ebook.epub.fixedlayoutviewer.manager.HtmlContentsManager;
 import com.ebook.epub.fixedlayoutviewer.view.FixedLayoutScrollView.PageMode;
 import com.ebook.epub.viewer.BookHelper;
 import com.ebook.epub.viewer.DebugSet;
+import com.ebook.epub.viewer.Highlight;
 import com.ebook.epub.viewer.ViewerContainer;
 import com.ebook.mediaoverlay.MediaOverlayController;
 import com.ebook.tts.Highlighter;
@@ -625,6 +626,10 @@ public class FixedLayoutZoomView extends LinearLayout {
 
     public void deleteAnnotation(){
         mFixedLayoutContainerView.deleteAnnotation();
+    }
+
+    public void deleteAnnotation(Highlight highlight){
+        mFixedLayoutContainerView.deleteAnnotation(highlight);
     }
 
     public void modifyAnnotationColorAndRange(int colorIndex){

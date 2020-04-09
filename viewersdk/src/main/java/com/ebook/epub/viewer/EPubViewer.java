@@ -2418,36 +2418,6 @@ public class EPubViewer extends ViewerBase {
         loadUrl("javascript:deleteAllHighlights(" + array.toString() + ")");
     }
 
-    /**
-     *
-     * deleteHighlight - 형광펜 삭제
-     * @return void
-     * @param id        : highlight ID
-     */
-    public void deleteHighlight(String id) {
-        for(Highlight h: mHighlights) {
-            if(h.highlightID.equals(id)) {
-                deleteHighlight(h);
-                break;
-            }
-        }
-    }
-
-    /**
-     * 	 해당 하이라이트를 삭제 요청하는 메소드
-     *   @param high : 삭제할 하이라이트 객체
-     */
-    public void deleteHighlight(Highlight high) {
-        JSONArray hiLite = new JSONArray();
-        hiLite.put(high.get2());
-        mHighlights.remove(high);
-        if( BookHelper.useHistory ) {
-            __hlHistory.remove(high.uniqueID);
-        }
-        loadUrl("javascript:deleteHighlights(" + hiLite.toString() + ")");
-        mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_CONTEXT_MENU_HIDE));
-    }
-
     public void searchResultFocusRect(String json) {
 
         if( __canFocusSearchResult ) return;
@@ -4854,6 +4824,16 @@ public class EPubViewer extends ViewerBase {
     public void deleteAnnotation(){
         loadUrl("javascript:deleteAnnotationInRange()");
         finishTextSelectionMode();
+    }
+
+    public void deleteAnnotation(Highlight highlight){
+        JSONArray highlightJsonArr = new JSONArray();
+        highlightJsonArr.put(highlight.get2());
+        mHighlights.remove(highlight);
+        if( BookHelper.useHistory ) {
+            __hlHistory.remove(highlight.uniqueID);
+        }
+        loadUrl("javascript:deleteHighlights(" + highlightJsonArr.toString() + ")");
     }
     /******************************************************************** e : delete annotation */
 

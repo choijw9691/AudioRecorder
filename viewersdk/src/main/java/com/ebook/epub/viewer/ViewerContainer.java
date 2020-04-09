@@ -936,14 +936,6 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         return new ArrayList<>();
     }
 
-    public void deleteHighlight(Highlight high){
-        if( mLayoutMode == LayoutMode.Reflowable ){
-            mEPubViewer.deleteHighlight(high);
-        } else if( mLayoutMode == LayoutMode.FixedLayout ){
-//            mFixedLayoutView.deleteHighlight(high);
-        }
-    }
-
     public void hasBookmark() {
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.hasBookmark();
@@ -1746,6 +1738,15 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             mEPubViewer.deleteAnnotation();
         } else if( mLayoutMode == LayoutMode.FixedLayout ) {
             mFixedLayoutView.deleteAnnotation();
+        }
+    }
+
+    public void deleteAnnotation(Highlight highlight){
+        // TODO : new custom selection deleteHighlight(Highlight highlight) -> deleteAnnotation(Highlight highlight)
+        if(mLayoutMode == LayoutMode.Reflowable) {
+            mEPubViewer.deleteAnnotation(highlight);
+        } else if( mLayoutMode == LayoutMode.FixedLayout ) {
+            mFixedLayoutView.deleteAnnotation(highlight);
         }
     }
 

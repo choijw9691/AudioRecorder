@@ -527,31 +527,6 @@ public class FixedLayoutWebview extends ViewerBase {
         mEndHandle.draw(canvas);
     }
 
-    public void deleteHighlight(String id) {
-        for(Highlight h: mHighlights) {
-            if(h.highlightID.equals(id)) {
-                deleteHighlight(h);
-                break;
-            }
-        }
-    }
-
-    public void deleteHighlight(Highlight high) {
-
-        JSONArray hiLite = new JSONArray();
-        hiLite.put(high.get2());
-
-        mHighlights.remove(high);
-        if( BookHelper.useHistory ) {
-            UserBookDataFileManager.__hlHistory.remove(high.uniqueID);
-        }
-
-        this.loadUrl("javascript:deleteHighlights(" + hiLite.toString() + ")");
-
-        HighlightManager.setHighlightList(mHighlights);
-//        SendMessage(Defines.SELECTOR_BAR_HIDE, true);     // TODO :: handler case 필요하면 정의
-    }
-
     private void addHighlightingData(String highlightedData) {
 
         try {
@@ -1432,6 +1407,17 @@ public class FixedLayoutWebview extends ViewerBase {
     public void deleteAnnotation(){
         loadUrl("javascript:deleteAnnotationInRange()");
         finishTextSelectionMode();
+    }
+
+    public void deleteAnnotation(Highlight highlight){
+        JSONArray highlightJsonArr = new JSONArray();
+        highlightJsonArr.put(highlight.get2());
+        mHighlights.remove(highlight);
+        if( BookHelper.useHistory ) {
+            UserBookDataFileManager.__hlHistory.remove(highlight.uniqueID);
+        }
+        this.loadUrl("javascript:deleteHighlights(" + highlightJsonArr.toString() + ")");
+        HighlightManager.setHighlightList(mHighlights);
     }
 
     public void modifyAnnotationColorAndRange(int colorIndex){

@@ -221,12 +221,6 @@ public class FixedLayoutContainerView extends LinearLayout {
         }
     }
 
-    public void deleteHighlight(Highlight hign) {
-        for(FixedLayoutWebview webview : mWebviewList){
-            webview.deleteHighlight(hign);
-        }
-    }
-
     public boolean saveHighlights() {
         return mWebviewList.get(getCurrentWebviewPosition()).saveHighlights();
     }
@@ -479,6 +473,12 @@ public class FixedLayoutContainerView extends LinearLayout {
             if(webview.getSelectionMode()){
                 webview.deleteAnnotation();
             }
+        }
+    }
+
+    public void deleteAnnotation(Highlight highlight){
+        for(FixedLayoutWebview webview : mWebviewList){
+            webview.deleteAnnotation(highlight);
         }
     }
 

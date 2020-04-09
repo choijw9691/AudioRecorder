@@ -6,8 +6,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -66,6 +64,9 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 /**
  @class FixedLayoutScrollView
@@ -2020,6 +2021,10 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     /******************************************************************** s : delete annotation */
     public void deleteAnnotation(){
         mPagerAdapter.getCurrentView().deleteAnnotation();
+    }
+
+    public void deleteAnnotation(Highlight highlight){
+        mPagerAdapter.getCurrentView().deleteAnnotation(highlight);
     }
     /******************************************************************** e : delete annotation */
 

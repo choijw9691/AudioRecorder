@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.BreakIterator;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -393,45 +392,41 @@ public class TTSDataInfoManager {
 
     private boolean setTTSDataList(String currentFilePath){
 
-        HashMap<String, Integer> tempTotalLengthData = new HashMap<>();
-
         try {
             for(int idx=0; idx<ttsDataJsonArr.length(); idx++){
 
                 JSONObject obj = ttsDataJsonArr.getJSONObject(idx);
                 String text = obj.getString("text");
                 String path = obj.getString("path");
+                String parentText = obj.getString("parentText");
                 String filePath = obj.getString("filePath");
 
                 if(!currentFilePath.equalsIgnoreCase(filePath))
                     continue;
 
+                int prevIndex = 0;
+                if(!parentText.isEmpty() && !text.equalsIgnoreCase(parentText)){
+                    int tempIdx = parentText.indexOf(text);
+                    if(tempIdx!=-1)
+                        prevIndex = tempIdx;
+                }
+
                 if( text.startsWith("flk_") ){ // math, svg, img 태그 처리
                     ttsDataInfoList.add(new TTSDataInfo(text , path, 0, 0, currentFilePath));
                 } else {
                     BreakIterator iterator = BreakIterator.getSentenceInstance();
-                    iterator.setText(text.trim());
+                    iterator.setText(text);
 
                     int index = 0;
-                    int prevLength=0;
-                    if(tempTotalLengthData.get(path)!=null){
-                        prevLength = tempTotalLengthData.get(path).intValue();
-                    }
-
                     while (iterator.next() != BreakIterator.DONE) {
-                        String sentence = text.trim().substring(index, iterator.current());
+                        String sentence = text.substring(index, iterator.current());
                         DebugSet.d("TAG","Sentence: " + sentence);
                         DebugSet.d("TAG","Path: " + path);
 
-                        if(sentence.trim().length()>0) {
-                            String trimSentence = sentence.replaceAll("[\\p{Zs}\\s]+", "").replaceAll(" ","");
-//                            String trimSentence = sentence.replaceAll("\u2002","").replaceAll("\u00a0","").replaceAll(" ", "").replaceAll("\n","");
-                            ttsDataInfoList.add(new TTSDataInfo(sentence, path, prevLength, prevLength+trimSentence.length(), currentFilePath));
-                            prevLength += trimSentence.length();
-                        }
+                        if(sentence.trim().length()>0)  // sentence.trim() 으로 데이터 넣지 않도록 수정함
+                            ttsDataInfoList.add(new TTSDataInfo(sentence, path, index+prevIndex, iterator.current()+prevIndex,  currentFilePath));
                         index = iterator.current();
                     }
-                    tempTotalLengthData.put(path, prevLength);
                 }
             }
         } catch (JSONException e) {
@@ -475,16 +470,15 @@ public class TTSDataInfoManager {
                 int ttsEndOffset = ttsDataInfoList.get(i).getEndOffset();
                 String ttsFilePath = ttsDataInfoList.get(i).getFilePath();
 
-                if( selectedStartElementPath.trim().toLowerCase().equals(ttsPath)){
-                    if(selectedFilePath.isEmpty() || selectedFilePath.equalsIgnoreCase(ttsFilePath)){
-                        if( ttsStartOffset <= selectedStartCharOffset && selectedStartCharOffset < ttsEndOffset){
+                if( selectedStartElementPath.trim().toLowerCase().equals(ttsPath) ){
+                    if(selectedFilePath.isEmpty() || selectedFilePath.equalsIgnoreCase(ttsFilePath)) {
+                        if (ttsStartOffset <= selectedStartCharOffset && selectedStartCharOffset < ttsEndOffset) {
                             startTextIndex = i;
-                            currentReadingText = ttsDataInfoList.get(i).getText().substring(selectedStartCharOffset-ttsStartOffset);
+                            currentReadingText = ttsDataInfoList.get(i).getText().substring(selectedStartCharOffset - ttsStartOffset);
                             selectedTTSDataInfo = new TTSDataInfo(currentReadingText, ttsDataInfoList.get(i).getXPath(), selectedStartCharOffset, ttsEndOffset, ttsDataInfoList.get(i).getFilePath());
                             break;
                         }
                     }
-
                 }
             }
 
@@ -630,12 +624,6 @@ public class TTSDataInfoManager {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-//            selectedStartElementPath = startElementPath;
-//            selectedEndElementPath = endElementPath;
-//            selectedStartCharOffset = startCharOffset;
-//            selectedEndCharOffset = endCharOffset;
-//            SendMessage(MSG_GET_SELECTED_DATA, selectedElementInfo);
         }
     }
 

@@ -9,7 +9,7 @@ public class TTSDataInfo {
 	private int startOffset;
 	private int endOffset;
 	private String filePath;
-	
+
 	public TTSDataInfo(String text, String path, int start, int end, String filePath){
 		this.text = text;
 		this.xPath = path;

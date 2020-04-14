@@ -325,30 +325,31 @@ public class TTSDataInfoManager {
                 }
 
             } else {
-                for( int i =0; i < childNodes.getLength(); i++ ){
-                    Node child = childNodes.item(i);
-                    getTextFromNode(child, filePath);
-                }
-            }
-        } else if(node.getNodeType() == Node.TEXT_NODE){
 
-            if(node.getTextContent()!=null && node.getTextContent().trim().replaceAll("\\p{Z}", "").length()>0){
+                if(node.getTextContent()!=null && node.getTextContent().trim().replaceAll("\\p{Z}", "").length()>0){
 
-                try {
-                    String xPath = getXPath(node.getParentNode());
+                    try {
+                        String xPath = getXPath(node);
 
-                    JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("text", node.getTextContent());
-                    jsonObj.put("path", xPath);
-                    jsonObj.put("parentText", "");
-                    jsonObj.put("filePath", filePath);
+                        JSONObject jsonObj = new JSONObject();
+                        jsonObj.put("text", node.getTextContent());
+                        jsonObj.put("path", xPath);
+                        jsonObj.put("parentText", "");
+                        jsonObj.put("filePath", filePath);
 
-                    elementXPathJsonArr.put(xPath);
+                        elementXPathJsonArr.put(xPath);
 
-                    ttsDataJsonArr.put(jsonObj);
+                        ttsDataJsonArr.put(jsonObj);
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    for( int i=0; i < childNodes.getLength(); i++ ){
+                        Node child = childNodes.item(i);
+                        getTextFromNode(child, filePath);
+                    }
                 }
             }
         }

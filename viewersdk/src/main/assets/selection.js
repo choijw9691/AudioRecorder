@@ -200,17 +200,6 @@ $(document).ready(function(){
         clearInterval(audioTimerID);
         window.selection.didFinishAudio($($(this)[0]).getPath());
     });
-
-
-    $('img').each(function (i, image) {
-        var result = new Object();
-        result.src = $(image).attr('src');
-        result.display = window.getComputedStyle(image).display;
-        imageDataInfo.push(result);
-        image.style.display = 'block';
-    });
-
-    setOrgFontSizeAttr();
 });
 /********************************************************************************************* e:ready */
 
@@ -416,7 +405,7 @@ function setupChapter(	highlights,
         first.css('marginTop', '0em', '!important');
         first.css('paddingTop', firstMarginTop, '!important');
 
-        changeFontSize(parseInt(fontSize)/100);
+        setOrgFontSizeAttr(parseInt(fontSize)/100);
 
         resizingImage();
 
@@ -437,24 +426,41 @@ function setupChapter(	highlights,
 }
 
 function changeFontSize(ratio) {
-    $('body').find('*').each(function(){
-        var fontSize = $(this).attr('orgfontsize')*ratio;
-        if(!isNaN(fontSize))
-            $(this).css("font-size", fontSize + "px");
-    });
+    try{
+        $('body').find('*').each(function(){
+            if($(this).attr('orgfontsize') != undefined){
+                var fontSize = $(this).attr('orgfontsize')*ratio;
+                if(!isNaN(fontSize))
+                    $(this).css("font-size", fontSize + "px");
+            }
+        });
+    } catch(error){
+        console.log('changeFontSize error : '+error);
+    }
 }
 
-function setOrgFontSizeAttr() {
+function setOrgFontSizeAttr(fontSize) {
     $('body').find('*').each(function(){
         var fontSize = parseInt($(this).css("font-size"));
         if(fontSize != undefined)
             $(this).attr('orgfontsize', fontSize);
     });
+
+    changeFontSize(fontSize);
 }
 
 function resizingImage() {
 
     try{
+
+        $('img').each(function (i, image) {
+            var result = new Object();
+            result.src = $(image).attr('src');
+            result.display = window.getComputedStyle(image).display;
+            imageDataInfo.push(result);
+            image.style.display = 'block';
+        });
+
         var booktableHeight = $('#feelingk_booktable').height();
         var bookcontentWidth = $('#feelingk_bookcontent').width();
 

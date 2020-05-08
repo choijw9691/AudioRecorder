@@ -173,7 +173,7 @@ public class TTSDataInfoManager {
         return ttsDataInfoList;
     }
 
-    private void getTextFromNode(Node node, String filePath) {
+    private void getTextFromNode(Node node, String filePath){
 
         NodeList childNodes = node.getChildNodes();
 
@@ -200,7 +200,7 @@ public class TTSDataInfoManager {
 //			}
 //
 //		} else
-        if (node.getNodeType() == Node.ELEMENT_NODE) {
+        if (node.getNodeType() == Node.ELEMENT_NODE){
 
 //		    if(node.hasAttributes() && node.getAttributes().getNamedItem("style")!=null){
 //		        String nodeAttr = node.getAttributes().getNamedItem("style").getNodeValue().replaceAll(" ","");
@@ -208,21 +208,19 @@ public class TTSDataInfoManager {
 //		            return;
 //                }
 //            }
-            if (node.getNodeName().equalsIgnoreCase("aside"))
-                return;
 
-            if (node.getNodeName().equalsIgnoreCase("div") ||
+            if(node.getNodeName().equalsIgnoreCase("div") ||
                     node.getNodeName().equalsIgnoreCase("section") ||
                     node.getNodeName().equalsIgnoreCase("figure") ||
-                    node.getNodeName().equalsIgnoreCase("blockquote")) {
+                    node.getNodeName().equalsIgnoreCase("blockquote")){
 
-                for (int i = 0; i < childNodes.getLength(); i++) {
+                for( int i =0; i < childNodes.getLength(); i++ ){
                     Node child = childNodes.item(i);
 
                     getTextFromNode(child, filePath);
                 }
 
-            } else if (node.getNodeName().equalsIgnoreCase("img")) {
+            } else if(node.getNodeName().equalsIgnoreCase("img")){
 
                 try {
 
@@ -230,10 +228,10 @@ public class TTSDataInfoManager {
 
                     JSONObject jsonObj = new JSONObject();
                     Node alt = node.getAttributes().getNamedItem(AttributeName.ALT);
-                    if (alt != null) {
-                        jsonObj.put("text", "flk_image:" + alt.getNodeValue());
-                    } else {
-                        jsonObj.put("text", "flk_image:");
+                    if(alt!=null){
+                        jsonObj.put("text","flk_image:"+alt.getNodeValue());
+                    }else {
+                        jsonObj.put("text","flk_image:");
                     }
                     jsonObj.put("path", xPath);
                     jsonObj.put("parentText", "");
@@ -247,14 +245,14 @@ public class TTSDataInfoManager {
                     e.printStackTrace();
                 }
 
-            } else if (node.getNodeName().equalsIgnoreCase("math")) {
+            } else if(node.getNodeName().equalsIgnoreCase("math")){
 
                 try {
 
                     String xPath = getXPath(node);
 
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("text", "flk_math:" + node.getTextContent());
+                    jsonObj.put("text","flk_math:"+node.getTextContent());
                     jsonObj.put("path", xPath);
                     jsonObj.put("parentText", "");
                     jsonObj.put("filePath", filePath);
@@ -267,13 +265,13 @@ public class TTSDataInfoManager {
                     e.printStackTrace();
                 }
 
-            } else if (node.getNodeName().equalsIgnoreCase("svg")) {
+            } else if(node.getNodeName().equalsIgnoreCase("svg")){
 
                 try {
                     String xPath = getXPath(node);
 
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("text", "flk_svg:");
+                    jsonObj.put("text","flk_svg:");
                     jsonObj.put("path", xPath);
                     jsonObj.put("parentText", "");
                     jsonObj.put("filePath", filePath);
@@ -286,13 +284,13 @@ public class TTSDataInfoManager {
                     e.printStackTrace();
                 }
 
-            } else if (node.getNodeName().equalsIgnoreCase("video")) {
+            } else if(node.getNodeName().equalsIgnoreCase("video")){
 
                 try {
                     String xPath = getXPath(node);
 
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("text", "flk_video:");
+                    jsonObj.put("text","flk_video:");
                     jsonObj.put("path", xPath);
                     jsonObj.put("parentText", "");
                     jsonObj.put("filePath", filePath);
@@ -305,13 +303,13 @@ public class TTSDataInfoManager {
                     e.printStackTrace();
                 }
 
-            } else if (node.getNodeName().equalsIgnoreCase("audio")) {
+            } else if(node.getNodeName().equalsIgnoreCase("audio")){
 
                 try {
                     String xPath = getXPath(node);
 
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("text", "flk_audio:");
+                    jsonObj.put("text","flk_audio:");
                     jsonObj.put("path", xPath);
                     jsonObj.put("parentText", "");
                     jsonObj.put("filePath", filePath);
@@ -325,14 +323,36 @@ public class TTSDataInfoManager {
                 }
 
             } else {
-                for (int i = 0; i < childNodes.getLength(); i++) {
-                    Node child = childNodes.item(i);
-                    getTextFromNode(child, filePath);
+
+                if(node.getTextContent()!=null && node.getTextContent().trim().replaceAll("\\p{Z}", "").length()>0){
+
+                    try {
+                        String xPath = getXPath(node);
+
+                        JSONObject jsonObj = new JSONObject();
+                        jsonObj.put("text", node.getTextContent());
+                        jsonObj.put("path", xPath);
+                        jsonObj.put("parentText", "");
+                        jsonObj.put("filePath", filePath);
+
+                        elementXPathJsonArr.put(xPath);
+
+                        ttsDataJsonArr.put(jsonObj);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    for( int i=0; i < childNodes.getLength(); i++ ){
+                        Node child = childNodes.item(i);
+                        getTextFromNode(child, filePath);
+                    }
                 }
             }
-        } else if (node.getNodeType() == Node.TEXT_NODE){
+        } else if(node.getNodeType() == Node.TEXT_NODE) {
 
-            if (node.getTextContent() != null && node.getTextContent().trim().replaceAll("\\p{Z}", "").length() > 0) {
+            if(node.getTextContent().trim().length()>0){
 
                 try {
                     String xPath = getXPath(node.getParentNode());

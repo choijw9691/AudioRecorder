@@ -60,6 +60,8 @@
                 var asideContent="";
                 if(noteref.attr('href').indexOf('#')==0){
                     var targetId = noteref.attr('href');
+                    if($(targetId)[0] == undefined)
+                        continue;
                     asideContent = $(targetId)[0].textContent;
                 }
                 var noterefData = {

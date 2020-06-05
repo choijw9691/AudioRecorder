@@ -1657,10 +1657,10 @@ function gotoID(inputid, twoPageViewMode) {
         if(gCurrentViewMode!=3){
             if($(checkid).css('display') == 'none'){
                 $(checkid).show();
-                left = $(checkid)[0].offsetLeft;
+                left = $(checkid)[0].getBoundingClientRect().left + $(document).scrollLeft();
                 $(checkid).hide();
             } else {
-                left = $(checkid)[0].offsetLeft;
+                left = $(checkid)[0].getBoundingClientRect().left + $(document).scrollLeft();
             }
 
             if( gDirectionType == 1 )
@@ -1672,11 +1672,11 @@ function gotoID(inputid, twoPageViewMode) {
         } else if(gCurrentViewMode==3){
             if($(checkid).css('display') == 'none'){
                 $(checkid).show();
-                top = $(checkid)[0].offsetTop;
+                top = $(checkid)[0].getBoundingClientRect().top + $(document).scrollTop();
                 $(checkid).hide();
                 window.scrollTo(0, top);
             } else {
-                top = $(checkid)[0].offsetTop;
+                top = $(checkid)[0].getBoundingClientRect().top + $(document).scrollTop();
             }
             window.scrollTo(0, top);
         }
@@ -2169,22 +2169,22 @@ function getCurrentInnerChapterId(Ids, bookMarks, twoPageView){
         if(chapterElement.css('display')=="none"){
             chapterElement.show();
             if(gCurrentViewMode == 3){
-                if(chapterElement[0].offsetTop < scrBottom ){
+                if(chapterElement[0].getBoundingClientRect().top + scrTop < scrBottom ){
                     currentChapterId = Ids[idx];
                 }
             } else {
-                if(chapterElement[0].offsetLeft < scrRight){
+                if(chapterElement[0].getBoundingClientRect().left + scrLeft< scrRight){
                     currentChapterId = Ids[idx];
                 }
             }
             chapterElement.hide();
         } else {
             if(gCurrentViewMode == 3){
-                if(chapterElement[0].offsetTop < scrBottom ){
+                if(chapterElement[0].getBoundingClientRect().top + scrTop < scrBottom ){
                     currentChapterId = Ids[idx];
                 }
             } else {
-                if(chapterElement[0].offsetLeft < scrRight){
+                if(chapterElement[0].getBoundingClientRect().left + scrLeft < scrRight){
                     currentChapterId = Ids[idx];
                 }
             }

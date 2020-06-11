@@ -27,6 +27,8 @@
 
             for (var i = 0; i < this.noterefDataList.length; i++) {
                 var noterefData = this.noterefDataList[i];
+                if(noterefData==undefined)
+                    continue;
                 var aTag = $(this.noterefDataList[i].element);
                 if (aTag.attr("epub\:type") == "noteref") {
                     aTag.on('click', { value: noterefData }, function(event){

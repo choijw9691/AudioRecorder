@@ -5061,6 +5061,10 @@ public class EPubViewer extends ViewerBase {
         DebugSet.d(TAG, "onTouchMoveAfterLongPress in x : "+x +" / y : "+y);
         DebugSet.d(TAG, "onTouchMoveAfterLongPress in moveDistX : "+moveDistX +" / moveDistY : "+moveDistY);
 
+        if(isQuickHighlightDisabled) {
+            return;
+        }
+
         if(!mTextSelectionMode) {
             if(autoScrollTimer!=null) {
                 autoScrollTimer.cancel();
@@ -6198,6 +6202,11 @@ public class EPubViewer extends ViewerBase {
     private boolean isTextSelectionDisabled = false;
     public void setSelectionDisabled(boolean isTextSelectionDisabled){
         this.isTextSelectionDisabled = isTextSelectionDisabled;
+    }
+
+    private boolean isQuickHighlightDisabled = false;
+    public void setQuickHighlightDisabled(boolean isQuickHighlightDisabled){
+        this.isQuickHighlightDisabled = isQuickHighlightDisabled;
     }
 
     public boolean saveLastPositionByTTSData(TTSDataInfo ttsDataInfo) {

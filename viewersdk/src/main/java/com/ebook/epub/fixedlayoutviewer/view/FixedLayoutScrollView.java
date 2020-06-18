@@ -536,11 +536,13 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 fixedLayoutZoomView.setTouchAreaCheckInterface(FixedLayoutScrollView.this);
                 fixedLayoutZoomView.setJSInterface(ttsDataInfoManager, ttsHighlighter, mediaOverlayController);
                 fixedLayoutZoomView.setSelectionDisabled(isTextSelectionDisabled);
+                fixedLayoutZoomView.setQuickHighlightDisabled(isQuickHighlightDisabled);
             } else{
                 fixedLayoutZoomView = new FixedLayoutZoomView(mContext, mPageDataArrayList.get(position), mPageMode, mPageDirection, true);
                 fixedLayoutZoomView.setWebviewCallbackListener(listener);
                 fixedLayoutZoomView.setTouchAreaCheckInterface(FixedLayoutScrollView.this);
                 fixedLayoutZoomView.setSelectionDisabled(isTextSelectionDisabled);
+                fixedLayoutZoomView.setQuickHighlightDisabled(isQuickHighlightDisabled);
             }
             container.addView(fixedLayoutZoomView, 0);
             mLoadedViewMap.put(position,fixedLayoutZoomView);
@@ -2045,6 +2047,11 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
     private boolean isTextSelectionDisabled = false;
     public void setSelectionDisabled(boolean isTextSelectionDisabled){
         this.isTextSelectionDisabled = isTextSelectionDisabled;
+    }
+
+    private boolean isQuickHighlightDisabled = false;
+    public void setQuickHighlightDisabled(boolean isQuickHighlightDisabled){
+        this.isQuickHighlightDisabled = isQuickHighlightDisabled;
     }
 
     private void checkPageStatus(int scrollDirection){

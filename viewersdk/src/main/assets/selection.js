@@ -419,6 +419,21 @@ function setupChapter(	highlights,
         epubswitch.init();
         epubtrigger.init();
 
+        var nodes = document.querySelectorAll('table');
+        if(currentChromeVersion >= 54 && nodes.length>0){
+            for(var index=0; index<nodes.length; index++){
+                var node = nodes[index];
+                var clone = node.cloneNode(true);
+                node.replaceWith(clone);
+            }
+        } else if(currentChromeVersion < 54 && nodes.length>0){
+            var nodes = document.querySelectorAll('table');
+            for(var index=0; index<nodes.length; index++){
+                var node = nodes[index];
+                var child = node.childNodes[0];
+               node.replaceChild(child,child);
+            }
+        }
     } catch(err) {
         log('setupChapter: ' + err);
         window.selection.reportError(0);

@@ -1781,6 +1781,14 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             mFixedLayoutView.finishTextSelectionMode();
         }
     }
+
+    public void setQuickHighlightDisabled(boolean isQuickHighlightDisabled){
+        if (mLayoutMode == LayoutMode.Reflowable) {
+            mEPubViewer.setQuickHighlightDisabled(isQuickHighlightDisabled);
+        } else if (mLayoutMode == LayoutMode.FixedLayout) {
+            mFixedLayoutView.setQuickHighlightDisabled(isQuickHighlightDisabled);
+        }
+    }
     /***************************** e: new custom selection */
 
     public void setOnAnalyticsListener(ViewerContainer.OnAnalyticsListener listener){

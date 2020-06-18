@@ -338,6 +338,10 @@ public class FixedLayoutZoomView extends LinearLayout {
 
                 case MotionEvent.ACTION_MOVE:
                     if(!isTextSelectionDisabled && isTextSelectionMode) {
+                        if(isQuickHighlightDisabled && !isStartHandlerTouched && !isEndHandlerTouched){
+                            return true;
+                        }
+
                         int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();    // TODO :: 텍스트 아주 작은 콘텐츠에서 slop 조정 필요
                         boolean userMoveConfirmed = Math.abs(mLastTouchX - ev.getX()) > slop || Math.abs(mLastTouchY -  ev.getY()) > slop;
                         if(userMoveConfirmed){
@@ -663,5 +667,10 @@ public class FixedLayoutZoomView extends LinearLayout {
     private boolean isTextSelectionDisabled = false;
     public void setSelectionDisabled(boolean isTextSelectionDisabled){
         this.isTextSelectionDisabled = isTextSelectionDisabled;
+    }
+
+    private boolean isQuickHighlightDisabled = false;
+    public void setQuickHighlightDisabled(boolean isQuickHighlightDisabled){
+        this.isQuickHighlightDisabled = isQuickHighlightDisabled;
     }
 }

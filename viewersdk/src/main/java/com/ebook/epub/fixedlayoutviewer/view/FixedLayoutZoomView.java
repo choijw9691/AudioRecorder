@@ -587,7 +587,7 @@ public class FixedLayoutZoomView extends LinearLayout {
         if(isTouchInView(mFixedLayoutContainerView,(int)x,(int)y)){
             mFixedLayoutContainerView.findTagUnderPoint((int)x,(int)y);
         } else {
-            BookHelper.ClickArea clickArea = BookHelper.getClickArea(this, x,y);
+            BookHelper.ClickArea clickArea = BookHelper.getClickArea(this, x,y, mPageDirection);
             if(clickArea== BookHelper.ClickArea.Left){
                 mTouchAreaChecker.onLeftTouched(x, y);
             } else if(clickArea== BookHelper.ClickArea.Right){

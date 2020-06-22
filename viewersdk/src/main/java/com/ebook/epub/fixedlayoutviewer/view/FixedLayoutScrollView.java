@@ -936,7 +936,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
 
         if( mOnTouchEventListener != null  && !isMoveByFling){
-            mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y));
+            mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection));
         }
     }
 
@@ -974,7 +974,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
 
         if( mOnTouchEventListener != null  && !isMoveByFling){
-            mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y));    // TODO :: 프론트가 필요한 콜백인가?
+            mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection));    // TODO :: 프론트가 필요한 콜백인가?
         }
     }
 
@@ -987,7 +987,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         }
 
         if( mOnTouchEventListener != null ){
-            mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y));
+            mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection));
         }
     }
 
@@ -1143,7 +1143,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             }
 
             if(mediaOverlayController.isMediaOverlayPlaying()){
-                touchedPositionDuringPlaying = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y);   // 미디어오버레이 아닌 영역 터치 시 필요
+                touchedPositionDuringPlaying = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection);   // 미디어오버레이 아닌 영역 터치 시 필요
                 mPagerAdapter.getCurrentView().getIDListByPoint(x,y);
                 return;
             }
@@ -1152,7 +1152,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
                 if(mPagerAdapter.getCurrentView().getCurrentScale() == 1f) {
 
-                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y);
+                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y, mPageDirection);
 
                     if(isPreventPageMove){
                         if(clickArea == BookHelper.ClickArea.Middle && !isMoveByFling){
@@ -1192,7 +1192,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                         mOnTouchEventListener.onUp(clickArea);
                     }
                 } else {
-                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y);
+                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y, mPageDirection);
                     if(clickArea == BookHelper.ClickArea.Middle){
                         mOnTouchEventListener.onUp(clickArea);
                     }

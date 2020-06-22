@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.128";
+    public static String VIEWER_VERSION = "3.129";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -190,15 +190,6 @@ public class BookHelper {
     public static String ACTIVE_CLASS = "-flk-epub-media-overlay-active";
 
     public static String memoIconPath = "";
-
-    /**
-     * percent value for left click area margin
-     *  - unit %
-     */
-    private static int leftClickMargin = 20;
-    private static int rightClickMargin = 20;
-    private static int topClickMargin = 0;
-    private static int bottomClickMargin = 0;
 
     /**
      * front 에서 일부 환경변수를 변경하고자 할경우 true로 셋팅
@@ -704,45 +695,66 @@ public class BookHelper {
         useEPUB3Viewer = use;
     }
 
-    /**
-     * click margin 값을 반환한다.
-     * 기준이 되는 단위는 percent 이다.
-     */
-    public static int getLeftClickMargin() {
-        return leftClickMargin;
-    }
-    public static int getRightClickMargin() {
-        return (100 - rightClickMargin);
-    }
-    public static int getTopClickMargin() {
-        return topClickMargin;
-    }
-    public static int getBottomClickMargin() {
-        return (100 - bottomClickMargin);
+    public static PageTurnInputRegionType pageTurnInputRegionType;
+    public enum PageTurnInputRegionType {
+        TopOrBottom,    // 상하터치
+        LeftOrRight     // 좌우터치
     }
 
-    /**
-     * 사용자의 x, y 입력을 받아 ClickArea type의 열거형 값을 리턴.
-     * @param view EPubViewer EpubViewer객체
-     * @param x float touch x 좌표
-     * @param y float touch y 좌표
-     * @return ClickArea 클릭 영역에 대한 정보 값
-     */
-    public static ClickArea getClickArea(View view, float x, float y) {
+    public static ClickArea getClickArea(View view, float x, float y, ViewerContainer.PageDirection pageReadDirectionType) {
+
+        int leftClickMargin = 20;
+        int rightClickMargin = 20;
+        int topClickMargin = 60;
+        int bottomClickMargin = 40;
 
         int w = view.getWidth();
         int h = view.getHeight();
 
-        if( x >= (w-100) && y <= (100) )
+        if( x >= (w-150) && y <= (150) )
             return ClickArea.Left_Corner;
-        if( x <= ((w * getLeftClickMargin()) / 100) )
-            return ClickArea.Left;
-        if( x >= ((w * getRightClickMargin()) / 100) )
-            return ClickArea.Right;
-        if( y <= ((h * getTopClickMargin()) / 100) )
-            return ClickArea.Top;
-        if( y >= ((h * getBottomClickMargin()) / 100) )
-            return ClickArea.Bottom;
+
+        if(pageTurnInputRegionType==PageTurnInputRegionType.LeftOrRight){
+            // 좌우터치모드 - 좌우 영역 20 퍼센트로만 판단
+            if( x <= ((w * leftClickMargin ) / 100.0) )
+                return ClickArea.Left;
+
+            if( x >= w- ((w * rightClickMargin) / 100.0) )
+                return ClickArea.Right;
+
+        } else if(pageTurnInputRegionType==PageTurnInputRegionType.TopOrBottom){
+            // 상하터치모드 - 좌우 영역 20 및 상 60 하 40 퍼센트로 판단
+            if( x <= ((w * leftClickMargin ) / 100.0) ) {
+
+                if( y <= ((h * topClickMargin) / 100.0) ) {
+                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
+                        return ClickArea.Right;
+                    return ClickArea.Left;
+                }
+
+                if( y >= h - ((h * bottomClickMargin) / 100.0) ) {
+                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
+                        return ClickArea.Left;
+                    return ClickArea.Right;
+                }
+            }
+
+            if( x >= w- ((w * rightClickMargin) / 100.0) ) {
+
+                if( y <= ((h * topClickMargin) / 100.0) ) {
+                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
+                        return ClickArea.Right;
+                    return ClickArea.Left;
+                }
+
+                if( y >= h - ((h * bottomClickMargin) / 100.0) ) {
+                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
+                        return ClickArea.Left;
+                    return ClickArea.Right;
+                }
+            }
+        }
+
         return ClickArea.Middle;
     }
 

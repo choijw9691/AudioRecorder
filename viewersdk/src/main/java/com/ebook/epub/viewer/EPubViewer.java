@@ -241,7 +241,7 @@ public class EPubViewer extends ViewerBase {
     private String mDrmKey = null;
 
     public int mHtmlDirectionType = 0; //해당 html 파일 내 direction type (0 : ltr, 1 : rtl)
-    public int mSpineDirectionType = 0; //opf 파일 내 direction type (0 : ltr, 1 : rtl)
+    public PageDirection mSpineDirectionType = PageDirection.LTR; //opf 파일 내 direction type (0 : ltr, 1 : rtl)
 
     int bodyTopBottomMargin;	// 스크롤 모드 시 상하 버튼 영역
 
@@ -4115,11 +4115,7 @@ public class EPubViewer extends ViewerBase {
     }
 
     public void setPageDirection(PageDirection dir) {
-        if( dir == PageDirection.RTL ) {
-            mSpineDirectionType = 1;
-        } else if( dir == PageDirection.LTR ) {
-            mSpineDirectionType = 0;
-        }
+        mSpineDirectionType = dir;
     }
 
     public void setTTSHighlightRect(JSONArray rectArray) {
@@ -4886,13 +4882,13 @@ public class EPubViewer extends ViewerBase {
 
         switch (direction) {
             case ViewerActionListener.FLING_LEFT:
-                if( mSpineDirectionType == 0 )
+                if( mSpineDirectionType == PageDirection.LTR )
                     scrollPrior();
                 else
                     scrollNext();
                 break;
             case ViewerActionListener.FLING_RIGHT:
-                if( mSpineDirectionType == 0 )
+                if( mSpineDirectionType == PageDirection.LTR )
                     scrollNext();
                 else
                     scrollPrior();
@@ -5526,21 +5522,21 @@ public class EPubViewer extends ViewerBase {
                 if(mediaOverlayController.isMediaOverlayPlaying()){
                     int x = Scr2Web((int)event.getX());
                     int y = Scr2Web((int)event.getY());
-                    touchedPositionDuringPlaying=  BookHelper.getClickArea(EPubViewer.this, event.getX(), event.getY());
+                    touchedPositionDuringPlaying=  BookHelper.getClickArea(EPubViewer.this, event.getX(), event.getY(), mSpineDirectionType);
                     loadUrl("javascript:getIDListByPoint(" + x + "," + y + ",'"+mReadingChapter.getCurrentChapter().getChapterFilePath()+"')");
                     return;
                 }
 
-                ClickArea ca = BookHelper.getClickArea(EPubViewer.this, event.getX(), event.getY());
+                ClickArea ca = BookHelper.getClickArea(EPubViewer.this, event.getX(), event.getY(), mSpineDirectionType);
                 if( isPreventPageMove == false && BookHelper.animationType!=3)  {
                     if( ca == ClickArea.Left ) {
-                        if( mSpineDirectionType == 0 ){
+                        if( mSpineDirectionType == PageDirection.LTR ){
                             scrollPrior();
                         } else {
                             scrollNext();
                         }
                     } else if( ca == ClickArea.Right ) {
-                        if( mSpineDirectionType == 0 ) {
+                        if( mSpineDirectionType == PageDirection.LTR ) {
                             scrollNext();
                         } else {
                             scrollPrior();
@@ -6033,7 +6029,7 @@ public class EPubViewer extends ViewerBase {
             if( scrollDirection == -1 ) {
                 try {
                     Animation prevPage = AnimationUtils.loadAnimation( mContext, __slideRightOut );
-                    if( mSpineDirectionType == 1 )
+                    if(mSpineDirectionType == PageDirection.RTL)
                         prevPage = AnimationUtils.loadAnimation( mContext, __slideLeftOut );
                     setAnimation(prevPage);
                     prevPage.setAnimationListener( new AnimationListener() {
@@ -6041,7 +6037,7 @@ public class EPubViewer extends ViewerBase {
                         @Override
                         public void onAnimationEnd(Animation animation) {
                             scrollPage(-1);
-                            if( mSpineDirectionType == 1 ) {
+                            if(mSpineDirectionType == PageDirection.RTL) {
                                 setAnimation(AnimationUtils.loadAnimation(mContext, __slideLeftIn));
                             } else {
                                 setAnimation(AnimationUtils.loadAnimation(mContext, __slideRightIn));
@@ -6063,7 +6059,7 @@ public class EPubViewer extends ViewerBase {
             } else {
                 try {
                     Animation nextPage = AnimationUtils.loadAnimation( mContext, __slideLeftOut );
-                    if( mSpineDirectionType == 1 )
+                    if(mSpineDirectionType == PageDirection.RTL)
                         nextPage = AnimationUtils.loadAnimation( mContext, __slideRightOut );
                     setAnimation(nextPage);
                     nextPage.setAnimationListener(new AnimationListener() {
@@ -6071,7 +6067,7 @@ public class EPubViewer extends ViewerBase {
                         @Override
                         public void onAnimationEnd(Animation animation) {
                             scrollPage(1);
-                            if( mSpineDirectionType == 1 ) {
+                            if(mSpineDirectionType == PageDirection.RTL) {
                                 setAnimation(AnimationUtils.loadAnimation(mContext, __slideRightIn));
                             } else {
                                 setAnimation(AnimationUtils.loadAnimation(mContext, __slideLeftIn));

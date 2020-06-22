@@ -1826,4 +1826,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             return mFixedLayoutView.saveLastPositionByTTSData(ttsDataInfo);
         return false;
     }
+
+    public void setPageTurnInputRegionType(BookHelper.PageTurnInputRegionType pageTurnInputRegionType) {
+        BookHelper.pageTurnInputRegionType = pageTurnInputRegionType;
+    }
 }

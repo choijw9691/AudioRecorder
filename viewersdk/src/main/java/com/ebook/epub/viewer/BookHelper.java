@@ -695,7 +695,7 @@ public class BookHelper {
         useEPUB3Viewer = use;
     }
 
-    public static PageTurnInputRegionType pageTurnInputRegionType;
+    public static PageTurnInputRegionType pageTurnInputRegionType = PageTurnInputRegionType.LeftOrRight;
     public enum PageTurnInputRegionType {
         TopOrBottom,    // 상하터치
         LeftOrRight     // 좌우터치

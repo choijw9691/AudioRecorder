@@ -49,7 +49,7 @@ public class Highlight implements Serializable {
     
     public Highlight() {
     	uniqueID = System.currentTimeMillis();
-    	creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd hh:mm:ss");
+    	creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd HH:mm:ss");
     }
 
     public String getId() {

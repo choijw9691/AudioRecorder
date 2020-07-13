@@ -47,7 +47,7 @@ public class Bookmark implements Serializable {
 
     public Bookmark() {
         this.uniqueID = System.currentTimeMillis();
-        this.creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd hh:mm:ss");
+        this.creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd HH:mm:ss");
         this.uniqueID /= 1000L;
         this.deviceModel = DeviceInfoUtil.getDeviceModel();
         this.osVersion = DeviceInfoUtil.getOSVersion();
@@ -68,7 +68,7 @@ public class Bookmark implements Serializable {
         extra1 = extra2 = extra3 = "";
 
         this.uniqueID = System.currentTimeMillis();
-        this.creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd hh:mm:ss");
+        this.creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd HH:mm:ss");
 //        this.uniqueID /= 1000L;
     }
     public Bookmark(String path, String file) {
@@ -79,7 +79,7 @@ public class Bookmark implements Serializable {
         extra1 = extra2 = extra3 = "";
 
         this.uniqueID = System.currentTimeMillis();
-        this.creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd hh:mm:ss");
+        this.creationTime = BookHelper.getDate(uniqueID, "yyyy-MM-dd HH:mm:ss");
 //        this.uniqueID /= 1000L;
     }
     public JSONObject get() {

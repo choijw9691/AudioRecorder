@@ -540,7 +540,7 @@ public class UserBookDataFileManager {
                     historyRemoveData.add(org.uniqueID);
                     Bookmark addData = org;
                     addData.uniqueID= System.currentTimeMillis();
-                    addData.creationTime = BookHelper.getDate(addData.uniqueID, "yyyy-MM-dd hh:mm:ss");
+                    addData.creationTime = BookHelper.getDate(addData.uniqueID, "yyyy-MM-dd HH:mm:ss");
                     finalSaveData.add(addData);
                     historyAddData.add(addData.uniqueID);
                 }else{

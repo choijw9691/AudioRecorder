@@ -31,10 +31,11 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.130";
+    public static String VIEWER_VERSION = "3.131";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
+    final public static int EINK = 3;
 
     /** style type 정의 */
     final public static int VIEW_STYLE_USER = 100;
@@ -287,6 +288,10 @@ public class BookHelper {
      * @return int : 디바이스 타입
      */
     public static int getDevice(Context context) {
+
+        if(deviceType == EINK)
+            return EINK;
+
         int widthPixels = context.getResources().getDisplayMetrics().widthPixels;
         int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
         int portrait_width_pixel=Math.min(widthPixels, heightPixels);

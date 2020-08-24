@@ -685,7 +685,11 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     	outerSpan.title = highlightID;
     	$(outerSpan).addClass(highlightID);
     	$(outerSpan).addClass(HIGHLIGHT_CLASS);
-        $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
+    	if(gDeviceType == 3){
+            $(outerSpan).addClass('FLKAnnotationColor4');
+    	} else {
+             $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
+    	}
         if($(document.body).hasClass(BODY_NIGHTMODE_CLASS)){
             if($(outerSpan)[0].tagName.toLowerCase() !='a' && $(outerSpan).parent()[0].tagName.toLowerCase() != 'a'){
                 $(outerSpan).addClass('FLKAnnotationFontColor');   // 주석 폰트 색상은 무조건 검정으로 -> 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지 -> 20190425 정책 변경됨 - 야간모드 시 검정으로

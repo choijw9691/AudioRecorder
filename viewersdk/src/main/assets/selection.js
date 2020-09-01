@@ -405,7 +405,11 @@ function setupChapter(	highlights,
         first.css('marginTop', '0em', '!important');
         first.css('paddingTop', firstMarginTop, '!important');
 
-        setOrgFontSizeAttr(parseInt(fontSize)/100);
+        if(gDeviceType==3){
+            changeFontSizeDirect(fontSize+"%");
+        } else {
+             setOrgFontSizeAttr(parseInt(fontSize)/100);
+        }
 
         resizingImage();
 
@@ -2384,8 +2388,11 @@ function setFont(fontFamily, fontPath) {
 
 function changeFontSizeDirect(value) {
 //	log('changeFontSizeDirect :' + value);
-//	$('#feelingk_bookcontent').css('font-size', value, 'important');
-    changeFontSize(parseInt(value)/100);
+    if(gDeviceType==3){
+        $('#feelingk_bookcontent').css('font-size', value, 'important');
+    } else{
+        changeFontSize(parseInt(value)/100);
+    }
 }
 
 function changeLineHeightDirect(value) {

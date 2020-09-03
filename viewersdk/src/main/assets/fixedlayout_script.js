@@ -7,6 +7,7 @@ const ANNOTATION_LASTSPAN_CLASS='KYBAnnotatedLastSpan';
 const MEMO_CLASS='KYBMemo';
 var gWindowInnerHeight = 0;
 var gWindowInnerWidth = 0;
+var gDeviceType;
 
 $(document).ready(function(){
 
@@ -659,10 +660,12 @@ function highlightSpans(spans, deleted, isAnnotation, highlightID, colorIndex) {
     	outerSpan.title = highlightID;
     	$(outerSpan).addClass(highlightID);
     	$(outerSpan).addClass(HIGHLIGHT_CLASS);
-        $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
-//        $(outerSpan).addClass('FLKAnnotationFontColor');	// 주석 폰트 색상은 무조건 검정으로 -> TODO :: 20190219 정책 변경됨 - 모든 폰트 컬러 원본 유지
+    	if(gDeviceType == 3){
+            $(outerSpan).addClass('FLKAnnotationColor4');
+    	} else {
+             $(outerSpan).addClass('FLKAnnotationColor'+colorIndex);
+    	}
     }
-
     if (spans.length > 0) {
         $(spans[spans.length-1]).addClass(ANNOTATION_LASTSPAN_CLASS);
     }
@@ -777,8 +780,9 @@ function createSpanForTextNodeContainer(container,startOffset,endOffset,childCou
     return childSpan;
 }
 
-function applyHighlights(highlights) {
+function applyHighlights(highlights, deviceType) {
     try {
+        gDeviceType = deviceType;
         for(var i=0;i<highlights.length;i++) {
             applyHighlight(highlights[i]);
             if(highlights[i].memo.length>0){

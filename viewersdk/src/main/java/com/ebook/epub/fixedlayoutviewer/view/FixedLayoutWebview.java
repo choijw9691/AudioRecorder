@@ -1402,7 +1402,7 @@ public class FixedLayoutWebview extends ViewerBase {
             return;
 
         if(annotationVisibility) {
-            loadUrl("javascript:applyHighlights(" + jsonArray.toString() + ")");
+            loadUrl("javascript:applyHighlights(" + jsonArray.toString() + ","+BookHelper.deviceType+")");
         } else {
             loadUrl("javascript:deleteHighlights(" + jsonArray.toString() + ")");
         }

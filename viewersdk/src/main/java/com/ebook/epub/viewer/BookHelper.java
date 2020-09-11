@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.134";
+    public static String VIEWER_VERSION = "3.135";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;

@@ -463,7 +463,11 @@ public class FixedLayoutWebview extends ViewerBase {
                     canvas.drawRect(r, mPaint);
                     drawHandler(canvas);
                 } else{
-                    mPaint.setColor(Color.parseColor(BookHelper.Colors[BookHelper.lastHighlightColor]));
+                    if(BookHelper.deviceType == 3) {
+                        mPaint.setColor(Color.parseColor(BookHelper.Colors[4]));
+                    } else {
+                        mPaint.setColor(Color.parseColor(BookHelper.Colors[BookHelper.lastHighlightColor]));
+                    }
                     mPaint.setAlpha(100);
                     canvas.drawRect(r, mPaint);
                 }

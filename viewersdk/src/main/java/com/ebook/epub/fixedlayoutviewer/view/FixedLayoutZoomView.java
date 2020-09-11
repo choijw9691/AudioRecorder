@@ -452,6 +452,10 @@ public class FixedLayoutZoomView extends LinearLayout {
         super.onDraw(canvas);
     }
 
+    public void setDeviceType(int position){
+        mFixedLayoutContainerView.setDeviceType(position);
+    }
+
     public boolean saveHighlights() {
         return mFixedLayoutContainerView.saveHighlights();
     }

@@ -221,6 +221,10 @@ public class FixedLayoutContainerView extends LinearLayout {
         }
     }
 
+    public void setDeviceType(int position){
+        mWebviewList.get(position).setDeviceType();
+    }
+
     public boolean saveHighlights() {
         return mWebviewList.get(getCurrentWebviewPosition()).saveHighlights();
     }

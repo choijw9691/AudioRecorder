@@ -1331,6 +1331,10 @@ public class FixedLayoutWebview extends ViewerBase {
         }
     }
 
+    public void setDeviceType(){
+        loadUrl("javascript:setDeviceType("+BookHelper.deviceType+")");
+    }
+
     public boolean getSelectionMode(){
         return mTextSelectionMode;
     }
@@ -1406,7 +1410,7 @@ public class FixedLayoutWebview extends ViewerBase {
             return;
 
         if(annotationVisibility) {
-            loadUrl("javascript:applyHighlights(" + jsonArray.toString() + ","+BookHelper.deviceType+")");
+            loadUrl("javascript:applyHighlights(" + jsonArray.toString() + ")");
         } else {
             loadUrl("javascript:deleteHighlights(" + jsonArray.toString() + ")");
         }

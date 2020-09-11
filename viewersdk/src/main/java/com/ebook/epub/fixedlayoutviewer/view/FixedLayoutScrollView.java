@@ -1056,6 +1056,8 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
 
                 }
             }
+
+            mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex).setDeviceType(position);
             mPagerAdapter.getLoadedViewMap().get(mCurrentPagerIndex).applyCurrentChapterHighlight(position);
 
             if(!selectedAnnotationId.isEmpty()){

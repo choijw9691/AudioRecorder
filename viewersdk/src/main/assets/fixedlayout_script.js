@@ -780,9 +780,12 @@ function createSpanForTextNodeContainer(container,startOffset,endOffset,childCou
     return childSpan;
 }
 
-function applyHighlights(highlights, deviceType) {
+function setDeviceType(deviceType){
+    gDeviceType = deviceType;
+}
+
+function applyHighlights(highlights) {
     try {
-        gDeviceType = deviceType;
         for(var i=0;i<highlights.length;i++) {
             applyHighlight(highlights[i]);
             if(highlights[i].memo.length>0){

@@ -200,6 +200,11 @@ $(document).ready(function(){
         clearInterval(audioTimerID);
         window.selection.didFinishAudio($($(this)[0]).getPath());
     });
+
+    $('a').click(function(event){
+        if(this.getAttribute('epub\:type') != 'noteref')
+            event.preventDefault();
+    });
 });
 /********************************************************************************************* e:ready */
 

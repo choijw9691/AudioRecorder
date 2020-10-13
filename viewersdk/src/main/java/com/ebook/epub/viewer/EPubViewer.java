@@ -286,6 +286,8 @@ public class EPubViewer extends ViewerBase {
 
     private boolean asidePopupStatus = false;
 
+    private int __scrollCharOffset=-1;
+
     ViewerContainer.OnVideoInfoListener mOnVideoInfoListener=null;
     public void setOnVideoInfoListener(ViewerContainer.OnVideoInfoListener l) {
         mOnVideoInfoListener = l;
@@ -458,15 +460,6 @@ public class EPubViewer extends ViewerBase {
         mOnAnalyticsListener = listener;
     }
 
-    //****************************************************************************
-
-    //Error Code
-    private static final int EPUB_SETUP_CHAPTER_ERROR = 0;
-    private static final int EPUB_TEXT_SELECTION_ERROR = 1;
-    private static final int EPUB_BOOKMARK_ERROR = 2;
-    private static final int EPUB_LINK_ERROR = 4;
-    private static final int EPUB_HIGHLIGHTING_ERROR = 5;
-
     /**
      * MyJavaScriptObject class - javascript interface용 클래스
      */
@@ -475,15 +468,6 @@ public class EPubViewer extends ViewerBase {
         @JavascriptInterface
         public void handleNoterefData(String noterefData){
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_HANDLE_NOTEREF,noterefData));
-        }
-
-        @JavascriptInterface
-        public void setCurrentInnerChapter(String chapterId){
-            if(chapterId.isEmpty()){
-                mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath());
-            } else {
-                mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath()+'#'+chapterId);
-            }
         }
 
         @JavascriptInterface
@@ -783,7 +767,7 @@ public class EPubViewer extends ViewerBase {
         /**
          *
          * reportBookmarkForPage
-         *      - 페이지 스크롤시 isBookmark() 를 통해 현재 페이지에 북마크가 존재하고 있는지의 여부를 알려준다.
+         *      - 현재 페이지에 북마크가 존재하고 있는지의 여부를 알려준다.
          */
         @JavascriptInterface
         public void reportBookmarkForPage(boolean isBookmarkVisible) {
@@ -796,121 +780,94 @@ public class EPubViewer extends ViewerBase {
          *      - getCurrentPageInfo() 등의 함수를 통해 현재 페이지의 정보를 취득하려는 경우.
          *      - 경우에 따라 북마크의 path정보를 취득하지 못하는 경우 쳅터내의 page를 percent로 환산하여 저장.
          *
-         * @param path      : 취득한 북마크의 path
-         * @param bShown    : show/hide 여부
+         * @param bookmarkInfo : 취득한 북마크 정보
          */
         @JavascriptInterface
-        public void reportBookmarkPath(String path, boolean bShown) {
-            DebugSet.d(TAG, "reportBookmarkPath >>>> " + path);
+        public void reportBookmarkPath(String bookmarkInfo) {
+            DebugSet.d(TAG, "reportBookmarkPath >>>> " + bookmarkInfo);
 
             try {
-                Bookmark bmd = null;
-                if( bShown ) {
-                    for(Bookmark bm: mBookmarks ) {
-                        if( bm.path.equals(path) ) {
-                            bmd = bm;
-                            break;
-                        }
-                    }
-                    if( bmd==null ) {
-                        throw new Exception();
-                    }
+                String elementType = AnnotationConst.FLK_BOOKMARK_TYPE_TEXT;
+                String chapterId = "";
+                String elementPath = "";
+                String elementText = "";
+                String elementTagName= "";
+                int startOffset = 0;
+                int pageInChapter = 0;
+
+                if(bookmarkInfo == null) {
+                    pageInChapter = mCurrentPageInChapter;
                 } else {
+                    JSONObject object = new JSONObject(bookmarkInfo);
+                    pageInChapter = object.getInt("page");
+                    elementPath = object.getString("elementPath");
+                    elementText = object.getString("elementText");  // text : 100자요약, 그외 : src
+                    elementTagName = object.getString("tagName");
+                    chapterId = object.getString("id");
+                    if(chapterId.isEmpty()){
+                        mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath());
+                    } else {
+                        mReadingChapter.setCurrentChapter(mReadingSpine.getCurrentSpineInfo().getSpinePath()+'#'+chapterId);
+                    }
 
-                    JSONObject object;
-                    String chapterId = "";
-                    int page = 0;
-                    String elPath = "";
-                    String text = "";
-                    String tagName="";
-                    String type = AnnotationConst.FLK_BOOKMARK_TYPE_TEXT;
-
-                    if( path != null ) {
-                        object = new JSONObject(path);
-                        chapterId = object.getString("id");         // chapterId
-                        page = object.getInt("page");
-                        elPath = object.getString("elementPath");
-                        text = object.getString("elementText");
-                        tagName = object.getString("tagName");
-                        if(tagName.isEmpty()){
-                            type = AnnotationConst.FLK_BOOKMARK_TYPE_TEXT;
-                        } else if(tagName.equalsIgnoreCase(ElementName.AUDIO)){
-                            type = AnnotationConst.FLK_BOOKMARK_TYPE_AUDIO;
-                            text = BookHelper.getFilename(text);
-                        } else if(tagName.equalsIgnoreCase(ElementName.VIDEO)){
-                            type = AnnotationConst.FLK_BOOKMARK_TYPE_VIDEO;
-                            text = BookHelper.getFilename(text);
-                        } else if(tagName.equalsIgnoreCase(ElementName.IMG)){
-                            type = AnnotationConst.FLK_BOOKMARK_TYPE_IMG;
-                            text = BookHelper.getFilename(text);
+                    if(elementTagName.isEmpty()){
+                        elementType = AnnotationConst.FLK_BOOKMARK_TYPE_TEXT;
+                        if(!object.isNull( "startOffset" )) {
+                            startOffset = object.getInt("startOffset");
                         }
                     } else {
-                        page = mCurrentPageInChapter;
+                        if(elementTagName.equalsIgnoreCase(ElementName.AUDIO)){
+                            elementType = AnnotationConst.FLK_BOOKMARK_TYPE_AUDIO;
+                        } else if(elementTagName.equalsIgnoreCase(ElementName.VIDEO)){
+                            elementType = AnnotationConst.FLK_BOOKMARK_TYPE_VIDEO;
+                        } else if(elementTagName.equalsIgnoreCase(ElementName.IMG)){
+                            elementType = AnnotationConst.FLK_BOOKMARK_TYPE_IMG;
+                        }
+                        elementText = BookHelper.getFilename(elementText);
                     }
-
-                    int pageInChapter = page;
-                    bmd = new Bookmark(chapterId, page, elPath);
-                    if( __currentBookmark != null ) {
-                        bmd.uniqueID = __currentBookmark.uniqueID;
-                    }
-                    bmd.text = text;
-                    bmd.type = type;
-                    bmd.chapterFile = mReadingSpine.getCurrentSpineInfo().getSpinePath();
-
-                    if(BookHelper.animationType!=3)
-                        bmd.percent = ((double)pageInChapter / (double)mTotalPageInChapter) * 100;
-                    else
-                        bmd.percent = perInchapter;
-
-                    double startPercent = mReadingSpine.getCurrentSpineInfo().getSpineStartPercentage();
-                    double havePercent = mReadingSpine.getCurrentSpineInfo().getSpinePercentage();
-                    bmd.percentInBook = startPercent + havePercent * ((double)bmd.percent/100);
-                    bmd.deviceModel = DeviceInfoUtil.getDeviceModel();
-                    bmd.osVersion = DeviceInfoUtil.getOSVersion();
                 }
+
+                Bookmark bmd = new Bookmark(chapterId, pageInChapter, elementPath, startOffset);    // TODO :: TEST
+                bmd.deviceModel = DeviceInfoUtil.getDeviceModel();
+                bmd.osVersion = DeviceInfoUtil.getOSVersion();
+                bmd.chapterFile = mReadingSpine.getCurrentSpineInfo().getSpinePath();
+                bmd.text = elementText;
+                bmd.type = elementType;
+                bmd.startCharOffset = startOffset;
+                if( __currentBookmark != null ) {
+                    bmd.uniqueID = __currentBookmark.uniqueID;  // ???? 있는거랑 뭔상관이지???? 이거 왜함???
+                }
+                double startPercent = mReadingSpine.getCurrentSpineInfo().getSpineStartPercentage();
+                double havePercent = mReadingSpine.getCurrentSpineInfo().getSpinePercentage();
+                bmd.percent = BookHelper.animationType == 3 ? perInchapter : ((double) pageInChapter / (double) mTotalPageInChapter) * 100;
+                bmd.percentInBook = startPercent + havePercent * (bmd.percent /100);
 
                 // 북마크 취득후에 행해질 특수 기능들
-                if( __onCloseBook ) {
-                    // Viewer 종료 프르세스
+                if( __onCloseBook ) { // Viewer 종료 프르세스
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_VIEWER_CLOSE, bmd));
-                }
-                else if( __currentPageInfo ) {
-                    // 현재 페이지 정보 취득
+                } else if( __currentPageInfo ) { // 현재 페이지 정보 취득
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_CURRENT_PAGE_INFO, bmd));
-                }
-                else if( __currentPageInfoForPageJump || __currentPageInfoForLinkJump || __currentPageInfoForJump ) {
-                    // 현재 페이지 정보 취득 & onGet 이벤트 발생
+                } else if( __currentPageInfoForPageJump || __currentPageInfoForLinkJump || __currentPageInfoForJump ) { // 현재 페이지 정보 취득 & onGet 이벤트 발생
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_NOTIFY_CURRENT_PAGE_INFO, bmd));
-                }
-                else if( __forceSaveLastPosition ) {
-                    // 현재 페이지 정보 취득 후 마지막 읽은 위치 저장
+                } else if( __forceSaveLastPosition ) { // 현재 페이지 정보 취득 후 마지막 읽은 위치 저장
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SAVE_LAST_POSITION,bmd));
-                }
-                else if( __doBookmarkShow ){
-                    // 현재 페이지 정보 취득후 북마크 show/hide
+                } else if( __doBookmarkShow ){ // 현재 페이지 정보 취득후 북마크 show/hide
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_BOOKMARK_SHOW, bmd));
-                }
-                else if( __currentTopPath ) {
-                    // 현재 페이지 정보 취득
+                } else if( __currentTopPath ) { // 현재 페이지 정보 취득
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_GET_CURRENT_TOP_PATH, bmd));
                 }
             } catch(Exception e) {
                 if( __onCloseBook ) {
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_VIEWER_CLOSE, null));
-                }
-                else if( __currentPageInfo ) {  // TODO :: 정확한 용도 알아보기
+                } else if( __currentPageInfo ) {
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_CURRENT_PAGE_INFO,null));
-                }
-                else if( __currentPageInfoForPageJump || __currentPageInfoForLinkJump || __currentPageInfoForJump ) {
+                } else if( __currentPageInfoForPageJump || __currentPageInfoForLinkJump || __currentPageInfoForJump ) {
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_NOTIFY_CURRENT_PAGE_INFO, null));
-                }
-                else if( __forceSaveLastPosition ) {
+                } else if( __forceSaveLastPosition ) {
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SAVE_LAST_POSITION,null));
-                }
-                else if( __doBookmarkShow ) {
+                } else if( __doBookmarkShow ) {
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_BOOKMARK_SHOW,null));
-                }
-                else if( __currentTopPath ) {
+                } else if( __currentTopPath ) {
                     mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_GET_CURRENT_TOP_PATH, null));
                 }
             }
@@ -1166,18 +1123,6 @@ public class EPubViewer extends ViewerBase {
         public void scrollNextPage() {  // 미디어 오버레이 중 다음 페이지 이동 ( 챕터 이동도 가능해야 함 )
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_SCROLL_PAGE_OR_CHAPTER, 1));
         }
-
-//        @JavascriptInterface
-//        public void setAsidePopupStatus(boolean status){
-//            asidePopupStatus = status;
-//            if(mOnNoterefListener!=null){
-//                if( asidePopupStatus){
-//                    mOnNoterefListener.didShowNoterefPopup();
-//                } else{
-//                    mOnNoterefListener.didHideNoterefPopup();
-//                }
-//            }
-//        }
 
         @JavascriptInterface
         public String getMemoIconPath(){
@@ -1829,10 +1774,10 @@ public class EPubViewer extends ViewerBase {
         if( bmd.path.trim().length() == 0 ) {
             __scrollByPercentInChapter=true;
             __scrollPercent=bmd.percent;
-        }
-        else {
+        } else {
             __scrollByPATH=true;
             __scrollPATH=bmd.path;
+            __scrollCharOffset = bmd.startCharOffset;
         }
 
         String bFile = bmd.chapterFile.toLowerCase();
@@ -2397,6 +2342,7 @@ public class EPubViewer extends ViewerBase {
             if( __anchorBookmark.path.trim().length() > 0 ) {
                 __scrollByPATH = true;
                 __scrollPATH = __anchorBookmark.path;
+                __scrollCharOffset = __anchorBookmark.startCharOffset;
             } else {
                 __scrollByPercentInChapter = true;
                 __scrollPercent = __anchorBookmark.percent;
@@ -2433,40 +2379,46 @@ public class EPubViewer extends ViewerBase {
         // script 호출하여 보이는지 여부에 따라 이벤트 발생.
         ChapterInfo currentChapter = mReadingChapter.getCurrentChapter();
         ReadingOrderInfo currentSpine = mReadingSpine.getCurrentSpineInfo();
+
         if( currentSpine == null ) return;
 
-        String chapterFile = currentSpine.getSpinePath().toLowerCase();
+        try {
+            String chapterFile = currentSpine.getSpinePath().toLowerCase();
 
-        ArrayList<String> array = new ArrayList<>();
+            JSONArray bookmarkJsonArr = new JSONArray();
+            for(Bookmark bm: mBookmarks) {
 
-        for(Bookmark bm: mBookmarks) {
-
-            if( bm.path.trim().equals("") ) {
-                // 이전 데이타 존재시
-                String chName = bm.chapterName.toLowerCase().trim();
-                String chapterName = currentChapter.getChapterName().toLowerCase().trim();
-
-                if( chapterName.equals(chName) ) {
-                    int page = (int)(((double)(mTotalPageInChapter-1) * bm.percent)/100);
-                    if( page == mCurrentPageIndexInChapter ) {
-                        mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_BOOKMARK_CHECK,true));
-                        return;
+                if( bm.path.trim().equals("") ) {
+                    // 이전 데이타 존재시
+                    String chName = bm.chapterName.toLowerCase().trim();
+                    String chapterName = currentChapter.getChapterName().toLowerCase().trim();
+                    if( chapterName.equals(chName) ) {
+                        int page = (int)(((double)(mTotalPageInChapter-1) * bm.percent)/100);
+                        if( page == mCurrentPageIndexInChapter ) {
+                            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_BOOKMARK_CHECK,true));
+                            return;
+                        }
+                    }
+                } else {
+                    String fileName = bm.chapterFile.toLowerCase();
+                    if( chapterFile.equals(fileName) ) {
+                        JSONObject bookmarkObj = new JSONObject();
+                        bookmarkObj.put("path", bm.path);
+                        bookmarkObj.put("startCharOffset", bm.startCharOffset);
+                        bookmarkJsonArr.put(bookmarkObj);
                     }
                 }
-            } else {
-                String fileName = bm.chapterFile.toLowerCase();
-                if( chapterFile.equals(fileName) )
-                    array.add(bm.path);
             }
-        }
 
-        if( array.size() <= 0 ) {
-            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_BOOKMARK_CHECK,false));
-            return;
-        }
+            if( bookmarkJsonArr.length() <= 0 ) {
+                mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_BOOKMARK_CHECK,false));
+                return;
+            }
 
-        JSONArray jarr = new JSONArray(array);
-        loadUrl("javascript:getBookmarkForPage(" + jarr.toString() +  ")" );
+            loadUrl("javascript:getBookmarkForPage(" + bookmarkJsonArr.toString() + ")" );
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -2476,33 +2428,35 @@ public class EPubViewer extends ViewerBase {
 
         String currentFile = mReadingSpine.getCurrentSpineInfo().getSpinePath();
 
-        // gathering id_tag information
-        ArrayList<String> array = new ArrayList<>();
-        for (int i = 0; i < mReadingChapter.getChapters().size(); i++) {
-            ChapterInfo ch = mReadingChapter.getChapters().get(i);
-            String chapterId = "";
-            String src = ch.getChapterFilePath();
-            if (src.lastIndexOf("#") != -1) {
-                chapterId = src.substring(src.lastIndexOf("#") + 1);
+        try {
+            ArrayList<String> array = new ArrayList<>();
+            for (int i = 0; i < mReadingChapter.getChapters().size(); i++) {
+                ChapterInfo ch = mReadingChapter.getChapters().get(i);
+                String src = ch.getChapterFilePath();
+                String chapterId = src.lastIndexOf("#") == -1 ? "" : src.substring(src.lastIndexOf("#") + 1);
+                if (!chapterId.isEmpty() && src.contains(currentFile)) {
+                    array.add(chapterId);
+                }
             }
-            if (chapterId != null && src.contains(currentFile)) {
-                array.add(chapterId);
+            JSONArray chapterIds = new JSONArray(array);
+
+            JSONArray bookmarkJsonArr = new JSONArray();
+            for( Bookmark bm: mBookmarks ) {
+                String file = bm.chapterFile;
+                if( file.equalsIgnoreCase(currentFile) ) {
+                    JSONObject bookmarkObj = new JSONObject();
+                    bookmarkObj.put("path", bm.path);
+                    bookmarkObj.put("startCharOffset", bm.startCharOffset);
+                    bookmarkJsonArr.put(bookmarkObj);
+                }
             }
+
+            __doBookmarkShow = true;
+
+            loadUrl("javascript:getBookmarkPath("+ chapterIds.toString() + "," + bookmarkJsonArr.toString() +","+ BookHelper.twoPageMode + ")" );
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        JSONArray carr = new JSONArray(array);
-        array.clear();
-
-        for( Bookmark bm: mBookmarks ) {
-            String file = bm.chapterFile.toLowerCase();
-            if( file.equals( currentFile ) ) {
-                array.add( bm.path );
-            }
-        }
-        JSONArray barr = new JSONArray(array);
-
-        __doBookmarkShow = true;
-
-        loadUrl("javascript:getBookmarkPath(" + carr.toString() + "," + barr.toString() + "," + BookHelper.twoPageMode + ")" );
     }
 
     /**
@@ -2510,37 +2464,33 @@ public class EPubViewer extends ViewerBase {
      */
     public void getCurrentPageInfo(boolean isClose) {
         String currentFile = mReadingSpine.getCurrentSpineInfo().getSpinePath();
-//        String currentChapterPath = mReadingChapter.getCurrentChapter().getChapterFilePath().toLowerCase();
-        ArrayList<String> array = new ArrayList<String>();
-        for (int i = 0; i < mReadingChapter.getChapters().size(); i++) {
-            ChapterInfo ch = mReadingChapter.getChapters().get(i);
-            String chapterId = "";
-            String src = ch.getChapterFilePath();
-
-            if (src.lastIndexOf("#") != -1) {
-                chapterId = src.substring(src.lastIndexOf("#") + 1);
-            }
-            if (!chapterId.isEmpty() && src.contains(currentFile)) {
-                array.add(chapterId);
-            }
-        }
-        JSONArray carr = new JSONArray(array);
-
-        array.clear();
-
-        if(!isClose){
-            for( Bookmark bm: mBookmarks ) {
-                String file = bm.chapterFile.toLowerCase();
-
-                if( file.equals( currentFile ) ) {
-                    array.add( bm.path );
+        try {
+            ArrayList<String> array = new ArrayList<>();
+            for (int i = 0; i < mReadingChapter.getChapters().size(); i++) {
+                ChapterInfo ch = mReadingChapter.getChapters().get(i);
+                String src = ch.getChapterFilePath();
+                String chapterId = src.lastIndexOf("#") == -1 ? "" : src.substring(src.lastIndexOf("#") + 1);
+                if (!chapterId.isEmpty() && src.contains(currentFile)) {
+                    array.add(chapterId);
                 }
             }
+            JSONArray chapterIds = new JSONArray(array);
+            JSONArray bookmarkJsonArr = new JSONArray();
+            if(!isClose){
+                for( Bookmark bm: mBookmarks ) {
+                    String file = bm.chapterFile;
+                    if( file.equalsIgnoreCase(currentFile) ) {
+                        JSONObject bookmarkObj = new JSONObject();
+                        bookmarkObj.put("path", bm.path);
+                        bookmarkObj.put("startCharOffset", bm.startCharOffset);
+                        bookmarkJsonArr.put(bookmarkObj);
+                    }
+                }
+            }
+            loadUrl("javascript:getBookmarkPath("+ chapterIds.toString() + "," + bookmarkJsonArr.toString() +","+ BookHelper.twoPageMode + ")" );
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        JSONArray barr = new JSONArray(array);
-
-//        loadUrl("javascript:getBookmarkPath(" + carr.toString() + "," + barr.toString() + "," + BookHelper.twoPageMode + ")" );
-        loadUrl("javascript:getCurrentInnerChapterId("+ carr.toString() + "," + barr.toString() + "," + BookHelper.twoPageMode + ")" );
     }
 
     ChapterInfo getChapterById(String file, String id) {
@@ -2583,17 +2533,7 @@ public class EPubViewer extends ViewerBase {
 
         for(Bookmark bm: mBookmarks) {
             String bFile = bm.chapterFile.toLowerCase();
-
-            if( !(path.path.trim().length()==0) && bm.path.equals(path.path) && bFile.equals(pFile) ) {
-                mBookmarks.remove(bm);
-                if(BookHelper.useHistory)
-                    __bmHistory.remove(bm.uniqueID);
-                return false;
-            }
-
-            int pageSrc = (int)Math.round(((double)(mTotalPageInChapter) * bm.percent)/100);
-            int pageDst = (int)Math.round(((double)(mTotalPageInChapter) * path.percent)/100);
-            if( bFile.equals(pFile) && pageSrc == pageDst && BookHelper.animationType!=3) {
+            if( !(path.path.trim().length()==0) && bm.path.equals(path.path) && bm.startCharOffset == path.startCharOffset && bFile.equalsIgnoreCase(pFile) ) {
                 mBookmarks.remove(bm);
                 if(BookHelper.useHistory)
                     __bmHistory.remove(bm.uniqueID);
@@ -2746,6 +2686,7 @@ public class EPubViewer extends ViewerBase {
             object.put(AnnotationConst.FLK_READPOSITION_FILE, BookHelper.getRelFilename(bm.chapterFile) );
             object.put(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT, bm.percent);
             object.put(AnnotationConst.FLK_READPOSITION_TOTAL_PERCENT, bm.percentInBook);		// [ssin] add total percent
+            object.put(AnnotationConst.FLK_READPOSITION_TEXT_INDEX, bm.startCharOffset);
             DebugSet.d(TAG, "json array ................. " + object.toString(1));
             output.write(object.toString(1).getBytes());
             output.close();
@@ -2756,7 +2697,6 @@ public class EPubViewer extends ViewerBase {
         }
         return bSuccess;
     }
-
 
     void restoreLastPosition() {
 
@@ -2827,7 +2767,13 @@ public class EPubViewer extends ViewerBase {
                             perInchapter = object.getDouble(AnnotationConst.FLK_READPOSITION_CHAPTER_PERCENT);
                         }
                         __scrollByPATH = true;
-                        __scrollPATH = path;
+                        if(!object.isNull(AnnotationConst.FLK_READPOSITION_TEXT_INDEX)){
+                            __scrollPATH = path;
+                            __scrollCharOffset = object.getInt(AnnotationConst.FLK_READPOSITION_TEXT_INDEX);
+                        } else {
+                            __scrollPATH = path;
+                            __scrollCharOffset = 0;
+                        }
                     }
                 }
             } catch (JSONException e){
@@ -2898,6 +2844,10 @@ public class EPubViewer extends ViewerBase {
                 if( !item.isNull(AnnotationConst.FLK_BOOKMARK_EXTRA3))
                     extra3 = item.getString(AnnotationConst.FLK_BOOKMARK_EXTRA3);
 
+                int startCharOffset = 0;
+                if(!item.isNull(AnnotationConst.FLK_BOOKMARK_TEXT_INDEX)){
+                    startCharOffset = item.getInt(AnnotationConst.FLK_BOOKMARK_TEXT_INDEX);
+                }
 
                 if( file.indexOf('\\') != -1 ) {
                     file = file.replace('\\', '/');
@@ -2923,6 +2873,7 @@ public class EPubViewer extends ViewerBase {
                 bm.extra3 = extra3;
                 bm.deviceModel = model;
                 bm.osVersion = osVersion;
+                bm.startCharOffset = startCharOffset;
                 mBookmarks.add(bm);
             }
 
@@ -3661,22 +3612,6 @@ public class EPubViewer extends ViewerBase {
         loadUrl("javascript:changeFontDirect('" + faceName + "','" + fontPath + "')");
     }
 
-//    public void changeFontStyle(String styleValue) {
-//        loadUrl("javascript:setFontStyle('" + styleValue + "')");
-//    }
-
-//    public void changeFontWeight(String weightValue) {
-//        loadUrl("javascript:setFontWeight('" + weightValue + "')");
-//    }
-
-//    public void changeListStyle(String styleValue) {
-//        loadUrl("javascript:setListStyleType('" + styleValue + "')");
-//    }
-
-//    public void changeTextEmphasis(String styleValue, String colorValue) {
-//        loadUrl("javascript:setTextEmphasis('" + styleValue + "','" + colorValue +"')");
-//    }
-
     /**
      * 	 폰트 사이즈 변경을 요청하는 메소드
      *   @param value : 변경할 폰트 사이즈 값
@@ -4254,18 +4189,6 @@ public class EPubViewer extends ViewerBase {
             mediaOverlayController.pause();
         }
     }
-
-//    public boolean isNoterefEnabled(){
-//        return asidePopupStatus;
-//    }
-
-//    public void hideNoteref(){
-//        loadUrl("javascript:resetBodyStatus()");
-//    }
-
-//    public void setPreventNoteref(boolean isPrevent){
-//        loadUrl("javascript:setPreventNoteref("+isPrevent+")");
-//    }
 
     public String getCurrentHtmlString(){
         return mChapterString.get(mReadingSpine.getCurrentSpineIndex());
@@ -5507,12 +5430,13 @@ public class EPubViewer extends ViewerBase {
                 __requestPageMove = true;
 
                 String path = (String)msg.obj;
-                script = "javascript:gotoPATH('" + path + "'," + isReload +","+ BookHelper.twoPageMode + ")";
+                script = "javascript:gotoPATH('" + path  + "'," + __scrollCharOffset + "," + isReload +","+ BookHelper.twoPageMode+")";
                 loadUrl(script);
 
                 __scrollByPATH = false;
                 __scrollPATH = null;
                 __scrollByPageFromPath = false;
+                __scrollCharOffset = 0;
                 isReload = false;	// 스크롤보기 화면처리를 위한 플래그
                 break;
 

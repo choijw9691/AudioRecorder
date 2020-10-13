@@ -1,13 +1,10 @@
 ﻿const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 const HIGHLIGHT_CLASS='KYBH';
-const UNDERLINE_CLASS='KYBUnderline';
 const BODY_NIGHTMODE_CLASS="KYBNightMode";
 const SEARCH_HIGHLIGHT='KYBSearchHighlight';
-const TTS_HIGHLIGHT_CLASS = "FLKTTSHighlight";
 const ANNOTATION_LASTSPAN_CLASS='KYBAnnotatedLastSpan';
 const MEMO_CLASS='KYBMemo';
-//const ATAG_CLASS='KYBAtag';
 
 var gPosition = 0;
 var gCurrentPage = 0;
@@ -33,6 +30,7 @@ var currentChromeVersion;
 var currentAndroidVersion;
 var splitAndroidVersion;
 var imageDataInfo= new Array();
+var lastReadPositionRange;
 /********************************************************************************************* s:ready */
 $(document).ready(function(){
 
@@ -907,10 +905,6 @@ function getRectangleObject(left,top,width,height){
     return rect;
 }
 
-function getSelectionRectObject(left,top,right,bottom,width,height){
-    var rect={'left':left,'top':top,'right':right,'bottom':bottom,'width':width,'height':height};
-    return rect;
-}
 function getElementRect(element) {
     return getRectangleObject(element.offsetLeft,element.offsetTop,element.offsetWidth,element.offsetHeight);
 }
@@ -1735,34 +1729,34 @@ function gotoHighlight(inputid, twoPageViewMode) {
 	}
 }
 
-function gotoPATH(path, isReload, twoPageViewMode) {
-
-	path = stringDotRevision(path);
-
-	if(gCurrentViewMode!=3){
-		var pageNum=0;
-		try {
-
-			var left = $(path).offset().left;
-
-			if( gDirectionType == 1 )
-				left = left - getWindowWidth(twoPageViewMode);
-
-			var retval = Math.abs(left);
-			pageNum = Math.floor((retval / getWindowWidth(twoPageViewMode)));
-		}
-		catch(err) {
-			pageNum = 0;
-		}
-		goPage(pageNum, twoPageViewMode);
-	} else if(gCurrentViewMode==3){
-		var top = $(path).offset().top;
-		window.scrollTo(0,top);
-		if($(document).height()<=window.innerHeight || isReload){
-			goPage(0, twoPageViewMode);
-		}
-	}
-}
+//function gotoPATH(path, isReload, twoPageViewMode) {
+//
+//	path = stringDotRevision(path);
+//
+//	if(gCurrentViewMode!=3){
+//		var pageNum=0;
+//		try {
+//
+//			var left = $(path).offset().left;
+//
+//			if( gDirectionType == 1 )
+//				left = left - getWindowWidth(twoPageViewMode);
+//
+//			var retval = Math.abs(left);
+//			pageNum = Math.floor((retval / getWindowWidth(twoPageViewMode)));
+//		}
+//		catch(err) {
+//			pageNum = 0;
+//		}
+//		goPage(pageNum, twoPageViewMode);
+//	} else if(gCurrentViewMode==3){
+//		var top = $(path).offset().top;
+//		window.scrollTo(0,top);
+//		if($(document).height()<=window.innerHeight || isReload){
+//			goPage(0, twoPageViewMode);
+//		}
+//	}
+//}
 
 function scrollPage(pageNumber, twoPageViewMode) {  // 강제 페이지 정보 업데이트 필요한 경우
     return goPageScrollWithCallback(pageNumber, twoPageViewMode, true);
@@ -1802,108 +1796,108 @@ function goPageScrollWithCallback(pageNumber, twoPageViewMode, updatePageInfo) {
 }
 /**************************************************** e:move page*/
 
-function getFirstVisibleItem(twoPageView) {
-
-	try {
-		var docscrolltop = $(document).scrollTop();
-		var docscrollleft = $(document).scrollLeft();
-		var viewportWidth = getWindowWidth(twoPageView);   // $(window).width();
-		var viewportHeight = gWindowInnerHeight;    //$(window).height();
-		var scrTop = docscrolltop;
-		var scrBottom = docscrolltop + viewportHeight;
-		var scrLeft = docscrollleft;
-		var scrRight = docscrollleft + viewportWidth;
-
-		var retval=null;
-
-		var data = $('#feelingk_bookcontent').find('*');
-
-		for(var i=0; i<data.length; i++ ) {
-
-			var node = data[i];
-    		var elementoffset = $(node).offset();
-
-    		if ($(node).contents().filter( function(){ return this.tagName == 'flk' || this.nodeType == 3;}).text().trim() == "" &&
-    				node.tagName.toUpperCase() !='IMG' &&
-    				node.tagName.toUpperCase() !='VIDEO' &&
-    				node.tagName.toUpperCase() !='AUDIO' &&
-    				'textContent' in node ) {
-    			continue;
-    		}
-
-    		if( elementoffset!=null &&
-    				$(node).css("display") != "none" &&
-    				$(node).is(":visible") == true &&
-    				node.tagName.toUpperCase() !== 'BR' &&
-    				$(node).hasClass(HIGHLIGHT_CLASS) != true &&
-    				$(node).hasClass(SEARCH_HIGHLIGHT) != true) {
-
-    			if(gCurrentViewMode == 3 ){
-    				if(docscrolltop <= elementoffset.top){
-    					retval = $(node).getPath();
-    					break;
-    				}
-    			} else {
-    				if(scrLeft <= elementoffset.left && elementoffset.left < scrRight ){
-    					retval = $(node).getPath();
-    					break;
-    				}
-    			}
-    		}
-		}
-
-		if(retval==null){
-			var pointX = parseInt($("#feelingk_booktable").css("webkit-column-width")) / 2;
-			var pointY = parseInt($("#feelingk_booktable").css("margin-top")) + 1;
-			var element = document.elementFromPoint(pointX, pointY);
-			retval = $(element).getPath();
-		}
-
-		return retval;
-	}
-	catch(err) {
-		log('getFirstVisibleItem() - ' + err);
-	}
-	return null;
-}
-
-/// Bookmark가 보여지는지에 대해서
-function isBookMarkVisible(elementpath) {
-
-	if(gCurrentViewMode==3){
-		var docscrolltop = $(document).scrollTop();
-		var viewportHeight = $(window).height();
-		var minTop = docscrolltop;
-		var maxTop = docscrolltop + viewportHeight;
-
-		if( elementpath==null || elementpath=='' ) {
-			return 0;
-		}
-
-		var retval = $(elementpath).offset().top;
-		if( retval >= minTop && retval <= maxTop) {
-			return 1;
-		} else {
-			return 0;
-		}
-	} else{
-		var docscrollleft = $(document).scrollLeft();
-		var viewportWidth = $(window).width();
-		var minLeft = docscrollleft;
-		var maxLeft = docscrollleft + viewportWidth;
-
-		if( elementpath==null || elementpath=='' ) {
-			return 0;
-		}
-
-		var retval = $(elementpath).offset().left;
-		if( retval > minLeft && retval < maxLeft) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-}
+//function getFirstVisibleItem(twoPageView) {
+//
+//	try {
+//		var docscrolltop = $(document).scrollTop();
+//		var docscrollleft = $(document).scrollLeft();
+//		var viewportWidth = getWindowWidth(twoPageView);   // $(window).width();
+//		var viewportHeight = gWindowInnerHeight;    //$(window).height();
+//		var scrTop = docscrolltop;
+//		var scrBottom = docscrolltop + viewportHeight;
+//		var scrLeft = docscrollleft;
+//		var scrRight = docscrollleft + viewportWidth;
+//
+//		var retval=null;
+//
+//		var data = $('#feelingk_bookcontent').find('*');
+//
+//		for(var i=0; i<data.length; i++ ) {
+//
+//			var node = data[i];
+//    		var elementoffset = $(node).offset();
+//
+//    		if ($(node).contents().filter( function(){ return this.tagName == 'flk' || this.nodeType == 3;}).text().trim() == "" &&
+//    				node.tagName.toUpperCase() !='IMG' &&
+//    				node.tagName.toUpperCase() !='VIDEO' &&
+//    				node.tagName.toUpperCase() !='AUDIO' &&
+//    				'textContent' in node ) {
+//    			continue;
+//    		}
+//
+//    		if( elementoffset!=null &&
+//    				$(node).css("display") != "none" &&
+//    				$(node).is(":visible") == true &&
+//    				node.tagName.toUpperCase() !== 'BR' &&
+//    				$(node).hasClass(HIGHLIGHT_CLASS) != true &&
+//    				$(node).hasClass(SEARCH_HIGHLIGHT) != true) {
+//
+//    			if(gCurrentViewMode == 3 ){
+//    				if(docscrolltop <= elementoffset.top){
+//    					retval = $(node).getPath();
+//    					break;
+//    				}
+//    			} else {
+//    				if(scrLeft <= elementoffset.left && elementoffset.left < scrRight ){
+//    					retval = $(node).getPath();
+//    					break;
+//    				}
+//    			}
+//    		}
+//		}
+//
+//		if(retval==null){
+//			var pointX = parseInt($("#feelingk_booktable").css("webkit-column-width")) / 2;
+//			var pointY = parseInt($("#feelingk_booktable").css("margin-top")) + 1;
+//			var element = document.elementFromPoint(pointX, pointY);
+//			retval = $(element).getPath();
+//		}
+//
+//		return retval;
+//	}
+//	catch(err) {
+//		log('getFirstVisibleItem() - ' + err);
+//	}
+//	return null;
+//}
+//
+///// Bookmark가 보여지는지에 대해서
+//function isBookMarkVisible(elementpath) {
+//
+//	if(gCurrentViewMode==3){
+//		var docscrolltop = $(document).scrollTop();
+//		var viewportHeight = $(window).height();
+//		var minTop = docscrolltop;
+//		var maxTop = docscrolltop + viewportHeight;
+//
+//		if( elementpath==null || elementpath=='' ) {
+//			return 0;
+//		}
+//
+//		var retval = $(elementpath).offset().top;
+//		if( retval >= minTop && retval <= maxTop) {
+//			return 1;
+//		} else {
+//			return 0;
+//		}
+//	} else{
+//		var docscrollleft = $(document).scrollLeft();
+//		var viewportWidth = $(window).width();
+//		var minLeft = docscrollleft;
+//		var maxLeft = docscrollleft + viewportWidth;
+//
+//		if( elementpath==null || elementpath=='' ) {
+//			return 0;
+//		}
+//
+//		var retval = $(elementpath).offset().left;
+//		if( retval > minLeft && retval < maxLeft) {
+//			return 1;
+//		} else {
+//			return 0;
+//		}
+//	}
+//}
 
 function getChapterID(Ids, twoPageViewMode) {
 
@@ -2174,155 +2168,155 @@ function removeSearchHighlight(){
 	$('#feelingk_bookcontent').removeHighlight();
 }
 
-function getCurrentInnerChapterId(Ids, bookMarks, twoPageView){
-
-    var viewportWidth = getWindowWidth(twoPageView);
-    var viewportHeight = gWindowInnerHeight;
-    var scrLeft = $(document).scrollLeft();
-    var scrRight = scrLeft + viewportWidth;
-    var scrTop = $(document).scrollTop();
-    var scrBottom = scrTop + viewportHeight;
-
-	var currentChapterId = "";
-
-    for(var idx=0; idx<Ids.length; idx++){
-
-        var chapterElement = $("[id=\""+Ids[idx]+"\"]");
-
-        if(chapterElement.css('display')=="none"){
-            chapterElement.show();
-            if(gCurrentViewMode == 3){
-                if(chapterElement[0].getBoundingClientRect().top + scrTop < scrBottom ){
-                    currentChapterId = Ids[idx];
-                }
-            } else {
-                if(chapterElement[0].getBoundingClientRect().left + scrLeft< scrRight){
-                    currentChapterId = Ids[idx];
-                }
-            }
-            chapterElement.hide();
-        } else {
-            if(gCurrentViewMode == 3){
-                if(chapterElement[0].getBoundingClientRect().top + scrTop < scrBottom ){
-                    currentChapterId = Ids[idx];
-                }
-            } else {
-                if(chapterElement[0].getBoundingClientRect().left + scrLeft < scrRight){
-                    currentChapterId = Ids[idx];
-                }
-            }
-        }
-    }
-
-    window.selection.setCurrentInnerChapter(currentChapterId);
-    getBookmarkPath(Ids, bookMarks, twoPageView);
-}
-
-function getBookmarkPath(Ids, bookMarks, twoPageView) {
-
-	for(var i=0 ;i<bookMarks.length; i++) {
-		// bookmark is aleady visible
-		if( isBookMarkVisible( bookMarks[i] ) == 1 ) {
-	        window.selection.reportBookmarkPath(bookMarks[i], true);
-	        return;
-		}
-	}
-
-    var pathObj = new Object();
-
-    var elementPath= getFirstVisibleItem(twoPageView);
-
-    if( elementPath !== null ) {
-
-        var retval = $(elementPath).offset().left;
-    	var respage = Math.floor((retval / window.innerWidth));
-
-    	var arrPages = getChapterID(Ids, twoPageView);
-    	var position = respage * gRealHeight * getNumColumns(twoPageView);
-        var lastId = '';
-
-        for(var i=0; i<arrPages.length; i++) {
-
-            var po = arrPages[i];
-            lastId = po.id;
-
-            if( position > po.start && position < po.end ) {
-                // 현재 북마크가 start id 와 end id 사이에 있는 경우
-                // end id 가 보이면 end id의 path로 설정
-                if( isBookMarkVisible(po.endElement) == 1 ) {
-                    lastId = po.endElement.id;
-                    elementPath = $(po.endElement).getPath();
-                }
-                break;
-            } else if( po.start >= position ) {
-                if( isBookMarkVisible(po.startElement) == 0 ) {
-                    lastId = '';
-                }
-                break;
-            }
-        }
-
-    	var node = $(elementPath)[0];
-        var snippet = '';
-        var tagName="";
-        var isText = false;
-
-    	if( node.textContent==undefined ) {
-    		var child = node.childNodes[0];
-    		if( child.tagName.toUpperCase() =='IMG' ) {
-    			tagName = child.tagName;
-    			snippet = decodeURI(child.src);
-    		} else if(child.tagName.toUpperCase() =='AUDIO') {
-    			tagName = child.tagName;
-    			snippet = decodeURI(child.src);
-    		}  else if(child.tagName.toUpperCase() =='VIDEO') {
-    			tagName = child.tagName;
-    			snippet = decodeURI(child.src);
-    		}
-    	} else {
-    		if( node.tagName.toUpperCase() == 'IMG' ) {
-    			tagName = node.tagName;
-    			snippet = decodeURI(node.src);
-    		}  else if(node.tagName.toUpperCase() =='AUDIO') {
-    			tagName = node.tagName;
-    			snippet = decodeURI(node.src);
-    		} else if(node.tagName.toUpperCase() =='VIDEO') {
-    			tagName = node.tagName;
-    			snippet = decodeURI(node.src);
-    		} else {
-    			isText=true;
-    			snippet = node.textContent;
-    		}
-    	}
-
-    	if( isText && snippet.length > 100 )
-    		snippet = snippet.substring(0, 100);
-
-    	pathObj.id = lastId;
-    	pathObj.page = respage;
-    	pathObj.elementPath = elementPath;
-    	pathObj.elementText = snippet;
-    	pathObj.tagName = tagName;
-
-        window.selection.reportBookmarkPath(JSON.stringify(pathObj), false);
-    } else {
-    	window.selection.reportError(2);
-        window.selection.reportBookmarkPath(null, false);
-    }
-}
-
-function getBookmarkForPage(bookMarks) {
-
-    for(var i=0; i<bookMarks.length; i++) {
-
-        var elementPath = bookMarks[i];
-        if( isBookMarkVisible(elementPath) == 1 ) {
-            window.selection.reportBookmarkForPage(true);
-            return;
-        }
-    }
-    window.selection.reportBookmarkForPage(false);
-}
+//function getCurrentInnerChapterId(Ids, bookMarks, twoPageView){
+//
+//    var viewportWidth = getWindowWidth(twoPageView);
+//    var viewportHeight = gWindowInnerHeight;
+//    var scrLeft = $(document).scrollLeft();
+//    var scrRight = scrLeft + viewportWidth;
+//    var scrTop = $(document).scrollTop();
+//    var scrBottom = scrTop + viewportHeight;
+//
+//	var currentChapterId = "";
+//
+//    for(var idx=0; idx<Ids.length; idx++){
+//
+//        var chapterElement = $("[id=\""+Ids[idx]+"\"]");
+//
+//        if(chapterElement.css('display')=="none"){
+//            chapterElement.show();
+//            if(gCurrentViewMode == 3){
+//                if(chapterElement[0].getBoundingClientRect().top + scrTop < scrBottom ){
+//                    currentChapterId = Ids[idx];
+//                }
+//            } else {
+//                if(chapterElement[0].getBoundingClientRect().left + scrLeft< scrRight){
+//                    currentChapterId = Ids[idx];
+//                }
+//            }
+//            chapterElement.hide();
+//        } else {
+//            if(gCurrentViewMode == 3){
+//                if(chapterElement[0].getBoundingClientRect().top + scrTop < scrBottom ){
+//                    currentChapterId = Ids[idx];
+//                }
+//            } else {
+//                if(chapterElement[0].getBoundingClientRect().left + scrLeft < scrRight){
+//                    currentChapterId = Ids[idx];
+//                }
+//            }
+//        }
+//    }
+//
+//    window.selection.setCurrentInnerChapter(currentChapterId);
+//    getBookmarkPath(Ids, bookMarks, twoPageView);
+//}
+//
+//function getBookmarkPath(Ids, bookMarks, twoPageView) {
+//
+//	for(var i=0 ;i<bookMarks.length; i++) {
+//		// bookmark is aleady visible
+//		if( isBookMarkVisible( bookMarks[i] ) == 1 ) {
+//	        window.selection.reportBookmarkPath(bookMarks[i], true);
+//	        return;
+//		}
+//	}
+//
+//    var pathObj = new Object();
+//
+//    var elementPath= getFirstVisibleItem(twoPageView);
+//
+//    if( elementPath !== null ) {
+//
+//        var retval = $(elementPath).offset().left;
+//    	var respage = Math.floor((retval / window.innerWidth));
+//
+//    	var arrPages = getChapterID(Ids, twoPageView);
+//    	var position = respage * gRealHeight * getNumColumns(twoPageView);
+//        var lastId = '';
+//
+//        for(var i=0; i<arrPages.length; i++) {
+//
+//            var po = arrPages[i];
+//            lastId = po.id;
+//
+//            if( position > po.start && position < po.end ) {
+//                // 현재 북마크가 start id 와 end id 사이에 있는 경우
+//                // end id 가 보이면 end id의 path로 설정
+//                if( isBookMarkVisible(po.endElement) == 1 ) {
+//                    lastId = po.endElement.id;
+//                    elementPath = $(po.endElement).getPath();
+//                }
+//                break;
+//            } else if( po.start >= position ) {
+//                if( isBookMarkVisible(po.startElement) == 0 ) {
+//                    lastId = '';
+//                }
+//                break;
+//            }
+//        }
+//
+//    	var node = $(elementPath)[0];
+//        var snippet = '';
+//        var tagName="";
+//        var isText = false;
+//
+//    	if( node.textContent==undefined ) {
+//    		var child = node.childNodes[0];
+//    		if( child.tagName.toUpperCase() =='IMG' ) {
+//    			tagName = child.tagName;
+//    			snippet = decodeURI(child.src);
+//    		} else if(child.tagName.toUpperCase() =='AUDIO') {
+//    			tagName = child.tagName;
+//    			snippet = decodeURI(child.src);
+//    		}  else if(child.tagName.toUpperCase() =='VIDEO') {
+//    			tagName = child.tagName;
+//    			snippet = decodeURI(child.src);
+//    		}
+//    	} else {
+//    		if( node.tagName.toUpperCase() == 'IMG' ) {
+//    			tagName = node.tagName;
+//    			snippet = decodeURI(node.src);
+//    		}  else if(node.tagName.toUpperCase() =='AUDIO') {
+//    			tagName = node.tagName;
+//    			snippet = decodeURI(node.src);
+//    		} else if(node.tagName.toUpperCase() =='VIDEO') {
+//    			tagName = node.tagName;
+//    			snippet = decodeURI(node.src);
+//    		} else {
+//    			isText=true;
+//    			snippet = node.textContent;
+//    		}
+//    	}
+//
+//    	if( isText && snippet.length > 100 )
+//    		snippet = snippet.substring(0, 100);
+//
+//    	pathObj.id = lastId;
+//    	pathObj.page = respage;
+//    	pathObj.elementPath = elementPath;
+//    	pathObj.elementText = snippet;
+//    	pathObj.tagName = tagName;
+//
+//        window.selection.reportBookmarkPath(JSON.stringify(pathObj), false);
+//    } else {
+//    	window.selection.reportError(2);
+//        window.selection.reportBookmarkPath(null, false);
+//    }
+//}
+//
+//function getBookmarkForPage(bookMarks) {
+//
+//    for(var i=0; i<bookMarks.length; i++) {
+//
+//        var elementPath = bookMarks[i];
+//        if( isBookMarkVisible(elementPath) == 1 ) {
+//            window.selection.reportBookmarkForPage(true);
+//            return;
+//        }
+//    }
+//    window.selection.reportBookmarkForPage(false);
+//}
 
 function changeFontDirect(faceName, fontPath) {
 
@@ -4574,148 +4568,353 @@ function finishTextSelection(){
     notifyOverflowedTextSelectionAfterPaging=false;
     contextMenuTargetPosition="END";
 }
-/********************************************************* e : selection common function test  */
+/********************************************************* e : selection common function  */
 
-/********************************************************* s : kindle way selection continue test */
-//function doSelectionContinue(){
-//
-//    /********************* s : kindle way selection continue test */
-//    var nodesOnCurrentPage=[];
-//
-//    var allNodes = $("#feelingk_bookcontent *").map(function(index) { return this;});
-//
-//    var viewportWidth = $(window).width();
-//    var scrLeft=$(document).scrollLeft();
-//    var scrRight=scrLeft + viewportWidth;
-//    var textNodesOnCurrentPage=[];
-//    var lastElement;
-//    for (var i=0; i<allNodes.length; i++) {
-//        if(allNodes[i].id=="feelingk_modify_bookcontent" || getElementDefaultDisplay(allNodes[i].tagName) !='block')
-//            continue;
-//        var leftOffset = $(allNodes[i]).offset().left;
-//        if (leftOffset >= scrLeft && leftOffset < scrRight){
-//            lastElement = allNodes[i];
-//        }
-//    }
-//
-//    nativeTreeWalker(lastElement, textNodesOnCurrentPage);
-//
-//    // TODO :: nativeTreeWalker 가 없으면 다음 페이지로 이동
-//
-//    var rect;
-//	var rectList = new Array();
-//	for (var i=0; i<textNodesOnCurrentPage.length; i++) {
-//        var tempRange = document.createRange();
-//        tempRange.selectNode(textNodesOnCurrentPage[i]);
-//        var clientRects = tempRange.getClientRects();
-//        for(var j=0; j<clientRects.length; j++){
-//            rectList.push(clientRects[j]);
-//        }
-//	}
-//
-//    var lastTextData = getLastTextWithinRange(rectList);
-//    var moveRange = document.caretRangeFromPoint(lastTextData.right, lastTextData.bottom);
-//    totalRange.setEnd(moveRange.endContainer, moveRange.endOffset);
-//    var currentRects = getSelectedTextNodeRectList(totalRange);
-//	console.log("SSIN totalRange continue : "+totalRange.toString());
-//	currentSelectionInfo.isExistHandler=true;
-//    drawSelectionRect(currentRects, currentSelectionInfo.isExistHandler);
-//
-////    //for check
-////    var startElementInfo = getStartElementInfoFromSelection(totalRange);
-////    currentSelectionInfo.startElementPath=startElementInfo.path;
-////    currentSelectionInfo.startCharOffset=startElementInfo.offset;
-////    var endElementInfo = getEndElementInfoFromSelection(totalRange);
-////    currentSelectionInfo.endElementPath=  endElementInfo.path;
-////    currentSelectionInfo.endCharOffset= endElementInfo.offset;
-////    highlightFromSelection(currentSelectionInfo.startElementPath, currentSelectionInfo.endElementPath, currentSelectionInfo.startCharOffset, currentSelectionInfo.endCharOffset, 0);
-//    /********************* s : kindle way selection continue test */
-//}
+/********************************************************* s : lastReadPosition */
+// 현재 북마크(마지막읽은위치) 기준 구하기 - 현재 이너챕터 판단도 수행
+function getBookmarkPath(elementIds, bookmarks, twoPageView) {
 
-//function nativeTreeWalker(el, textNodesOnCurrentPage) {
-//
-//    var walker = document.createTreeWalker(
-//        el,
-//        NodeFilter.SHOW_TEXT,
-//        null,
-//        false
-//    );
-//
-//    var node;
-//    while(node = walker.nextNode()) {
-//        textNodesOnCurrentPage.push(node);
-//    }
-//}
+    var elementPath= getFirstVisibleItem(twoPageView);
+    if(elementPath == null || elementPath == ""){
+        window.selection.reportError(2);
+        window.selection.reportBookmarkPath(null);
+    }
 
-//function getElementDefaultDisplay(tagName) {
-//    var cStyle,
-//    t = document.createElement(tagName),
-//    gcs = "getComputedStyle" in window;
-//
-//    document.body.appendChild(t);
-//    cStyle = (gcs ? window.getComputedStyle(t, "") : t.currentStyle).display;
-//    document.body.removeChild(t);
-//
-//    return cStyle;
-//}
 
-//function getLastTextWithinRange(rectList){
-//
-//    var lastLineData = new Array();
-//
-//    var largestTop = Math.max.apply(Math,rectList.map(function(obj){return obj.top;}))
-//
-//    for (var i=0; i<rectList.length; i++) {
-//        if(rectList[i].top == largestTop){
-//            lastLineData.push(rectList[i]);
-//        }
-//		}
-//    var largestRight = Math.max.apply(Math,lastLineData.map(function(obj){return obj.right;}))
-//
-//    var lastTextData = lastLineData.find(function(obj){ return obj.right == largestRight; })
-//    console.log("lastText : "+JSON.stringify(lastTextData));
-//
-//    return lastTextData;
-//		}
-/********************************************************* e : kindle way selection continue test */
+    try {
+        var maxLeft = $(document).scrollLeft() + getWindowWidth(twoPageView);
+        var maxTop = $(document).scrollTop() +  gWindowInnerHeight;
+        var targetLeft = $(elementPath).offset().left;
+        var targetPage = Math.floor((targetLeft / window.innerWidth));
+        var currentChapterId = "";
 
-/********************************************************* s : line annotation test */
-var annotationLineRects= new Array();
-function getAnnotationRects(){
+        for(var idx=0; idx<elementIds.length; idx++){  // get current inner chapter id
 
-    var flkTags = document.getElementsByTagName('flk');
-    console.log("flkTags length: "+flkTags.length);
+            var chapterElement = $("[id=\""+elementIds[idx]+"\"]");
 
-    var rect;
-    var rectList = new Array();
+            if(chapterElement.css('display')=="none"){
+                chapterElement.show();
+                if(gCurrentViewMode == 3){
+                    if(chapterElement[0].offsetTop < maxTop ){
+                        currentChapterId = elementIds[idx];
+                    }
+                } else {
+                    if(chapterElement[0].offsetLeft < maxLeft){
+                        currentChapterId = elementIds[idx];
+                    }
+                }
+                chapterElement.hide();
+            } else {
+                if(gCurrentViewMode == 3){
+                    if(chapterElement[0].offsetTop < maxTop ){
+                        currentChapterId = elementIds[idx];
+                    }
+                } else {
+                    if(chapterElement[0].offsetLeft < maxLeft){
+                        currentChapterId = elementIds[idx];
+                    }
+                }
+            }
+        }
 
-    for(var i=0;i<flkTags.length;i++){
-        var range = document.createRange();
-        range.selectNodeContents(flkTags[i]);
-        var rects = range.getClientRects();
-        for(var j=0; j<rects.length; j++){
-            annotationLineRects.push(rects[j]);
+        var elementTextOrSrc = '';
+        var checkOffsetDone = false;
+        var currentCharOffset=0;
+        var node = $(elementPath)[0];
+        var tagName=node.tagName.toLowerCase();
+
+        if( tagName == 'img' || tagName == 'audio' || tagName == 'video'){
+            elementTextOrSrc = decodeURI(node.src);
+
+            var tempRange = document.createRange();
+            tempRange.selectNodeContents($(elementPath)[0]);
+            lastReadPositionRange = tempRange;
+        } else {
+            tagName = "";
+            elementTextOrSrc = node.textContent.length > 100 ? node.textContent.substring(0, 100) : node.textContent;
+
+            var tempRange = document.createRange();
+            tempRange.selectNodeContents($(elementPath)[0]);
+
+            var childNodes=new Array();
+            findAllFullTextNodesInRange(childNodes, tempRange);
+
+            var childTextNode;
+            for(var idx=0; idx<childNodes.length; idx++){
+                childTextNode = childNodes[idx];
+                for(var index=0; index<childTextNode.textContent.length; index++){
+                    var tempRange = document.createRange();
+                    tempRange.setStart(childTextNode,index);
+                    tempRange.setEnd(childTextNode, index+1);
+
+                    if(tempRange.toString().trim().length==0){
+                        continue;
+                    }
+
+                    var tempRect = tempRange.getBoundingClientRect();
+                    if(gCurrentViewMode == 3){
+                        if(tempRect.top>=0 || tempRect.bottom>0){
+                            targetPage = Math.floor((tempRect.top + $(document).scrollTop()) / window.innerWidth);
+                            checkOffsetDone = true;
+                            lastReadPositionRange = tempRange;
+                            break;
+                        }
+                    } else {
+                        if(tempRect.left>=0 && tempRect.right>0){
+                            targetPage = Math.floor((tempRect.left + $(document).scrollLeft()) / window.innerWidth);
+                            checkOffsetDone = true;
+                            lastReadPositionRange = tempRange;
+                            break;
+                        }
+                    }
+                    currentCharOffset++;
+                }
+
+                if(checkOffsetDone){
+                    break;
+                }
+            }
+        }
+
+        var pathObj = new Object();
+        pathObj.id = currentChapterId;
+        pathObj.page = targetPage;
+        pathObj.elementPath = elementPath;
+        pathObj.elementText = elementTextOrSrc;
+        pathObj.tagName = tagName;
+        pathObj.startOffset = currentCharOffset;
+
+        window.selection.reportBookmarkPath(JSON.stringify(pathObj));
+    } catch(error){
+        window.selection.reportError(2);
+        window.selection.reportBookmarkPath(null);
+    }
+}
+
+function getFirstVisibleItem() {		// 첫 엘리먼트 - 걸쳐있는 것도 포함
+	try {
+		var targetPath=null;
+
+		var data = $('#feelingk_bookcontent').find('*');
+		for(var i=0; i<data.length; i++ ) {
+			var node = data[i];
+    		var elementOffset = $(node).offset();
+    		if ($(node).contents().filter( function(){ return this.tagName == 'flk' || this.nodeType == 3;}).text().trim() == "" &&
+    				node.tagName.toUpperCase() !='IMG' &&
+    				node.tagName.toUpperCase() !='VIDEO' &&
+    				node.tagName.toUpperCase() !='AUDIO' &&
+    				'textContent' in node ) {
+    			continue;
+    		}
+
+    		if( elementOffset!=null &&
+    				$(node).css("display") != "none" &&
+    				$(node).is(":visible") == true &&
+    				node.tagName.toUpperCase() !== 'BR' &&
+    				$(node).hasClass(HIGHLIGHT_CLASS) != true &&
+    				$(node).hasClass(SEARCH_HIGHLIGHT) != true) {
+
+                    var elementRect = $(node)[0].getBoundingClientRect();
+
+    				if(gCurrentViewMode == 3 ){
+                        if(elementRect.top<0 && elementRect.bottom>0) {
+                            return targetPath = $(node).getPath();
+                        } else if(0<=elementRect.top && 0<elementRect.bottom) {
+                            return targetPath = $(node).getPath();
+                        }
+    				} else {
+                        if(elementRect.left<0 && elementRect.right>0){
+                            return targetPath = $(node).getPath();
+                        } else if(0<= elementRect.left && 0<elementRect.right) {
+                            return targetPath = $(node).getPath();
+                        }
+    				}
+                }
+            }
+
+		if(targetPath==null){
+			var pointX = parseInt($("#feelingk_booktable").css("webkit-column-width")) / 2;
+			var pointY = parseInt($("#feelingk_booktable").css("margin-top")) + 1;
+			var element = document.elementFromPoint(pointX, pointY);
+			return targetPath = $(element).getPath();
+		}
+	} catch(err) {
+		log('getFirstVisibleItem() error : ' + err);
+	}
+	return null;
+}
+
+// 현재 페이지 북마크 활성화 여부 - 프론트 UI용
+function getBookmarkForPage(bookMarks) {
+    for(var i=0; i<bookMarks.length; i++) {
+        var bookmark = bookMarks[i];
+        if( isBookMarkVisible(bookmark.path, bookmark.startCharOffset) == 1 ) {
+            window.selection.reportBookmarkForPage(true);
+            return;
+        }
+    }
+    window.selection.reportBookmarkForPage(false);
+}
+
+function isBookMarkVisible(elementPath, startCharOffset) {
+
+    if(elementPath==null || elementPath==''){
+        return 0;
+    }
+
+    var docScrollLeft = $(document).scrollLeft();
+    var docScrollTop = $(document).scrollTop();
+    var minTop = docScrollTop;
+    var maxTop = minTop + $(window).height();
+    var minLeft = docScrollLeft;
+    var maxLeft = minLeft + $(window).width();
+
+    var targetTagName = $(elementPath)[0].tagName.toLowerCase();
+    if( targetTagName =='img' || targetTagName =='audio' || targetTagName =='video'){
+        if(gCurrentViewMode!=3){
+            var left = $(elementPath).offset().left;
+            if( minLeft <= left && left < maxLeft) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            var top = $(elementPath).offset().top;
+            if( minTop <= top && top < maxTop) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    } else {
+        var currentCharOffset=0;
+
+        var tempRange = document.createRange();
+        tempRange.selectNodeContents($(elementPath)[0]);
+
+        var childNodes = new Array();
+        findAllFullTextNodesInRange(childNodes, tempRange);
+
+        for(var idx=0; idx<childNodes.length; idx++) {
+
+            var childTextNode = childNodes[idx];
+
+            for(var index=0; index<childTextNode.textContent.length; index++){
+
+                if(childTextNode.textContent.charAt(index).trim().length==0){
+                    continue;
+                }
+
+                if(currentCharOffset == startCharOffset){
+                    var tempRange = document.createRange();
+                    tempRange.setStart(childTextNode,index);
+                    tempRange.setEnd(childTextNode, index+1);
+
+                    if(gCurrentViewMode!=3){
+                        var targetLeft = tempRange.getBoundingClientRect().left;
+                        var targetWidth = tempRange.getBoundingClientRect().width;
+                        if( minLeft <= targetLeft + docScrollLeft
+                            && targetLeft + docScrollLeft + targetWidth < maxLeft) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        var targetTop = tempRange.getBoundingClientRect().top;
+                        var targetHeight = tempRange.getBoundingClientRect().height;
+                        if( minTop <= targetTop + docScrollTop
+                            && targetTop + docScrollTop + targetHeight < maxTop) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+                currentCharOffset++;
+            }
         }
     }
 }
 
-function drawLineAnnotation(){
+// 마지막 읽은 위치, 북마크 이동
+function gotoPATH(path, startCharOffset, isReload, twoPageViewMode) {
 
-    var lineRect = new Array();
+    try {
+        var targetPath = stringDotRevision(path);
+        var targetTagName = $(targetPath)[0].tagName.toLowerCase();
+        if( targetTagName =='img' || targetTagName =='audio' || targetTagName =='video') {
+            if(gCurrentViewMode!=3){
+                var pageNum=0;
+                var left = $(targetPath).offset().left;
+                if( gDirectionType == 1 ) { left = left - getWindowWidth(twoPageViewMode); }
+                var targetLeft = Math.abs(left);
+                pageNum = Math.floor((targetLeft / getWindowWidth(twoPageViewMode)));
+                goPage(pageNum, twoPageViewMode);
+            } else {
+                var top = $(targetPath).offset().top;
+                window.scrollTo(0,top);
+                if($(document).height()<=window.innerHeight || isReload){
+                    goPage(0, twoPageViewMode);
+                }
+            }
+        } else {
+            var pageNum=0;
+            var currentCharOffset=0;
+            var checkOffsetDone = false;
 
-    var scrTop = $(document).scrollTop();
-    var scrBottom = scrTop + $(window).height();
+            var tempRange = document.createRange();
+            tempRange.selectNodeContents($(targetPath)[0]);
 
-    if(annotationLineRects.length==0){
-        return;
-    }
+            var childNodes = new Array();
+            findAllFullTextNodesInRange(childNodes, tempRange);
 
-    for(var idx=0; idx<annotationLineRects.length; idx++){
-        if(annotationLineRects[idx].top>scrTop &&
-            annotationLineRects[idx].bottom<scrBottom){
-                lineRect.push(annotationLineRects[idx]);
+            for(var idx=0; idx<childNodes.length; idx++){
+
+                var childTextNode = childNodes[idx];
+
+                for(var index=0; index<childTextNode.textContent.length; index++){
+
+                    if(childTextNode.textContent.charAt(index).toString().trim().length==0){
+                        continue;
+                    }
+
+                    if(currentCharOffset == startCharOffset){
+                        var tempRange = document.createRange();
+                        tempRange.setStart(childTextNode,index);
+                        tempRange.setEnd(childTextNode, index+1);
+
+                        if(gCurrentViewMode!=3){
+                            var targetLeft = tempRange.getBoundingClientRect().left + $(document).scrollLeft();
+                            if( gDirectionType == 1 ) { targetLeft = targetLeft - getWindowWidth(twoPageViewMode); }
+                            targetLeft = Math.abs(targetLeft);
+                            pageNum = Math.floor((targetLeft / getWindowWidth(twoPageViewMode)));
+                            checkOffsetDone = true;
+                            break;
+                        } else {
+                            var top = tempRange.getBoundingClientRect().top + $(document).scrollTop();
+                            window.scrollTo(0,top);
+                            checkOffsetDone = true;
+                            break;
+                        }
+                    }
+                    currentCharOffset++;
+                }
+
+                if(checkOffsetDone){
+                    if(gCurrentViewMode!=3){
+                        goPage(pageNum, twoPageViewMode);
+                    } else {
+                        if($(document).height()<=window.innerHeight || isReload){
+                            goPage(0, twoPageViewMode);
+                        }
+                    }
+                    break;
+                }
+            }
         }
+    } catch(err) {
+        log('gotoPATH() error : ' + err);
+        goPage(0, twoPageViewMode);
     }
-    drawSelectionRect(lineRect,false);
 }
-/********************************************************* e : line annotation test */
+/********************************************************* e : lastReadPosition */

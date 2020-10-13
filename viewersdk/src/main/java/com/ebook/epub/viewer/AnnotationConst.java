@@ -19,11 +19,11 @@ public class AnnotationConst {
 	public static final String FLK_READPOSITION_MODEL = "FLK_READPOSITION_MODEL";
 	public static final String FLK_READPOSITION_OS_VERSION = "FLK_READPOSITION_OS_VERSION";
 	public static final String FLK_READPOSITION_TOTAL_PERCENT = "FLK_READPOSITION_TOTAL_PERCENT";
+    public static final String FLK_READPOSITION_TEXT_INDEX = "FLK_READPOSITION_TEXT_INDEX";
 	
 	// - bookmark
 	public static final String FLK_BOOKMARK_VERSION = "FLK_BOOKMARK_VERSION";
 	public static final String FLK_BOOKMARK_LIST = "FLK_BOOKMARK_LIST";
-
 	public static final String FLK_BOOKMARK_ID = "FLK_BOOKMARK_ID";
 	public static final String FLK_BOOKMARK_CREATION_TIME = "FLK_BOOKMARK_CREATION_TIME";
 	public static final String FLK_BOOKMARK_FILE = "FLK_BOOKMARK_FILE";
@@ -37,13 +37,13 @@ public class AnnotationConst {
 	public static final String FLK_BOOKMARK_TYPE_AUDIO = "FLK_BOOKMARK_TYPE_AUDIO";
 	public static final String FLK_BOOKMARK_TYPE_VIDEO = "FLK_BOOKMARK_TYPE_VIDEO";
 	public static final String FLK_BOOKMARK_TYPE_OTHER = "FLK_BOOKMARK_TYPE_OTHER";
-
 	public static final String FLK_BOOKMARK_TEXT = "FLK_BOOKMARK_TEXT";
 	public static final String FLK_BOOKMARK_MODEL = "FLK_BOOKMARK_MODEL";
 	public static final String FLK_BOOKMARK_OS_VERSION = "FLK_BOOKMARK_OS_VERSION";
 	public static final String FLK_BOOKMARK_EXTRA1 = "FLK_BOOKMARK_EXTRA1";
 	public static final String FLK_BOOKMARK_EXTRA2 = "FLK_BOOKMARK_EXTRA2";
 	public static final String FLK_BOOKMARK_EXTRA3 = "FLK_BOOKMARK_EXTRA3";
+    public static final String FLK_BOOKMARK_TEXT_INDEX = "FLK_BOOKMARK_TEXT_INDEX";
 
 	// - Annotation
 	public static final String FLK_ANNOTATION_VERSION = "FLK_ANNOTATION_VERSION";

@@ -4674,6 +4674,10 @@ function getBookmarkPath(elementIds, bookmarks, twoPageView) {
                     break;
                 }
             }
+
+            if(!checkOffsetDone){
+                currentCharOffset--;
+            }
         }
 
         var pathObj = new Object();

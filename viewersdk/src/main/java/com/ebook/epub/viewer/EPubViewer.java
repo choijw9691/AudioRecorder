@@ -5443,10 +5443,11 @@ public class EPubViewer extends ViewerBase {
             case Defines.REF_SCROLL_BY_CLICK :  // TODO :: REF_HANDLE_TOUCH_EVENT
                 DebugSet.d(TAG, "REF_SCROLL_BY_CLICK");
 
-                if(asidePopupStatus)
+                MotionEvent event = (MotionEvent)msg.obj;
+
+                if(asidePopupStatus || event==null)
                     return;
 
-                MotionEvent event = (MotionEvent)msg.obj;
                 if(mediaOverlayController.isMediaOverlayPlaying()){
                     int x = Scr2Web((int)event.getX());
                     int y = Scr2Web((int)event.getY());
@@ -5610,6 +5611,10 @@ public class EPubViewer extends ViewerBase {
                 DebugSet.d(TAG, "REF_NOTIFY_CURRENT_PAGE_INFO");
 
                 bookmark = (Bookmark)msg.obj;
+
+                if(bookmark==null)
+                    return;
+
                 DebugSet.d(TAG, "REF_NOTIFY_CURRENT_PAGE_INFO "+ bookmark.toString());
 
                 __currentTopPath = false;

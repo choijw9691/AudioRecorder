@@ -5459,19 +5459,50 @@ public class EPubViewer extends ViewerBase {
                 ClickArea ca = BookHelper.getClickArea(EPubViewer.this, event.getX(), event.getY(), mSpineDirectionType);
                 if( isPreventPageMove == false && BookHelper.animationType!=3)  {
                     if( ca == ClickArea.Left ) {
+                        if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_PREV_NEXT) {
+                            if( mSpineDirectionType == PageDirection.LTR ){
+                                scrollPrior();
+                            } else {
+                                scrollNext();
+                            }
+                        } else if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_PREV ||
+                                BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_NEXT) {
+                            if( mSpineDirectionType == PageDirection.LTR ){
+                                scrollNext();
+                            } else {
+                                scrollPrior();
+                            }
+                        }
+                    } else if( ca == ClickArea.Right ) {
+                        if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_PREV_NEXT ||
+                                BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_NEXT) {
+                            if( mSpineDirectionType == PageDirection.LTR ){
+                                scrollNext();
+                            } else {
+                                scrollPrior();
+                            }
+                        } else if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_PREV) {
+                            if( mSpineDirectionType == PageDirection.LTR ){
+                                scrollPrior();
+                            } else {
+                                scrollNext();
+                            }
+                        }
+                    } else  if( ca == ClickArea.Top ) {
                         if( mSpineDirectionType == PageDirection.LTR ){
                             scrollPrior();
                         } else {
                             scrollNext();
                         }
-                    } else if( ca == ClickArea.Right ) {
-                        if( mSpineDirectionType == PageDirection.LTR ) {
+                    } else if( ca == ClickArea.Bottom){
+                        if( mSpineDirectionType == PageDirection.LTR ){
                             scrollNext();
                         } else {
                             scrollPrior();
                         }
                     }
                 }
+
                 if( mOnTouchEventListener != null ) {
                     mOnTouchEventListener.onUp(ca);
                 }

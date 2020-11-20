@@ -77,6 +77,8 @@ public class FixedLayoutZoomView extends LinearLayout {
     public interface TouchAreaChecker {
         void onLeftTouched(float x, float y);
         void onRightTouched(float x, float y);
+        void onTopTouched(float x, float y);
+        void onBottomTouched(float x, float y);
         void onMiddleTouched(float x, float y);
         void onLeftCornerTouched();
     }
@@ -596,6 +598,10 @@ public class FixedLayoutZoomView extends LinearLayout {
                 mTouchAreaChecker.onLeftTouched(x, y);
             } else if(clickArea== BookHelper.ClickArea.Right){
                 mTouchAreaChecker.onRightTouched(x, y);
+            } else if(clickArea== BookHelper.ClickArea.Top){
+                mTouchAreaChecker.onTopTouched(x, y);
+            } else if(clickArea== BookHelper.ClickArea.Bottom){
+                mTouchAreaChecker.onBottomTouched(x, y);
             } else if(clickArea== BookHelper.ClickArea.Middle){
                 mTouchAreaChecker.onMiddleTouched(x, y);
             } else if(clickArea== BookHelper.ClickArea.Left_Corner){

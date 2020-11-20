@@ -1830,4 +1830,11 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
     public void setPageTurnInputRegionType(BookHelper.PageTurnInputRegionType pageTurnInputRegionType) {
         BookHelper.pageTurnInputRegionType = pageTurnInputRegionType;
     }
+
+    public void setTouchMargin(int top, int bottom, int left, int right){
+        BookHelper.topTouchMargin = top;
+        BookHelper.bottomTouchMargin = bottom;
+        BookHelper.leftTouchMargin = left;
+        BookHelper.rightTouchMargin = right;
+    }
 }

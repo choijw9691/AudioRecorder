@@ -917,23 +917,38 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             return;
         }
 
-        if(mPageDirection == ViewerContainer.PageDirection.LTR){
-            int numChapter = getCurrentItem() - 1;
-            if( numChapter < 0 ) {
-                mOnBookStartEnd.onStart();
-                return;
+        if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_PREV_NEXT) {
+            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                if ( getCurrentItem()-1 < 0) {
+                    mOnBookStartEnd.onStart();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+            } else {
+                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                    mOnBookStartEnd.onStart();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
             }
-        } else {
-            int numChapter = getCurrentItem() + 1;
-            if( numChapter == mPagerAdapter.getCount() ) {
-                mOnBookStartEnd.onEnd();
-                return;
+        } else if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_PREV ||
+                BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_NEXT) {
+            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                    mOnBookStartEnd.onEnd();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+            } else {
+                if ( getCurrentItem()-1 < 0) {
+                    mOnBookStartEnd.onEnd();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
             }
         }
 
         isFromRight = mPagerAdapter.getCurrentView().getIsFromRight();
-
-        setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
 
         if( mOnTouchEventListener != null  && !isMoveByFling){
             mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection));
@@ -955,26 +970,101 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             return;
         }
 
-        if(mPageDirection == ViewerContainer.PageDirection.LTR){
-            int numChapter = getCurrentItem() + 1;
-            if( numChapter == mPagerAdapter.getCount() ) {
-                mOnBookStartEnd.onEnd();
-                return;
+        if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_PREV_NEXT ||
+                BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_NEXT) {
+            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                    mOnBookStartEnd.onEnd();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+            } else {
+                if ( getCurrentItem()-1 < 0) {
+                    mOnBookStartEnd.onEnd();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
             }
-        } else{
-            int numChapter = getCurrentItem() - 1;
-            if( numChapter < 0 ) {
-                mOnBookStartEnd.onStart();
-                return;
+        } else if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_PREV) {
+            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                if ( getCurrentItem()-1 < 0) {
+                    mOnBookStartEnd.onStart();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+            } else {
+                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                    mOnBookStartEnd.onStart();
+                    return;
+                }
+                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
             }
         }
 
         isFromLeft = mPagerAdapter.getCurrentView().getIsFromLeft();
 
-        setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
-
         if( mOnTouchEventListener != null  && !isMoveByFling){
             mOnTouchEventListener.onUp(BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection));    // TODO :: 프론트가 필요한 콜백인가?
+        }
+    }
+
+    @Override
+    public void onTopTouched(float x, float y) {
+
+        if(asidePopupStatus){
+            asidePopupStatus = false;
+            return;
+        }
+
+        if(isPreventPageMove)
+            return;
+
+        if(mPagerAdapter.getCurrentView().getCurrentScale() != 1f) {
+            return;
+        }
+
+        if(mPageDirection == ViewerContainer.PageDirection.LTR){
+            if ( getCurrentItem()-1 < 0) {
+                mOnBookStartEnd.onStart();
+                return;
+            }
+            setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+        } else {
+            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                mOnBookStartEnd.onStart();
+                return;
+            }
+            setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+        }
+    }
+
+    @Override
+    public void onBottomTouched(float x, float y) {
+
+        if(asidePopupStatus){
+            asidePopupStatus = false;
+            return;
+        }
+
+        if(isPreventPageMove)
+            return;
+
+        if(mPagerAdapter.getCurrentView().getCurrentScale() != 1f) {
+            return;
+        }
+
+        if(mPageDirection == ViewerContainer.PageDirection.LTR){
+            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                mOnBookStartEnd.onEnd();
+                return;
+            }
+            setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+        } else {
+            if ( getCurrentItem()-1 < 0) {
+                mOnBookStartEnd.onEnd();
+                return;
+            }
+            setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
         }
     }
 
@@ -1129,23 +1219,15 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
         @Override
         public void reportTouchPosition(int x, int y) {
 
-//            if(isPageScrolling){
-//                isPageScrolling = false;
-//                return;
-//            }
-
-//            if(isMoveByFling){
-//                isMoveByFling=false;
-//                return;
-//            }
-
             if(asidePopupStatus) {
                 asidePopupStatus = false;
                 return;
             }
 
+            BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y, mPageDirection);
+
             if(mediaOverlayController.isMediaOverlayPlaying()){
-                touchedPositionDuringPlaying = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x, y, mPageDirection);   // 미디어오버레이 아닌 영역 터치 시 필요
+                touchedPositionDuringPlaying = clickArea;  // 미디어오버레이 아닌 영역 터치 시 필요
                 mPagerAdapter.getCurrentView().getIDListByPoint(x,y);
                 return;
             }
@@ -1153,8 +1235,6 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
             if( mOnTouchEventListener != null ){
 
                 if(mPagerAdapter.getCurrentView().getCurrentScale() == 1f) {
-
-                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y, mPageDirection);
 
                     if(isPreventPageMove){
                         if(clickArea == BookHelper.ClickArea.Middle && !isMoveByFling){
@@ -1164,37 +1244,100 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                     }
 
                     if(clickArea== BookHelper.ClickArea.Left){
-                        if(mPageDirection == ViewerContainer.PageDirection.LTR){
-                            if ( getCurrentItem()-1 < 0) {
-                                mOnBookStartEnd.onStart();
-                                return;
+                        if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_PREV_NEXT) {
+                            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                                if ( getCurrentItem()-1 < 0) {
+                                    mOnBookStartEnd.onStart();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+                            } else {
+                                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                                    mOnBookStartEnd.onStart();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
                             }
-                        } else {
-                            if ( getCurrentItem()-1 < 0) {
-                                mOnBookStartEnd.onEnd();
-                                return;
+                        } else if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_PREV ||
+                                BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_NEXT) {
+                            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                                    mOnBookStartEnd.onEnd();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+                            } else {
+                                if ( getCurrentItem()-1 < 0) {
+                                    mOnBookStartEnd.onEnd();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
                             }
                         }
-                        setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
                     } else if(clickArea== BookHelper.ClickArea.Right){
+                        if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_PREV_NEXT ||
+                                BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_NEXT) {
+                            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                                    mOnBookStartEnd.onEnd();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+                            } else {
+                                if ( getCurrentItem()-1 < 0) {
+                                    mOnBookStartEnd.onEnd();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+                            }
+                        } else if(BookHelper.pageTurnInputRegionType == BookHelper.PageTurnInputRegionType.LeftOrRight_NEXT_PREV) {
+                            if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                                if ( getCurrentItem()-1 < 0) {
+                                    mOnBookStartEnd.onStart();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+                            } else {
+                                if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                                    mOnBookStartEnd.onStart();
+                                    return;
+                                }
+                                setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+                            }
+                        }
 
+                    } else if( clickArea== BookHelper.ClickArea.Top ) {
                         if(mPageDirection == ViewerContainer.PageDirection.LTR){
-                            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
-                                mOnBookStartEnd.onEnd();
+                            if ( getCurrentItem()-1 < 0) {
+                                mOnBookStartEnd.onStart();
                                 return;
                             }
+                            setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
                         } else {
                             if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
                                 mOnBookStartEnd.onStart();
                                 return;
                             }
+                            setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
                         }
-                        setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+                    } else if( clickArea== BookHelper.ClickArea.Bottom){
+                        if(mPageDirection == ViewerContainer.PageDirection.LTR){
+                            if ( getCurrentItem()+1 == mPagerAdapter.getCount() ) {
+                                mOnBookStartEnd.onEnd();
+                                return;
+                            }
+                            setCurrentItem(mCurrentPagerIndex+1, pagerAnimation);
+                        } else {
+                            if ( getCurrentItem()-1 < 0) {
+                                mOnBookStartEnd.onEnd();
+                                return;
+                            }
+                            setCurrentItem(mCurrentPagerIndex-1, pagerAnimation);
+                        }
                     } else if(clickArea== BookHelper.ClickArea.Middle){
                         mOnTouchEventListener.onUp(clickArea);
                     }
                 } else {
-                    BookHelper.ClickArea clickArea = BookHelper.getClickArea(mPagerAdapter.getCurrentView(), x,y, mPageDirection);
                     if(clickArea == BookHelper.ClickArea.Middle){
                         mOnTouchEventListener.onUp(clickArea);
                     }

@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.140";
+    public static String VIEWER_VERSION = "3.141";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -700,18 +700,20 @@ public class BookHelper {
         useEPUB3Viewer = use;
     }
 
-    public static PageTurnInputRegionType pageTurnInputRegionType = PageTurnInputRegionType.LeftOrRight;
+    public static PageTurnInputRegionType pageTurnInputRegionType = PageTurnInputRegionType.LeftOrRight_PREV_NEXT;
     public enum PageTurnInputRegionType {
-        TopOrBottom,    // 상하터치
-        LeftOrRight     // 좌우터치
+        TopOrBottom,                // 상하터치
+        LeftOrRight_PREV_NEXT,      // 좌우터치
+        LeftOrRight_NEXT_PREV,
+        LeftOrRight_NEXT_NEXT
     }
 
-    public static ClickArea getClickArea(View view, float x, float y, ViewerContainer.PageDirection pageReadDirectionType) {
+    public static int leftTouchMargin = 20;
+    public static int rightTouchMargin = 20;
+    public static int topTouchMargin = 30;
+    public static int bottomTouchMargin = 30;
 
-        int leftClickMargin = 20;
-        int rightClickMargin = 20;
-        int topClickMargin = 60;
-        int bottomClickMargin = 40;
+    public static ClickArea getClickArea(View view, float x, float y, ViewerContainer.PageDirection pageReadDirectionType) {
 
         int w = view.getWidth();
         int h = view.getHeight();
@@ -719,47 +721,21 @@ public class BookHelper {
         if( x >= (w-150) && y <= (150) )
             return ClickArea.Left_Corner;
 
-        if(pageTurnInputRegionType==PageTurnInputRegionType.LeftOrRight){
-            // 좌우터치모드 - 좌우 영역 20 퍼센트로만 판단
-            if( x <= ((w * leftClickMargin ) / 100.0) )
-                return ClickArea.Left;
-
-            if( x >= w- ((w * rightClickMargin) / 100.0) )
-                return ClickArea.Right;
-
-        } else if(pageTurnInputRegionType==PageTurnInputRegionType.TopOrBottom){
-            // 상하터치모드 - 좌우 영역 20 및 상 60 하 40 퍼센트로 판단
-            if( x <= ((w * leftClickMargin ) / 100.0) ) {
-
-                if( y <= ((h * topClickMargin) / 100.0) ) {
-                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
-                        return ClickArea.Right;
-                    return ClickArea.Left;
-                }
-
-                if( y >= h - ((h * bottomClickMargin) / 100.0) ) {
-                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
-                        return ClickArea.Left;
-                    return ClickArea.Right;
-                }
+        if(pageTurnInputRegionType==PageTurnInputRegionType.TopOrBottom){
+            // 상하터치모드 - 상하 영역 각 30 퍼센트로만 판단
+            if( y <= ((h * topTouchMargin) / 100.0)) {
+                return ClickArea.Top;
+            } else if (y >= h - ((h * bottomTouchMargin) / 100.0)) {
+                return ClickArea.Bottom;
             }
-
-            if( x >= w- ((w * rightClickMargin) / 100.0) ) {
-
-                if( y <= ((h * topClickMargin) / 100.0) ) {
-                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
-                        return ClickArea.Right;
-                    return ClickArea.Left;
-                }
-
-                if( y >= h - ((h * bottomClickMargin) / 100.0) ) {
-                    if(pageReadDirectionType == ViewerContainer.PageDirection.RTL)
-                        return ClickArea.Left;
-                    return ClickArea.Right;
-                }
+        } else {
+            // 좌우터치모드 - 좌우 영역 각 20 퍼센트로만 판단
+            if( x <= ((w * leftTouchMargin ) / 100.0) ) {
+                return ClickArea.Left;
+            } else if( x >= w- ((w * rightTouchMargin) / 100.0) ) {
+                return ClickArea.Right;
             }
         }
-
         return ClickArea.Middle;
     }
 

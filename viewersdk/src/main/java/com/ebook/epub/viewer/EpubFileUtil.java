@@ -75,7 +75,7 @@ public class EpubFileUtil {
 		String fileName = href;
 		String dirName = "";
 		String parentPath = "";
-		
+
 		if (path.endsWith("/"))
 			parentPath = path.substring(0, path.length()-1);
 		else
@@ -89,8 +89,8 @@ public class EpubFileUtil {
 			fileName = fileName.replace("./", "");
 		}
 
-		if( href.lastIndexOf("#") != -1 ) {
-			fileName = href.substring(0, href.lastIndexOf("#"));
+		if( fileName.lastIndexOf("#") != -1 ) {
+			fileName = fileName.substring(0, fileName.lastIndexOf("#"));
 			id = href.substring(href.lastIndexOf("#"));
 		}
 		if( fileName.lastIndexOf("/") != -1 ) {

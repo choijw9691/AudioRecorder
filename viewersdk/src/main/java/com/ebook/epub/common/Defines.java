@@ -54,6 +54,7 @@ public class Defines {
     public static final int REF_OVERFLOW_TEXT_SELECTION = 146;
     public static final int REF_OVERFLOW_MEMO_CONTENT = 147;
     public static final int REF_HANDLE_NOTEREF = 148;
+    public static final int REF_CONTINUE_SCROLL_SELECTION = 149;
 
     public static final int REF_VIDEO_TAG_CLICK = 160;
     public static final int REF_VIDEO_CONTROL = 161;

@@ -456,6 +456,7 @@ public class FixedLayoutScrollView extends ViewPager implements Runnable, FixedL
                 @Override
                 public void run() {
                     viewPageChangeListener.onPageSelected(0);	    // noti ::: 0 페이지로 로드 시 onPageSelected callback 동작 X
+                    mPagerAdapter.notifyDataSetChanged();
                 }
             }, 100);
         }

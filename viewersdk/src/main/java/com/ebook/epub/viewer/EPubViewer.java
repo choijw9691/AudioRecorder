@@ -471,6 +471,11 @@ public class EPubViewer extends ViewerBase {
         }
 
         @JavascriptInterface
+        public void continueAutoScrollSelection(){
+            mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_CONTINUE_SCROLL_SELECTION));
+        }
+
+        @JavascriptInterface
         public void overflowedMemoContent(){
             mWebviewInnerHandler.sendMessage(mWebviewInnerHandler.obtainMessage(Defines.REF_OVERFLOW_MEMO_CONTENT));
         }
@@ -5192,6 +5197,12 @@ public class EPubViewer extends ViewerBase {
                 if(autoScrollTimer==null || selectionRectList.isEmpty())
                     return;
                 loadUrl("javascript:autoScroll("+scrollToTop+","+scrollToBottom+")");
+                break;
+
+            case Defines.REF_CONTINUE_SCROLL_SELECTION :
+                if(isStartHandlerTouched || isEndHandlerTouched){
+                    loadUrl("javascript:setMoveRangeWithHandler(" + touchedXY[0] + "," + touchedXY[1] +","+isStartHandlerTouched+","+isEndHandlerTouched+")");
+                }
                 break;
 
             case Defines.REF_ADD_HIGHLIGHTED_DATA :

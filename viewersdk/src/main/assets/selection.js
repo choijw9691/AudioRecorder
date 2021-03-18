@@ -3477,11 +3477,19 @@ function autoScroll(scrollToTop, scrollToBottom){
     }
 
     if(scrollToTop){
-         window.scrollBy(0, -20);
+        var currentBottom = $(document).scrollTop();
+        window.scrollBy(0, -20);
+        if(currentBottom == $(document).scrollTop()) {
+            window.selection.continueAutoScrollSelection();
+        }
     }
 
     if(scrollToBottom){
-         window.scrollBy(0, 20);
+        var currentBottom = $(document).scrollTop() + window.innerHeight;
+        window.scrollBy(0, 20);
+        if(currentBottom == $(document).scrollTop() + window.innerHeight) {
+            window.selection.continueAutoScrollSelection();
+        }
     }
 }
 

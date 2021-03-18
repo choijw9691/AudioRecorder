@@ -2349,13 +2349,12 @@ function removeCommentNode(){
 function resizeWidth(){
     var viewportmeta = document.querySelector('meta[name="viewport"]');
     var check = viewportmeta.content.match(/width=[^,]+/);
-    var viewportWidth  = check[0].match(/\d/g);
+    var viewportWidth = check[0].match(/\d/g);
     viewportWidth = viewportWidth.join("");
     $('*').each(function() {
         if($(this).outerWidth()>viewportWidth){
-            var diffWidth = $(this).outerWidth() - viewportWidth;
-            if(viewportWidth-diffWidth == 0)
-                continue;
+        var diffWidth = $(this).outerWidth() - viewportWidth;
+        if(viewportWidth-diffWidth>0)
             $(this).css('width', (viewportWidth-diffWidth));
         }
     });

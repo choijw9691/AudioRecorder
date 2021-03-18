@@ -1008,6 +1008,11 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
             mEPubViewer.getCurrentTopPath();
     }
 
+    public void setFontColor(String fontColor){
+        if( mLayoutMode == LayoutMode.Reflowable )
+            BookHelper.fontColor = fontColor;
+    }
+
     public void changeFontDirect(String fontName, String faceName, String fontPath){
         if( mLayoutMode == LayoutMode.Reflowable )
             mEPubViewer.changeFontDirect(fontName, faceName, fontPath);

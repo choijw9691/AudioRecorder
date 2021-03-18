@@ -358,6 +358,7 @@ function setupChapter(	highlights,
 						lineHeight,
 						fontName,
 						fontSize,
+						fontColor,
 						maxSelectionLength,
 						bodyMargin) {
     try {
@@ -412,7 +413,7 @@ function setupChapter(	highlights,
 
         resizingImage();
 
-        setNightMode(isNightMode,true, backgroundColor);
+        setNightMode(isNightMode,true, backgroundColor, fontColor);
         applyHighlights(highlights);
 
         var epubtype = $.epubtype();
@@ -772,7 +773,7 @@ function callPageReady(twoPageMode) {
     window.selection.pageReady(gPageCount, windowWidth);
 }
 
-function setNightMode(isNightMode, doCallback, backgroundColor) {
+function setNightMode(isNightMode, doCallback, backgroundColor, fontColor) {
 
     if(isNightMode==true || isNightMode==1) {
         $(document.body).addClass(BODY_NIGHTMODE_CLASS);
@@ -781,12 +782,10 @@ function setNightMode(isNightMode, doCallback, backgroundColor) {
     }
 
     var bodyStyle=document.body.style;
-    var textColor;
 
     if(isNightMode==true || isNightMode==1) {
-        textColor="#bebebe";
         $('body').find('*').not('flk').not('a').css('backgroundColor', backgroundColor, 'important');
-        $('body').find('*').not('flk, flk *, a').css('color', textColor, 'important');
+        $('body').find('*').not('flk, flk *, a').css('color', fontColor, 'important');
         $('body').find('a').css('color','#6887f7', 'important');
         $('body').css('backgroundColor', backgroundColor, 'important');
     } else if(isNightMode!=true && isNightMode!=1){

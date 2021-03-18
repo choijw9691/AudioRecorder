@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.144";
+    public static String VIEWER_VERSION = "3.145";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -51,6 +51,7 @@ public class BookHelper {
     public static int lastViewMode=0;
     /** Viewer의 배경 색상 ( Color value )  */
     public static Integer backgroundColor = null;
+    public static String fontColor="";
     public static String[] Colors = { "#fbdab9", "#f8c9cd", "#f9f0ab", "#a8e3c7", "#d0c6f5"};
     public static int lastHighlightColor =2;
 //    public static int lastMemoHighlightColor = 4;

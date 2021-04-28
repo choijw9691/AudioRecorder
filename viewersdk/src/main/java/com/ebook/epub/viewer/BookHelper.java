@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class BookHelper {
 
-    public static String VIEWER_VERSION = "3.145";
+    public static String VIEWER_VERSION = "3.146";
 
     final public static int PHONE = 1;
     final public static int TABLET = 2;
@@ -612,11 +612,11 @@ public class BookHelper {
 
                 boolean isExist=false;
                 for(int idx=0; idx<styleDetail.length; idx++){
-                    if(styleDetail[idx].indexOf("background-color:")!=-1){
-                        result = result+" background-color:"+styleDetail[idx].split(":")[1]+";";
+                    if(styleDetail[idx].indexOf("background-color")!=-1){
+                        result = result+styleDetail[idx]+";";
                         isExist=true;
-                    } else if(styleDetail[idx].indexOf("color:")!=-1){
-                        result = result + " color:" +styleDetail[idx].split(":")[1]+";";
+                    } else if(styleDetail[idx].indexOf("color")!=-1){
+                        result = result+styleDetail[idx]+";";
                         isExist=true;
                     }
                 }

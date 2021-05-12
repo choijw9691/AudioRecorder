@@ -1842,4 +1842,8 @@ public class ViewerContainer extends FrameLayout implements Highlighter.OnHighli
         BookHelper.leftTouchMargin = left;
         BookHelper.rightTouchMargin = right;
     }
+
+    public String getCoverImage() {
+        return mEpubFile.getCoverImage();
+    }
 }

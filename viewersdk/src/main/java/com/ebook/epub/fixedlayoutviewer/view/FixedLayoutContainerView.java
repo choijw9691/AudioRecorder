@@ -495,9 +495,7 @@ public class FixedLayoutContainerView extends LinearLayout {
             if(webview.getCurrentPageData().getContentsString()==null)
                 continue;
 
-            if(webview.getSelectionMode()){
-                webview.changeMemoText(memoId, currentMemo);
-            }
+            webview.changeMemoText(memoId, currentMemo);
         }
     }
 

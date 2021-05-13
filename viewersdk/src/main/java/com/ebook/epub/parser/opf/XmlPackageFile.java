@@ -315,17 +315,17 @@ public class XmlPackageFile {
                 }
             }
 
-            String[] covernames = { "cover", "standard_coverimage", "coverimage", "bookcover", "img0", "img1" };
-
-            for(XmlItem item : publicationImages){
-                String[] splitStr = item.getHRef().split("/");
-                for (String name : covernames) {
-                    if(splitStr[splitStr.length-1].startsWith(name)){
-                        cover = splitStr[splitStr.length-1];
-                        return cover;
-                    }
-                }
-            }
+//            String[] covernames = { "cover", "standard_coverimage", "coverimage", "bookcover", "img0", "img1" };
+//
+//            for(XmlItem item : publicationImages){
+//                String[] splitStr = item.getHRef().split("/");
+//                for (String name : covernames) {
+//                    if(splitStr[splitStr.length-1].startsWith(name)){
+//                        cover = splitStr[splitStr.length-1];
+//                        return cover;
+//                    }
+//                }
+//            }
         }
 
         return cover;

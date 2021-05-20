@@ -788,6 +788,13 @@ function setNightMode(isNightMode, doCallback, backgroundColor, fontColor) {
         $('body').find('*').not('flk, flk *, a').css('color', fontColor, 'important');
         $('body').find('a').css('color','#6887f7', 'important');
         $('body').css('backgroundColor', backgroundColor, 'important');
+        var nightModeCssRule = ":not(a, flk, flk *) { color: "+fontColor+" !important; } \n "
+            + "flk, flk *{ color: black !important; } \n"
+            + "a, a flk{ color: #6887f7 !important; }";
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.textContent = nightModeCssRule;
+        document.head.append(style);
     } else if(isNightMode!=true && isNightMode!=1){
     	if(backgroundColor != null && backgroundColor.toUpperCase() != "#FFFFFF")
     		$('body').css('backgroundColor', backgroundColor, 'important');

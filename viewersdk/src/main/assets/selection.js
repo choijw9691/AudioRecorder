@@ -794,7 +794,7 @@ function setNightMode(isNightMode, doCallback, backgroundColor, fontColor) {
         var style = document.createElement('style');
         style.type = 'text/css';
         style.textContent = nightModeCssRule;
-        document.head.append(style);
+        document.head.appendChild(style);
     } else if(isNightMode!=true && isNightMode!=1){
     	if(backgroundColor != null && backgroundColor.toUpperCase() != "#FFFFFF")
     		$('body').css('backgroundColor', backgroundColor, 'important');

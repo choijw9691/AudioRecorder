@@ -741,7 +741,7 @@ function getPageCount(twoPageViewMode){
 
         gRealHeight = gWindowInnerHeight - (gMarginTop + gMarginBottom);
         gColumnWidth = gWindowInnerWidth / getNumColumns(twoPageViewMode);
-        var bookContentHeight = parseInt($('#feelingk_bookcontent').css('height'));
+        var bookContentHeight = parseInt($('#feelingk_bookcontent')[0].scrollHeight);
         var bookTableHeight = parseInt($('#feelingk_booktable').css('height'));
         if(twoPageViewMode == 1 && document.body.scrollWidth % getWindowWidth(twoPageViewMode) != 0 ){
             modifyBookContents();
